@@ -2189,10 +2189,10 @@ NLP技术广泛应用于机器翻译、情感分析、文本分类等领域。�
 
 | **类型** | **原理说明** | **适用场景** |
 | --- | --- | --- |
-| percentile | 计算相邻句子嵌入向量的余弦距离，取距离<br>分布的第N百分位值作为阈值，高于此值则<br>分割 | 常规文本（如文<br>章、报告） |
-| standard_deviation | 以均值 + N倍标准差为阈值，识别语义突变<br>点 | 语义变化剧烈的<br>文档（如技术手<br>册） |
-| interquartile | 用四分位距（IQR） 定义异常值边界，超过<br>则分割 | 长文档（如书<br>籍） |
-| gradient | 基于嵌入向量变化的梯度检测分割点（需自<br>定义实现） | 实验性需求 |
+| percentile | 计算相邻句子嵌入向量的余弦距离，取距离分布的第N百分位值作为阈值，高于此值则分割 | 常规文本（如文章、报告） |
+| standard_deviation | 以均值 + N倍标准差为阈值，识别语义突变点 | 语义变化剧烈的文档（如技术手册） |
+| interquartile | 用四分位距（IQR） 定义异常值边界，超过则分割 | 长文档（如书籍） |
+| gradient | 基于嵌入向量变化的梯度检测分割点（需自定义实现） | 实验性需求 |
 
 2. **breakpoint_threshold_amount** （断点阈值量）
 **作用**：控制分割的**粒度敏感度**，值越小分割越细（块越多），值越大分割越粗（块越少）。
@@ -2388,12 +2388,12 @@ print(doc.page_content)
 常用嵌入模型：
 | **模型** | **机构** | **描述** |
 | --- | --- | --- |
-| bge-large-zh | 北京智源研究院<br>（BAAI） | 开源，向量维度1024，序列长度512 |
+| bge-large-zh | 北京智源研究院（BAAI） | 开源，向量维度1024，序列长度512 |
 | bge-base-zh | BAAI | 开源，向量维度768，序列长度512 |
 | bge-small-zh | BAAI | 开源，向量维度512，序列长度512 |
-| bge-m3 | BAAI | 开源，多语言，向量维度1024，序列长度<br>8192 |
-| text-embedding-3-<br>small | OpenAI | 多语言，向量维度1536，序列长度8192 |
-| text-embedding-3-<br>large | OpenAI | 多语言，向量维度3072，序列长度8192 |
+| bge-m3 | BAAI | 开源，多语言，向量维度1024，序列长度8192 |
+| text-embedding-3-small | OpenAI | 多语言，向量维度1536，序列长度8192 |
+| text-embedding-3-large | OpenAI | 多语言，向量维度3072，序列长度8192 |
 
 LangChain中针对向量化模型的封装提供了两种接口，一种针对 句子的向量化embed_query ，一种针
 对 文档的向量化(embed_documents) 。
@@ -2610,12 +2610,12 @@ LangChain提供了众多向量存储的集成，包括开源的本地向量存�
 常用向量数据库：
 | **向量数据库** | **描述** |
 | --- | --- |
-| FAISS | 一个用于高效相似性搜索和密集向量聚类的库。Meta出品，开源、免费，<br>Facebook AI相似性搜索服务。（Facebook AI Similarity Search，Facebook<br>AI 相似性搜索库） /fæs/ |
+| FAISS | 一个用于高效相似性搜索和密集向量聚类的库。Meta出品，开源、免费，Facebook AI相似性搜索服务。（Facebook AI Similarity Search，FacebookAI 相似性搜索库） /fæs/ |
 | Chroma | 开源、免费的 轻量级 向量数据库，有极简的 API |
-| Milvus | 开源的专为向量搜索设计的 云原生数据库 。性能强悍，功能丰富。覆盖 轻量<br>级 的原型开发到 十亿级向量 的大规模生产系统 |
-| Pgvector | 开源关系型数据库 PostgreSQL 的扩展，为PostgreSQL增加了向量数据类型和<br>相似性搜索功能 |
+| Milvus | 开源的专为向量搜索设计的 云原生数据库 。性能强悍，功能丰富。覆盖 轻量级 的原型开发到 十亿级向量 的大规模生产系统 |
+| Pgvector | 开源关系型数据库 PostgreSQL 的扩展，为PostgreSQL增加了向量数据类型和相似性搜索功能 |
 | Redis | 开源内存数据结构存储，现已原生支持向量相似性搜索功能 |
-| Elasticsearch | 开源分布式搜索和分析引擎，提供了一个基于文档的数据库，结构化、非结构<br>化和向量数据通过高效的列式存储统一管理 |
+| Elasticsearch | 开源分布式搜索和分析引擎，提供了一个基于文档的数据库，结构化、非结构化和向量数据通过高效的列式存储统一管理 |
 | Pinecone | 具有广泛功能的向量数据库 |
 
 这里我们使用 Milvus 作为向量存储，参考《Milvus使用指南.md》
