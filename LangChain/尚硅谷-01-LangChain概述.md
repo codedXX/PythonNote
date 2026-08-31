@@ -250,15 +250,15 @@ uv 是一个现代 Python 包管理工具，主要 管理 Python 生态依赖 �
 统级数据库驱动、编译器这类通用非 Python 依赖。
 如果项目主要是普通 Python 开发，这类项目通常可以**优先考虑** **uv**。例如：
 ~~~text
-1 FastAPI 项目
-2 LangChain 项目
+FastAPI 项目
+LangChain 项目
 ~~~
 
 3 脚本工具
 ~~~text
-4 Web 后端
-5 普通 AI Agent 应用
-6 RAG 应用层代码
+Web 后端
+普通 AI Agent 应用
+RAG 应用层代码
 ~~~
 
 **方案3-使用venv：Python** **自带的轻量级虚拟环境工具**
@@ -266,7 +266,7 @@ uv 是一个现代 Python 包管理工具，主要 管理 Python 生态依赖 �
 venv 是 Python 官方自带的虚拟环境工具，不需要额外安装。
 它的特点是简单、轻量：
 ~~~bash
-1 python -m venv .venv
+python -m venv .venv
 ~~~
 
 **注意**： venv 不负责安装新的 Python 解释器，只能基于当前已经安装好的 Python 解释器创建虚拟环
@@ -288,62 +288,62 @@ LangChain 1.2版本要求Python版本为 3.10+以上 ，这里我们使用 pytho
 注意：如下包的安装，必须显式指明版本，否则可能会出现不兼容情况。
 **1、创建conda环境：**
 ~~~bash
-1 #创建一个名为langchain1.2的环境，指定Python版本是3.13.12
-2 conda create --name langchain1.2 python=3.13.12
-3
-4 #查看anconda安装好的python环境
-5 conda env list
-6
+#创建一个名为langchain1.2的环境，指定Python版本是3.13.12
+conda create --name langchain1.2 python=3.13.12
+
+#查看anconda安装好的python环境
+conda env list
+
 ~~~
 
 7 #初始化虚拟环境 (执行完此指令，重新启动命令行窗口)
 ~~~bash
-8 conda init
-9
-10 #在命令行窗口切换到某python环境
-11 conda activate langchain1.2
-12
-13 #验证python版本
-14 (langchain1.2) C:\Users\shkstart>python -V
-15 #或 调用：python --version
+conda init
+
+#在命令行窗口切换到某python环境
+conda activate langchain1.2
+
+#验证python版本
+(langchain1.2) C:\Users\shkstart>python -V
+#或 调用：python --version
 ~~~
 
 ~~~text
-16 #输出：Python 3.12.13
+#输出：Python 3.12.13
 ~~~
 
 **2、退出/删除conda环境：**
 ~~~bash
-1 #在命令行退出当前python环境
-2 (langchain1.2) C:\Users\shkst>conda deactivate
-3
-4 #删除一个已有的anconda管理的python环境
-5 conda remove --name langchain1.2 --all
+#在命令行退出当前python环境
+(langchain1.2) C:\Users\shkst>conda deactivate
+
+#删除一个已有的anconda管理的python环境
+conda remove --name langchain1.2 --all
 ~~~
 
 #### 4.2.3 下载langchain安装包
 方式1：使用conda指令 （推荐）
 ~~~bash
-1 # 安装指定版本。比如1.2.2
-2 conda install langchain==1.2.12
+# 安装指定版本。比如1.2.2
+conda install langchain==1.2.12
 ~~~
 
 3 # 或者安装最新版（默认仓库）
 ~~~bash
-4 conda install langchain
-5
-6
-7 # 指定频道（如 conda-forge）
-8 conda install -c conda-forge langchain==1.2.12
-9
-10 # 更新包
-11 conda update langchain
-12
-13 # 卸载包
-14 conda uninstall langchain
-15
-16 # 查看已安装包
-17 conda list
+conda install langchain
+
+
+# 指定频道（如 conda-forge）
+conda install -c conda-forge langchain==1.2.12
+
+# 更新包
+conda update langchain
+
+# 卸载包
+conda uninstall langchain
+
+# 查看已安装包
+conda list
 ~~~
 
 conda 包通常来自 defaults 或 conda-forge。
@@ -351,31 +351,31 @@ conda 包通常来自 defaults 或 conda-forge。
 conda-forge ：该源比官方默认渠道更新更快、包更全
 方式2：使用pip指令
 ~~~bash
-1 # 安装指定版本
-2 pip install langchain==1.2.12
-3 #安装最新版（不推荐）：pip install langchain
-4
+# 安装指定版本
+pip install langchain==1.2.12
+#安装最新版（不推荐）：pip install langchain
+
 ~~~
 
 5 # 使用指定源：国内镜像加速 （解决下载慢） -i：指定镜像源
 ~~~bash
-6 pip install langchain==1.2.12 -i https://pypi.tuna.tsinghua.edu.cn/simple
-7
+pip install langchain==1.2.12 -i https://pypi.tuna.tsinghua.edu.cn/simple
+
 ~~~
 
 8 # 从旧版本升级到新版本
 ~~~bash
-9 pip install --upgrade langchain
-10 #或者 pip install -U langchain==1.2.12
-11
-12 # 卸载包
-13 pip uninstall langchain
+pip install --upgrade langchain
+#或者 pip install -U langchain==1.2.12
+
+# 卸载包
+pip uninstall langchain
 ~~~
 
 ~~~bash
-14
-15 # 查看已安装包
-16 pip list
+
+# 查看已安装包
+pip list
 ~~~
 
 **建议：优先** **conda** **install，conda没有，再用pip** **install。**
@@ -384,8 +384,8 @@ conda依赖检查严格，pip相对宽松；
 conda 管环境 + 依赖 + 稳定性，pip 只管Python 包；
 conda：支持Python 包 + 非 Python 包；pip：只支持 Python 包。
 ~~~bash
-1 # 检查包来源
-2 conda list # Conda 安装的包显示频道，pip 安装的显示 `pypi`
+# 检查包来源
+conda list # Conda 安装的包显示频道，pip 安装的显示 `pypi`
 ~~~
 
 ![尚硅谷-01-LangChain概述-p016-X121](./images/尚硅谷-01-LangChain概述-p016-X121.png)
@@ -401,9 +401,9 @@ https://www.jetbrains.com/pycharm/download/other/#releases-2025
 ![尚硅谷-01-LangChain概述-p017-X128](./images/尚硅谷-01-LangChain概述-p017-X128.png)
 
 ~~~python
-1 import langchain
-2
-3 print(langchain.__version__)
+import langchain
+
+print(langchain.__version__)
 ~~~
 
 ## 5、大模型应用场景介绍

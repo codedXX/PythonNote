@@ -109,17 +109,17 @@ LangGraph Cloud）。
 ### 2.3 新增环境变量
 在.env配置文件中，添加四个环境变量：
 ~~~html
-1 # 是否启用Langsmith监控功能
-2 LANGSMITH_TRACING=true
-3
-4 # Langsmith监控WebUI地址
-5 LANGSMITH_ENDPOINT=https://api.smith.LangChain.com
-6
-7 # 创建的API_KEY
-8 LANGSMITH_API_KEY=<YOUR_API_KEY>
-9
-10 # 自定义项目名称，可以在Langsmith WebUI监控页面根据名称查看对应的运行记录
-11 LANGSMITH_PROJECT="pr-clear-harmony-32"
+# 是否启用Langsmith监控功能
+LANGSMITH_TRACING=true
+
+# Langsmith监控WebUI地址
+LANGSMITH_ENDPOINT=https://api.smith.LangChain.com
+
+# 创建的API_KEY
+LANGSMITH_API_KEY=<YOUR_API_KEY>
+
+# 自定义项目名称，可以在Langsmith WebUI监控页面根据名称查看对应的运行记录
+LANGSMITH_PROJECT="pr-clear-harmony-32"
 ~~~
 
 ## 3、查看监控指标
@@ -128,102 +128,102 @@ LangGraph Cloud）。
 **步骤1：运行任意LangChain程序**
 举例1：
 ~~~python
-1 import os
-2
-3 from dotenv import load_dotenv
-4 from langchain_deepseek import ChatDeepSeek
-5
-6 # 将env文件中的变量加载为环境变量
-7 #override=True：表示.env优先
-8 load_dotenv(override=True)
-9
-10 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-11 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL")
-12
-13 model = ChatDeepSeek(
-14 api_key=DEEPSEEK_API_KEY,
-15 api_base=DEEPSEEK_BASE_URL,
-16 model_name="deepseek-v4-flash"
+import os
+
+from dotenv import load_dotenv
+from langchain_deepseek import ChatDeepSeek
+
+# 将env文件中的变量加载为环境变量
+#override=True：表示.env优先
+load_dotenv(override=True)
+
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL")
+
+model = ChatDeepSeek(
+api_key=DEEPSEEK_API_KEY,
+api_base=DEEPSEEK_BASE_URL,
+model_name="deepseek-v4-flash"
 ~~~
 
 ~~~python
-17 )
-18
-19 print(model.invoke("你好"))
+)
+
+print(model.invoke("你好"))
 ~~~
 
 举例2：
 ~~~python
-1 from langchain.chat_models import init_chat_model
-2 from dotenv import load_dotenv
-3 import os
-4
-5 load_dotenv(override=True)
-6
-7 CLOSEAI_API_KEY=os.getenv("CLOSEAI_API_KEY")
-8 CLOSEAI_BASE_URL=os.getenv("CLOSEAI_BASE_URL")
-9
-10 model = init_chat_model(model="deepseek-v4-flash",
-11 model_provider="openai",
-12 api_key=CLOSEAI_API_KEY,
-13 base_url=CLOSEAI_BASE_URL)
-14
-15 print(model.invoke("你好，用一句话回答"))
+from langchain.chat_models import init_chat_model
+from dotenv import load_dotenv
+import os
+
+load_dotenv(override=True)
+
+CLOSEAI_API_KEY=os.getenv("CLOSEAI_API_KEY")
+CLOSEAI_BASE_URL=os.getenv("CLOSEAI_BASE_URL")
+
+model = init_chat_model(model="deepseek-v4-flash",
+model_provider="openai",
+api_key=CLOSEAI_API_KEY,
+base_url=CLOSEAI_BASE_URL)
+
+print(model.invoke("你好，用一句话回答"))
 ~~~
 
 举例3：
 ~~~python
-1 from langchain.chat_models import init_chat_model
-2 from dotenv import load_dotenv
-3 import os
-4 from rich import print as rprint
-5
-6 # 从.env文件中加载环境变量
-7 load_dotenv(override=True)
-8
-9 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-10 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL")
-11
-12 # 1. 初始化模型
-13 model = init_chat_model(
-14 model="deepseek-v4-flash",
-15 model_provider="deepseek",
-16 api_key=DEEPSEEK_API_KEY,
-17 base_url=DEEPSEEK_BASE_URL,
-18 temperature=0.2,
-19 max_tokens=500,
-20 # 指定可调整参数
-21 configurable_fields=("model", "model_provider", "temperature",
+from langchain.chat_models import init_chat_model
+from dotenv import load_dotenv
+import os
+from rich import print as rprint
+
+# 从.env文件中加载环境变量
+load_dotenv(override=True)
+
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL")
+
+# 1. 初始化模型
+model = init_chat_model(
+model="deepseek-v4-flash",
+model_provider="deepseek",
+api_key=DEEPSEEK_API_KEY,
+base_url=DEEPSEEK_BASE_URL,
+temperature=0.2,
+max_tokens=500,
+# 指定可调整参数
+configurable_fields=("model", "model_provider", "temperature",
 "max_tokens"),
-22 )
-23
-24 # 2. 准备 config 字典
-25 config = {
-26 "run_name": "joke_generation", # 在LangSmith中这次运行会显示为
+)
+
+# 2. 准备 config 字典
+config = {
+"run_name": "joke_generation", # 在LangSmith中这次运行会显示为
 "joke_generation"
-27 "tags": ["my_tag1", "my_tag2"], # 打上标签便于分类查找
-28 "metadata": {
-29 "user_id": "shkstart", # 记录用户ID
-30 "session_id": "sess_123" # 记录会话ID
+"tags": ["my_tag1", "my_tag2"], # 打上标签便于分类查找
+"metadata": {
+"user_id": "shkstart", # 记录用户ID
+"session_id": "sess_123" # 记录会话ID
 ~~~
 
 ~~~python
-31 },
-32 "configurable": {
-33 "model": "deepseek-v4-pro", # 配置模型参数
-34 "model_provider": "openai", # 配置模型提供商参数
-35 "temperature": 0.7, # 配置温度参数
-36 "max_tokens": 1000 # 配置最大令牌数
-37 }
-38 }
-39
-40 # 3. 调用模型并传入config
-41 response = model.invoke(
-42 "1 + 2 = ？",
-43 config=config
-44 )
-45
-46 rprint(response)
+},
+"configurable": {
+"model": "deepseek-v4-pro", # 配置模型参数
+"model_provider": "openai", # 配置模型提供商参数
+"temperature": 0.7, # 配置温度参数
+"max_tokens": 1000 # 配置最大令牌数
+}
+}
+
+# 3. 调用模型并传入config
+response = model.invoke(
+"1 + 2 = ？",
+config=config
+)
+
+rprint(response)
 ~~~
 
 **步骤2：打开监控界面**
