@@ -117,21 +117,21 @@ tool_call_id="call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s" # 一定要和AI消息中的调�
 
 ~~~python
 from langchain_core.messages import (
-HumanMessage, # 用户消息
-AIMessage, # AI 消息
-SystemMessage, # 系统消息
-ToolMessage # 工具返回消息
+    HumanMessage,  # 用户消息
+    AIMessage,  # AI 消息
+    SystemMessage,  # 系统消息
+    ToolMessage,  # 工具返回消息
 )
 
 # 消息列表示例
 messages = [
-SystemMessage(content="你是一个助手"),
-HumanMessage(content="你好"),
-AIMessage(content="你好！有什么可以帮你？"),
-HumanMessage(content="天气怎么样？"),
-AIMessage(content="让我查询一下..."),
-ToolMessage(content="北京：晴天", tool_call_id="call_123"),
-AIMessage(content="北京今天是晴天")
+    SystemMessage(content="你是一个助手"),
+    HumanMessage(content="你好"),
+    AIMessage(content="你好！有什么可以帮你？"),
+    HumanMessage(content="天气怎么样？"),
+    AIMessage(content="让我查询一下..."),
+    ToolMessage(content="北京：晴天", tool_call_id="call_123"),
+    AIMessage(content="北京今天是晴天"),
 ]
 ~~~
 
@@ -162,18 +162,18 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 
 # 通过JSON初始化
 messages = [
-{"role": "system", "content": "你是一个善于给出通俗易懂解释的AI助手"},
-{"role": "user", "content": "你好"},
-{"role": "assistant", "content": "你好！我能帮你什么？"},
-{"role": "user", "content": "什么是机器学习"}
+    {"role": "system", "content": "你是一个善于给出通俗易懂解释的AI助手"},
+    {"role": "user", "content": "你好"},
+    {"role": "assistant", "content": "你好！我能帮你什么？"},
+    {"role": "user", "content": "什么是机器学习"},
 ]
 
 response = model.invoke(messages)
@@ -231,18 +231,18 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 
 # 通过JSON初始化
 messages = [
-SystemMessage("你是一个善于给出通俗易懂解释的AI助手"),
-HumanMessage("你好"),
-AIMessage("你好！我能帮你什么？"),
-HumanMessage("什么是机器学习"),
+    SystemMessage("你是一个善于给出通俗易懂解释的AI助手"),
+    HumanMessage("你好"),
+    AIMessage("你好！我能帮你什么？"),
+    HumanMessage("什么是机器学习"),
 ]
 
 response = model.invoke(messages)
@@ -318,9 +318,9 @@ HumanMessage(content = "你好啊~")
 
 ~~~python
 HumanMessage(
-content="Hello!",
-name="alice", # 可选，用户名
-id="msg_123", # 可选，message的ID
+    content="Hello!",
+    name="alice",  # 可选，用户名
+    id="msg_123",  # 可选，message 的 ID
 )
 ~~~
 
@@ -343,28 +343,21 @@ load_dotenv(override=True)
 CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 messages = [
-SystemMessage("你是一个信息抽取器。你会收到多条来自不同发言者的 user 消息。每条消息
+    SystemMessage(
+        """你是一个信息抽取器。你会收到多条来自不同发言者的 user 消息。每条消息
 可能带有 name 字段。你的任务是：严格根据每条消息的 name 提取发言者及其观点，并输出
-JSON。禁止使用“第一个人/第二个人”这种相对称呼。若某条消息没有 name，则输出 unknown。输出
-格式：{\"speakers\":[{\"name\":\"...\",\"claim\":\"...\"}]}"),
-HumanMessage(
-content="我认为 1+1=2",
-name="Bob"
-),
-HumanMessage(
-content="我认为 1+1>2",
-name="Tom"
-),
-HumanMessage(
-content="请列出谁说了什么，不要判断对错。",
-name="audience"
-)
+JSON。禁止使用“第一个人/第二个人”这种相对称呼。若某条消息没有 name，则输出 unknown。
+输出格式：{\"speakers\":[{\"name\":\"...\",\"claim\":\"...\"}]}"""
+    ),
+    HumanMessage(content="我认为 1+1=2", name="Bob"),
+    HumanMessage(content="我认为 1+1>2", name="Tom"),
+    HumanMessage(content="请列出谁说了什么，不要判断对错。", name="audience"),
 ]
 response = model.invoke(messages)
 print(response.content)
@@ -384,28 +377,21 @@ load_dotenv(override=True)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_API_BASE = os.getenv("OPENROUTER_API_BASE")
 model = ChatOpenRouter(
-# model="openai/gpt-5.4-mini",
-model="openai/gpt-4o-mini",
-api_key=OPENROUTER_API_KEY,
-base_url=OPENROUTER_API_BASE,
+    # model="openai/gpt-5.4-mini",
+    model="openai/gpt-4o-mini",
+    api_key=OPENROUTER_API_KEY,
+    base_url=OPENROUTER_API_BASE,
 )
 messages = [
-SystemMessage("你是一个信息抽取器。你会收到多条来自不同发言者的 user 消息。每条消息
+    SystemMessage(
+        """你是一个信息抽取器。你会收到多条来自不同发言者的 user 消息。每条消息
 可能带有 name 字段。你的任务是：严格根据每条消息的 name 提取发言者及其观点，并输出
-JSON。禁止使用“第一个人/第二个人”这种相对称呼。若某条消息没有 name，则输出 unknown。输出
-格式：{\"speakers\":[{\"name\":\"...\",\"claim\":\"...\"}]}"),
-HumanMessage(
-content="我认为 1+1=2",
-name="Bob"
-),
-HumanMessage(
-content="我认为 1+1>2",
-name="Tom"
-),
-HumanMessage(
-content="请列出谁说了什么，不要判断对错。",
-name="audience"
-)
+JSON。禁止使用“第一个人/第二个人”这种相对称呼。若某条消息没有 name，则输出 unknown。
+输出格式：{\"speakers\":[{\"name\":\"...\",\"claim\":\"...\"}]}"""
+    ),
+    HumanMessage(content="我认为 1+1=2", name="Bob"),
+    HumanMessage(content="我认为 1+1>2", name="Tom"),
+    HumanMessage(content="请列出谁说了什么，不要判断对错。", name="audience"),
 ]
 response = model.invoke(messages)
 print(response.content)
@@ -430,17 +416,18 @@ AIMessage(content="你好~")
 
 ~~~python
 tool_calls=[
-{
-'name': 'get_weather', // 应调用的工具名
-'args': {'city': '杭州'}, // 调用工具的参数
-'id': 'call_00_gIXYOD1Q1OkEXmdDBqXR1578', // 工具调用的唯一标识ID
-'type': 'tool_call'
+    {
+    'name': 'get_weather',  # 应调用的工具名
+    'args': {'city': '杭州'},  # 调用工具的参数
+    'id': 'call_00_gIXYOD1Q1OkEXmdDBqXR1578',  # 工具调用的唯一标识 ID
+    'type': 'tool_call',
 },
-{'name': 'get_news',
-'args': {},
-'id': 'call_01_jD3phD5PEaIZf0mVLhKt0861',
-'type': 'tool_call'
-}
+{
+    'name': 'get_news',
+    'args': {},
+    'id': 'call_01_jD3phD5PEaIZf0mVLhKt0861',
+    'type': 'tool_call',
+    }
 ]
 ~~~
 
@@ -479,14 +466,14 @@ load_dotenv(override=True)
 CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 messages = [
-SystemMessage("你叫小智，是一名助人为乐的助手。"),
-HumanMessage("你好，好久不见，请介绍下你自己。")
+    SystemMessage("你叫小智，是一名助人为乐的助手。"),
+    HumanMessage("你好，好久不见，请介绍下你自己。"),
 ]
 response = model.invoke(messages)
 rprint(response)
@@ -547,7 +534,7 @@ rprint(response)
 >
 > 
 
-~~~
+~~~python
 rprint(response.usage_metadata)
 ~~~
 
@@ -598,38 +585,38 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 
 def get_weather(city: str) -> str:
-return "不错哦~"
+    return "不错哦~"
 
 # 模拟模型绑定工具
 model_with_tools = model.bind_tools([get_weather])
 
 ai_message = {
-"role": "assistant",
-"content": "",
-"tool_calls": [{
-"name": "get_weather",
-"args": {"location": "北京"},
-"id": "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s"
-}]
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [{
+        "name": "get_weather",
+        "args": {"location": "北京"},
+        "id": "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s",
+    }],
 }
 
 tool_message = {
-"role": "tool",
-"content": "今天北京天气晴朗，万里无云~",
-"tool_call_id": "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s"
+    "role": "tool",
+    "content": "今天北京天气晴朗，万里无云~",
+    "tool_call_id": "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s",
 }
 
 messages = [
-{"role": "user", "content": "北京天气如何"},
-ai_message,
-tool_message
+    {"role": "user", "content": "北京天气如何"},
+    ai_message,
+    tool_message,
 ]
 
 response = model.invoke(messages)
@@ -676,14 +663,14 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 
 def get_weather(city: str) -> str:
-return "不错哦~"
+    return "不错哦~"
 
 # 模拟模型绑定工具
 model_with_tools = model.bind_tools([get_weather])
@@ -698,12 +685,12 @@ model_with_tools = model.bind_tools([get_weather])
 # }]
 # }
 ai_message = AIMessage(
-content = [],
-tool_calls = [{
-"name": "get_weather",
-"args": {"location": "北京"},
-"id": "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s"
-}]
+    content=[],
+    tool_calls=[{
+        "name": "get_weather",
+        "args": {"location": "北京"},
+        "id": "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s",
+    }],
 )
 
 
@@ -714,19 +701,19 @@ tool_calls = [{
 # }
 
 tool_message = ToolMessage(
-content = "今天北京天气晴朗，万里无云~",
-tool_call_id = "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s"
+    content="今天北京天气晴朗，万里无云~",
+    tool_call_id="call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s",
 )
 
 messages = [
 # {"role": "user", "content": "北京天气如何"},
-HumanMessage(content="北京天气如何"),
-ai_message,
-tool_message
+    HumanMessage(content="北京天气如何"),
+    ai_message,
+    tool_message,
 ]
 
 # for message in messages:
-# print(message)
+#     print(message)
 
 response = model.invoke(messages)
 
@@ -831,17 +818,11 @@ response2 = model.invoke(conversation) # AI 记得！
 
 ~~~python
 def keep_recent_messages(messages, max_pairs=3):
-"""
-保留最近的 N 轮对话
-max_pairs: 保留的对话轮数（每轮 = user + assistant）
-"""
-# 分离 system 和对话
-system_msgs = [m for m in messages if m.get("role") == "system"]
-conversation_msgs = [m for m in messages if m.get("role") != "system"]
-# 只保留最近的
-recent_msgs = conversation_msgs[-(max_pairs * 2):]
-# 返回：system + 最近对话
-return system_msgs + recent_msgs
+    """保留最近的 N 轮对话。"""
+    system_msgs = [m for m in messages if m.get("role") == "system"]
+    conversation_msgs = [m for m in messages if m.get("role") != "system"]
+    recent_msgs = conversation_msgs[-(max_pairs * 2):]
+    return system_msgs + recent_msgs
 ~~~
 
 测试：
@@ -908,18 +889,18 @@ EXIT_WORD = "quit"
 
 # 2. 初始化模型
 model = init_chat_model(
-model=MODEL_NAME,
-model_provider="openai",
-api_key=os.getenv("CLOSEAI_API_KEY"),
-base_url=os.getenv("CLOSEAI_BASE_URL")
+    model=MODEL_NAME,
+    model_provider="openai",
+    api_key=os.getenv("CLOSEAI_API_KEY"),
+    base_url=os.getenv("CLOSEAI_BASE_URL"),
 )
 # 3. 初始化消息列表
 messages = [
-{
-"role":"system",
-"content":"你是小谷姐姐，尚硅谷教育的数字员工，也是一名耐心、友好的智能助手。我
-会用自然、清晰的方式回答用户问题。"
-}
+    {
+    "role": "system",
+    "content": """你是小谷姐姐，尚硅谷教育的数字员工，也是一名耐心、友好的智能助手。
+会用自然、清晰的方式回答用户问题。""",
+    }
 ]
 # 4. 启动提示
 print(f"✨ 请输入问题，输入 {EXIT_WORD} 结束对话\n")
@@ -927,29 +908,22 @@ print(f"✨ 请输入问题，输入 {EXIT_WORD} 结束对话\n")
 # 轮次记录
 i = 1
 while True:
-print("\n", "=" * 10, f'-> 第 {i} 轮对话开始 <-', "=" * 10, "\n")
-user_input = input("🙋 请输入：")
-# 退出判断
-if user_input.lower() == EXIT_WORD:
-print("🌙 对话已结束，欢迎下次再来！")
-break
-# 追加用户消息
-messages.append({"role":"user","content":user_input})
-# 流式输出模型回复
-print("🧚 小谷姐姐：", end="", flush=True)
-reply_content = ""
-# 优化历史记忆
-memory_messages = keep_recent_messages(messages,max_pairs =
-MAX_PAIRS_HISTORY)
-# 控制发送给模型的消息长度
-for chunk in model.stream(memory_messages):
-if chunk.content:
-print(chunk.content, end="", flush=True)
-reply_content += chunk.content
-print("\n", "=" * 10, f'-> 第 {i} 轮对话结束 <-', "=" * 10, "\n")
-i += 1
-# 追加 AI 回复
-messages.append({"role":"assistant","content":reply_content})
+    print("\n", "=" * 10, f"-> 第 {i} 轮对话开始 <-", "=" * 10, "\n")
+    user_input = input("🙋 请输入：")
+    if user_input.lower() == EXIT_WORD:
+        print("🌙 对话已结束，欢迎下次再来！")
+        break
+    messages.append({"role": "user", "content": user_input})
+    print("🧚 小谷姐姐：", end="", flush=True)
+    reply_content = ""
+    memory_messages = keep_recent_messages(messages, max_pairs=MAX_PAIRS_HISTORY)
+    for chunk in model.stream(memory_messages):
+        if chunk.content:
+            print(chunk.content, end="", flush=True)
+            reply_content += chunk.content
+    print("\n", "=" * 10, f"-> 第 {i} 轮对话结束 <-", "=" * 10, "\n")
+    i += 1
+    messages.append({"role": "assistant", "content": reply_content})
 ~~~
 
 其中，keep_recent_messages()定义，见1.6.2小节。
@@ -991,17 +965,17 @@ import os
 load_dotenv(override=True)
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=os.getenv("CLOSEAI_API_KEY"),
-base_url=os.getenv("CLOSEAI_BASE_URL")
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=os.getenv("CLOSEAI_API_KEY"),
+    base_url=os.getenv("CLOSEAI_BASE_URL"),
 )
 
 def encode_image(img_path, img_type='jpeg'):
-"""将一张本地图片转换成 Base64 编码的 Data URI 字符串,方便在文本中嵌入图片数据"""
-with open(img_path, "rb") as img_file:
-return f"data:image/{img_type};base64,
-{base64.b64encode(img_file.read()).decode("utf-8")}"
+    """将本地图片转换为 Base64 编码的 Data URI 字符串。"""
+    with open(img_path, "rb") as img_file:
+        encoded = base64.b64encode(img_file.read()).decode("utf-8")
+    return f"data:image/{img_type};base64,{encoded}"
 
 # 图像路径
 img_path = "image_test.png"
@@ -1010,17 +984,14 @@ img_path = "image_test.png"
 base64_image = encode_image(img_path)
 
 response = model.invoke(
-[
-HumanMessage(
-content=[
-{'type': 'text', 'text': '这张图里有什么？'},
-{
-'type': 'image_url',
-"image_url": base64_image,
-}
-]
-)
-]
+    [
+        HumanMessage(
+            content=[
+                {"type": "text", "text": "这张图里有什么？"},
+                {"type": "image_url", "image_url": base64_image},
+            ]
+        )
+    ]
 )
 print(response.content)
 ~~~
@@ -1065,16 +1036,16 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=os.getenv("CLOSEAI_API_KEY"),
-base_url=os.getenv("CLOSEAI_BASE_URL")
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=os.getenv("CLOSEAI_API_KEY"),
+    base_url=os.getenv("CLOSEAI_BASE_URL"),
 )
 
 def encode_image(img_path):
-"""将一张本地图片转换成 Base64 编码的 Data URI 字符串,方便在文本中嵌入图片数据"""
-with open(img_path, "rb") as img_file:
-return base64.b64encode(img_file.read()).decode("utf-8")
+    """将本地图片转换成 Base64 字符串。"""
+    with open(img_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
 
 # 图像路径
 img_path = "image_test.png"
@@ -1083,30 +1054,20 @@ img_path = "image_test.png"
 base64_image = encode_image(img_path)
 
 response = model.invoke(
-[
-# 此种格式可用
-# HumanMessage(
-# content=[
-# {'type': 'text', 'text': '这张图里有什么？'},
-# {
-# 'type': 'image_url',
-# "image_url": base64_image,
-# }
-# ]
-# )
-# 推荐的统一写法
-HumanMessage(
-content_blocks=[
-{'type': 'text', 'text': '这张图里有什么？'},
-{
-'type': 'image',
-'base64': base64_image,
-'mime_type': 'image/png',
-}
-]
-)
-
-]
+    [
+        # 此种格式可用：HumanMessage(content=[...])
+        # 推荐的统一写法
+        HumanMessage(
+            content_blocks=[
+                {"type": "text", "text": "这张图里有什么？"},
+                {
+                    "type": "image",
+                    "base64": base64_image,
+                    "mime_type": "image/png",
+                },
+            ]
+        )
+    ]
 )
 print(response.content)
 ~~~
@@ -1125,21 +1086,23 @@ print(response.content)
 ~~~python
 import base64
 from langchain.messages import HumanMessage
+from langchain.chat_models import init_chat_model
+import os
 
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
 model = init_chat_model(
-model="claude-haiku-4-5",
-model_provider="openai",
-api_key=os.getenv("CLOSEAI_API_KEY"),
-base_url=os.getenv("CLOSEAI_BASE_URL")
+    model="claude-haiku-4-5",
+    model_provider="openai",
+    api_key=os.getenv("CLOSEAI_API_KEY"),
+    base_url=os.getenv("CLOSEAI_BASE_URL"),
 )
 
 def encode_image(img_path):
-"""将一张本地图片转换成 Base64 编码的 Data URI 字符串,方便在文本中嵌入图片数据"""
-with open(img_path, "rb") as img_file:
-return base64.b64encode(img_file.read()).decode("utf-8")
+    """将本地图片转换成 Base64 字符串。"""
+    with open(img_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
 
 # 图像路径
 img_path = "image_test.png"
@@ -1148,19 +1111,19 @@ img_path = "image_test.png"
 base64_image = encode_image(img_path)
 
 response = model.invoke(
-[
-# 推荐的统一写法
-HumanMessage(
-content_blocks=[
-{'type': 'text', 'text': '这张图里有什么？'},
-{
-'type': 'image',
-'base64': base64_image,
-'mime_type': 'image/png',
-}
-]
-)
-]
+    [
+        # 推荐的统一写法
+        HumanMessage(
+            content_blocks=[
+                {"type": "text", "text": "这张图里有什么？"},
+                {
+                    "type": "image",
+                    "base64": base64_image,
+                    "mime_type": "image/png",
+                },
+            ]
+        )
+    ]
 )
 print(response.content)
 ~~~
@@ -1193,8 +1156,8 @@ load_dotenv()
 load_dotenv(override=True)
 
 model = init_chat_model(
-model="deepseek:deepseek-v4-flash",
-extra_body={"thinking": {"type": "enabled"}},
+    model="deepseek:deepseek-v4-flash",
+    extra_body={"thinking": {"type": "enabled"}},
 )
 
 response = model.invoke("你好，一句话回答")
@@ -1247,7 +1210,7 @@ print(response.content_blocks)
 +），也可以使用 LangChain 提供的` PromptTemplate` 或 `ChatPromptTemplate `。
 **举例1：字符串拼接方式**
 
-~~~
+~~~python
 # 字符串拼接
 topic = "Python"
 difficulty = "初学者"
@@ -1281,7 +1244,7 @@ topic = "Python"
 difficulty = "初学者"
 
 template = PromptTemplate.from_template(
-"你是一个{difficulty}级别的编程导师。请用简单易懂的语言解释{topic}。"
+    "你是一个{difficulty}级别的编程导师。请用简单易懂的语言解释{topic}。"
 )
 
 # 使用模板生成提示词
@@ -1293,13 +1256,14 @@ print(f"AI 回复：{response.content}...\n")
 from langchain_core.prompts import ChatPromptTemplate
 
 prompt_template = ChatPromptTemplate([
-("system", "你是一个AI开发工程师. 你的名字是 {name}."),
-("human", "{user_input}")
+    ("system", "你是一个AI开发工程师. 你的名字是 {name}."),
+    ("human", "{user_input}"),
 ])
 
 #调用format()方法，返回字符串
-prompt = prompt_template.invoke({"name":"小谷AI", "user_input":"你能帮我做什
-么?"})
+prompt = prompt_template.invoke(
+    {"name": "小谷AI", "user_input": "你能帮我做什么?"}
+)
 print(prompt)
 
 ~~~
@@ -1334,22 +1298,22 @@ LangChain 1.0的架构变革中，核心的演进之一体现在 Prompt 机制�
 
 * **③** **Prompt** **工具：**核心工具是 `PromptTemplate `。它的职责是接收一组变量，并通过模板渲染，最终输出一个完整的字符串。
 
-  ~~~
-  from langchain.prompts import PromptTemplate
-  prompt_template = PromptTemplate.from_template(
-  "请给我一个关于{topic}的{type}解释。"
-  )
-  #传入模板中的变量名
-  prompt = prompt_template.format(type="详细", topic="量子力学")
-  print(prompt)
-  ~~~
+~~~python
+from langchain.prompts import PromptTemplate
+prompt_template = PromptTemplate.from_template(
+    "请给我一个关于{topic}的{type}解释。"
+)
+# 传入模板中的变量名
+prompt = prompt_template.format(type="详细", topic="量子力学")
+print(prompt)
+~~~
 
   
 
 * **④** **局限性：**当我们需要用这种方式模拟多轮聊天时，开发者必须在字符串中手动拼接和伪造对话角色，例如：
 
-  ~~~
-  "Human：你好\nAI：你好！有什么我能帮忙的吗？\nHuman：..."
+~~~text
+"Human：你好\nAI：你好！有什么我能帮忙的吗？\nHuman：..."
   ~~~
 
 ​	这种方式不仅导致Prompt 的结构混乱、难以维护，也极易让模型混淆对话的边界与上下文，影响生成质	量。
@@ -1393,12 +1357,12 @@ ChatPromptTemplate 可以通过 `初始化方法 `或 `from_messages `方法来�
 from langchain_core.prompts import ChatPromptTemplate
 # 定义聊天提示词模版
 chat_template = ChatPromptTemplate.from_messages(
-[
-("system", "你是一个有帮助的AI机器人，你的名字是{name}。"),
-("human", "你好，最近怎么样？"),
-("ai", "我很好，谢谢！"),
-("human", "{user_input}"),
-]
+    [
+        ("system", "你是一个有帮助的AI机器人，你的名字是{name}。"),
+        ("human", "你好，最近怎么样？"),
+        ("ai", "我很好，谢谢！"),
+        ("human", "{user_input}"),
+    ]
 )
 # 格式化聊天提示词模版中的变量
 prompt = chat_template.invoke({"name":"小明", "user_input":"你叫什么名字？"})
@@ -1425,15 +1389,16 @@ from langchain_core.prompts import ChatPromptTemplate
 #参数类型这里使用的是tuple构成的list
 prompt_template = ChatPromptTemplate([
 # 字符串 role + 字符串 content
-("system", "你是一个AI开发工程师. 你的名字是 {name}."),
-("human", "你能开发哪些AI应用?"),
-("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
-("human", "{user_input}")
+    ("system", "你是一个AI开发工程师. 你的名字是 {name}."),
+    ("human", "你能开发哪些AI应用?"),
+    ("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
+    ("human", "{user_input}"),
 ])
 
 #调用invoke()方法，返回ChatPromptValue
-prompt = prompt_template.invoke({"name":"小谷AI", "user_input":"你能帮我做什
-么?"})
+prompt = prompt_template.invoke(
+    {"name": "小谷AI", "user_input": "你能帮我做什么?"}
+)
 print(prompt)
 ~~~
 
@@ -1460,14 +1425,15 @@ from langchain_core.prompts import ChatPromptTemplate
 #参数类型这里使用的是tuple构成的list
 prompt_template = ChatPromptTemplate([
 # 字符串 role + 字符串 content
-("system", "你是一个AI开发工程师. 你的名字是 {name}."),
-("human", "你能开发哪些AI应用?"),
-("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
-("human", "{user_input}")
+    ("system", "你是一个AI开发工程师. 你的名字是 {name}."),
+    ("human", "你能开发哪些AI应用?"),
+    ("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
+    ("human", "{user_input}"),
 ])
 
-prompt = prompt_template.invoke({"name":"小谷AI", "user_input":"你能帮我做什
-么?"})
+prompt = prompt_template.invoke(
+    {"name": "小谷AI", "user_input": "你能帮我做什么?"}
+)
 print(type(prompt))
 print(prompt)
 print(len(prompt.messages))
@@ -1489,10 +1455,10 @@ from langchain_core.prompts import ChatPromptTemplate
 #参数类型这里使用的是tuple构成的list
 prompt_template = ChatPromptTemplate([
 # 字符串 role + 字符串 content
-("system", "你是一个AI开发工程师. 你的名字是 {name}."),
-("human", "你能开发哪些AI应用?"),
-("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
-("human", "{user_input}")
+    ("system", "你是一个AI开发工程师. 你的名字是 {name}."),
+    ("human", "你能开发哪些AI应用?"),
+    ("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
+    ("human", "{user_input}"),
 ])
 
 #方式1：调用format()方法，返回字符串
@@ -1516,15 +1482,16 @@ print(prompt)
 from langchain_core.prompts import ChatPromptTemplate
 
 prompt_template = ChatPromptTemplate([
-("system", "你是一个AI开发工程师. 你的名字是 {name}."),
-("human", "你能开发哪些AI应用?"),
-("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
-("human", "{user_input}")
+    ("system", "你是一个AI开发工程师. 你的名字是 {name}."),
+    ("human", "你能开发哪些AI应用?"),
+    ("ai", "我能开发很多AI应用, 比如聊天机器人, 图像识别, 自然语言处理等."),
+    ("human", "{user_input}"),
 ])
 
 #调用format_messages()方法，返回消息列表
-prompt = prompt_template.format_messages(name="小谷AI", user_input="你能帮我做
-什么?")
+prompt = prompt_template.format_messages(
+    name="小谷AI", user_input="你能帮我做什么?"
+)
 print(type(prompt))
 print(prompt)
 ~~~
@@ -1556,22 +1523,22 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 
 ######2、提供提示词#########
 chat_prompt = ChatPromptTemplate.from_messages([
-("system", "你是一个数学家，你可以计算任何算式"),
-("human", "{text}"),
+    ("system", "你是一个数学家，你可以计算任何算式"),
+    ("human", "{text}"),
 ])
 
 
 # 输入提示
 prompt_value = chat_prompt.invoke({
-"text":"我今年18岁，我的舅舅今年38岁，我的爷爷今年72岁，我和舅舅一共多少岁了？"
+    "text": "我今年18岁，我的舅舅今年38岁，我的爷爷今年72岁，我和舅舅一共多少岁了？"
 })
 
 
@@ -1595,25 +1562,36 @@ print(output.content)
 
 ~~~python
 def __init__(self,
-messages: Sequence[BaseMessagePromptTemplate | BaseMessage |
-BaseChatPromptTemplate | tuple[str | type, str | list[dict] | list[object]] |
-str | dict[str, Any]],
-*,
-template_format: Literal["f-string", "mustache", "jinja2"] = "f-
-string",
-**kwargs: Any) -> None
+    messages: Sequence[
+        BaseMessagePromptTemplate
+        | BaseMessage
+        | BaseChatPromptTemplate
+        | tuple[str | type, str | list[dict] | list[object]]
+        | str
+        | dict[str, Any]
+    ],
+    *,
+    template_format: Literal["f-string", "mustache", "jinja2"] = "f-string",
+    **kwargs: Any,
+) -> None: ...
 ~~~
 
 源码：
 
 ~~~python
-@classmethod def from_messages(cls,
-messages: Sequence[BaseMessagePromptTemplate | BaseMessage
-| BaseChatPromptTemplate | tuple[str | type, str | list[dict] | list[object]]
-| str | dict[str, Any]],
-template_format: Literal["f-string", "mustache", "jinja2"]
-= "f-string")
--> ChatPromptTemplate
+@classmethod
+def from_messages(
+    cls,
+    messages: Sequence[
+        BaseMessagePromptTemplate
+        | BaseMessage
+        | BaseChatPromptTemplate
+        | tuple[str | type, str | list[dict] | list[object]]
+        | str
+        | dict[str, Any]
+    ],
+    template_format: Literal["f-string", "mustache", "jinja2"] = "f-string",
+) -> ChatPromptTemplate: ...
 ~~~
 
 结论：参数是列表类型，列表的元素可以是字符串、字典、字符串构成的元组、消息类型、提示词模板类型、消息提示词模板类型等
@@ -1626,9 +1604,9 @@ template_format: Literal["f-string", "mustache", "jinja2"]
 from langchain_core.prompts import ChatPromptTemplate
 # 2.定义聊天提示词模版
 chat_template = ChatPromptTemplate.from_messages(
-[
-"Hello, {name}!" # 等价于 ("human", "Hello, {name}!")
-]
+    [
+        "Hello, {name}!"  # 等价于 ("human", "Hello, {name}!")
+    ]
 )
 # 3. 使用invoke执行
 messages = chat_template.invoke({"name":"小谷AI"})
@@ -1648,8 +1626,8 @@ print(messages)
 ~~~python
 # 示例: 元组形式的消息
 prompt = ChatPromptTemplate.from_messages([
-("system", "你的名字是{role}."),
-("human", "很高兴认识你"),
+    ("system", "你的名字是{role}."),
+    ("human", "很高兴认识你"),
 ])
 
 print(prompt.invoke({"role":"小智"}))
@@ -1669,8 +1647,8 @@ print(prompt.invoke({"role":"小智"}))
 ~~~python
 # 示例: 字典形式的消息
 prompt = ChatPromptTemplate.from_messages([
-{"role": "system", "content": "你的名字是{role}."},
-{"role": "human", "content":"很高兴认识你"},
+    {"role": "system", "content": "你的名字是{role}."},
+    {"role": "human", "content": "很高兴认识你"},
 ])
 
 print(prompt.invoke({"role":"小智"}))
@@ -1688,9 +1666,8 @@ print(prompt.invoke({"role":"小智"}))
 from langchain_core.messages import SystemMessage,HumanMessage
 
 chat_prompt_template = ChatPromptTemplate.from_messages([
-SystemMessage(content="我是一个贴心的智能助手"),
-HumanMessage(content="我的问题是:人工智能英文怎么说？")
-
+    SystemMessage(content="我是一个贴心的智能助手"),
+    HumanMessage(content="我的问题是:人工智能英文怎么说？"),
 ])
 
 messages = chat_prompt_template.invoke({})
@@ -1711,8 +1688,8 @@ print(type(messages))
 ~~~python
 from langchain_core.messages import SystemMessage,HumanMessage
 chat_prompt_template = ChatPromptTemplate.from_messages([
-SystemMessage(content="我是一个贴心的智能助手"),
-HumanMessage(content="我的问题是:{word}英文怎么说？")
+    SystemMessage(content="我是一个贴心的智能助手"),
+    HumanMessage(content="我的问题是:{word}英文怎么说？"),
 ])
 messages = chat_prompt_template.invoke({"word":"人工智能"})
 print(messages)
@@ -1745,23 +1722,29 @@ LangChain提供不同类型的MessagePromptTemplate。最常用的是`SystemMess
 
 **举例1：**
 
-~~~
+~~~python
 # 导入聊天消息类模板
-from langchain_core.prompts import ChatPromptTemplate,
-HumanMessagePromptTemplate, SystemMessagePromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    SystemMessagePromptTemplate,
+)
 # 创建消息模板
-system_message_prompt = SystemMessagePromptTemplate.from_template("你是一个
-{role}")
-human_message_prompt = HumanMessagePromptTemplate.from_template("给我解释
-{concept}，用浅显易懂的语言")
+system_message_prompt = SystemMessagePromptTemplate.from_template(
+    "你是一个{role}"
+)
+human_message_prompt = HumanMessagePromptTemplate.from_template(
+    "给我解释{concept}，用浅显易懂的语言"
+)
 # 组合成聊天提示模板
 chat_prompt = ChatPromptTemplate.from_messages([
-system_message_prompt,
-human_message_prompt
+    system_message_prompt,
+    human_message_prompt,
 ])
 # 格式化提示
-formatted_messages = chat_prompt.invoke({"role":"物理学家","concept":"相对
-论"})
+formatted_messages = chat_prompt.invoke(
+    {"role": "物理学家", "concept": "相对论"}
+)
 print(formatted_messages)
 ~~~
 
@@ -1782,14 +1765,15 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # 使用 BaseChatPromptTemplate（嵌套的 ChatPromptTemplate）
 nested_prompt_template1 = ChatPromptTemplate.from_messages([
-("system", "我是一个人工智能助手，我的名字叫{name}")
+    ("system", "我是一个人工智能助手，我的名字叫{name}"),
 ])
 nested_prompt_template2 = ChatPromptTemplate.from_messages([
-("human", "很高兴认识你,我的问题是{question}")
+    ("human", "很高兴认识你,我的问题是{question}"),
 ])
 
 prompt_template = ChatPromptTemplate.from_messages([
-nested_prompt_template1,nested_prompt_template2
+    nested_prompt_template1,
+    nested_prompt_template2,
 ])
 
 prompt_template.invoke({"name":"小智","question":"你为什么这么帅？"})
@@ -1809,13 +1793,14 @@ prompt_template.invoke({"name":"小智","question":"你为什么这么帅？"})
 from langchain_core.prompts import ChatPromptTemplate
 
 # 使用 BaseChatPromptTemplate（嵌套的 ChatPromptTemplate）
-nested_prompt_template1 = ChatPromptTemplate.from_messages([("system", "我是
-一个人工智能助手")])
-nested_prompt_template2 = ChatPromptTemplate.from_messages([("human", "很高兴
-认识你")])
+nested_prompt_template1 = ChatPromptTemplate.from_messages(
+    [("system", "我是一个人工智能助手")]
+)
+nested_prompt_template2 = ChatPromptTemplate.from_messages([("human", "很高兴认识你")])
 
 prompt_template = ChatPromptTemplate.from_messages([
-nested_prompt_template1,nested_prompt_template2
+    nested_prompt_template1,
+    nested_prompt_template2,
 ])
 
 prompt_template.invoke({})
@@ -1833,9 +1818,9 @@ prompt_template.invoke({})
 
 ~~~python
 from langchain_core.prompts import (
-ChatPromptTemplate,
-SystemMessagePromptTemplate,
-HumanMessagePromptTemplate,
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
 )
 from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -1851,11 +1836,11 @@ human_prompt = HumanMessagePromptTemplate.from_template("{user_input}")
 nested_prompt = ChatPromptTemplate.from_messages([("system", "嵌套提示词")])
 
 prompt = ChatPromptTemplate.from_messages([
-system_msg, # MessageLike (BaseMessage)
-human_msg, # MessageLike (BaseMessage)
-system_prompt, # MessageLike (BaseMessagePromptTemplate)
-human_prompt, # MessageLike (BaseMessagePromptTemplate)
-nested_prompt, # MessageLike (BaseChatPromptTemplate)
+    system_msg,  # MessageLike (BaseMessage)
+    human_msg,  # MessageLike (BaseMessage)
+    system_prompt,  # MessageLike (BaseMessagePromptTemplate)
+    human_prompt,  # MessageLike (BaseMessagePromptTemplate)
+    nested_prompt,  # MessageLike (BaseChatPromptTemplate)
 ])
 
 prompt.invoke({"role":"人工智能专家","user_input":"介绍一下大模型的应用场景"})
@@ -1886,14 +1871,14 @@ from langchain_core.prompts import ChatPromptTemplate
 
 # 原始模板
 template = ChatPromptTemplate.from_messages([
-("system", "你是{role}，目标用户是{audience}"),
-("user", "{task}")
+    ("system", "你是{role}，目标用户是{audience}"),
+    ("user", "{task}"),
 ])
 
 # 部分填充
 customer_support_template = template.partial(
-role="客服专员",
-audience="普通用户"
+    role="客服专员",
+    audience="普通用户",
 )
 
 # 现在只需要提供 task
@@ -1912,18 +1897,18 @@ print(messages)
 ~~~python
 # 场景：为不同部门创建专用模板
 base_template = ChatPromptTemplate.from_messages([
-("system", "你是{department}的{role}"),
-("user", "{task}")
+    ("system", "你是{department}的{role}"),
+    ("user", "{task}"),
 ])
 # IT 部门
 it_template = base_template.partial(
-department="IT 部门",
-role="技术支持"
+    department="IT 部门",
+    role="技术支持",
 )
 # 销售部门
 sales_template = base_template.partial(
-department="销售部门",
-role="销售顾问"
+    department="销售部门",
+    role="销售顾问",
 )
 sales_template.invoke({"task":"为什么每年年底汽车会促销"})
 ~~~
@@ -1946,21 +1931,21 @@ sales_template.invoke({"task":"为什么每年年底汽车会促销"})
 from langchain_core.prompts import ChatPromptTemplate
 
 template = ChatPromptTemplate.from_messages(
-[
-("system", "你是一个有用的AI助手"),
-("placeholder", "{conversation}"),
-]
+    [
+        ("system", "你是一个有用的AI助手"),
+        ("placeholder", "{conversation}"),
+    ]
 )
 
 prompt_value = template.invoke(
-{
-"conversation": [
-("human", "你好!"),
-("ai", "今天我能帮你做什么？"),
-("human", "你能给我做一个冰激凌吗？"),
-("ai", "抱歉，我没有这样的能力"),
-]
-}
+    {
+        "conversation": [
+            ("human", "你好!"),
+            ("ai", "今天我能帮你做什么？"),
+            ("human", "你能给我做一个冰激凌吗？"),
+            ("ai", "抱歉，我没有这样的能力"),
+        ]
+    }
 )
 
 print(prompt_value)
@@ -1989,8 +1974,8 @@ print(prompt_value)
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage
 prompt_template = ChatPromptTemplate.from_messages([
-("system", "You are a helpful assistant"),
-MessagesPlaceholder("msgs")
+    ("system", "You are a helpful assistant"),
+    MessagesPlaceholder("msgs"),
 ])
 prompt_template.invoke({"msgs": [HumanMessage(content="hi!")]})
 # prompt_template.format_messages(msgs=[HumanMessage(content="hi!")])
@@ -2013,21 +1998,21 @@ prompt_template.invoke({"msgs": [HumanMessage(content="hi!")]})
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 prompt_template = ChatPromptTemplate.from_messages(
-[
-("system", "你是一个非常友好的AI助手"),
-MessagesPlaceholder(variable_name="history"),
-("human", "{question}")
-]
+    [
+        ("system", "你是一个非常友好的AI助手"),
+        MessagesPlaceholder(variable_name="history"),
+        ("human", "{question}"),
+    ]
 )
 
 prompt_template.invoke(
-{
-"history": [
-("human", "5 + 2 = ?"),
-("ai", "5 + 2 = 7")
-],
-"question": "结果再乘以4呢？"
-}
+    {
+        "history": [
+            ("human", "5 + 2 = ?"),
+            ("ai", "5 + 2 = 7"),
+        ],
+        "question": "结果再乘以4呢？",
+    }
 )
 ~~~
 
@@ -2055,27 +2040,27 @@ templates.py文件声明如下
 from langchain_core.prompts import ChatPromptTemplate
 
 class PromptLibrary:
-"""可复用的提示词模板库"""
+    """可复用的提示词模板库。"""
 
-TRANSLATOR = ChatPromptTemplate.from_messages([
-("system", "你是专业翻译，精通{source_lang}和{target_lang}"),
-("user", "翻译以下文本：\n{text}")
-])
+    TRANSLATOR = ChatPromptTemplate.from_messages([
+        ("system", "你是专业翻译，精通{source_lang}和{target_lang}"),
+        ("user", "翻译以下文本：\n{text}"),
+    ])
 
-CODE_REVIEWER = ChatPromptTemplate.from_messages([
-("system", "你是{language}代码审查专家，重点关注{focus}"),
-("user", "审查代码：\n```{language}\n{code}\n```")
-])
+    CODE_REVIEWER = ChatPromptTemplate.from_messages([
+        ("system", "你是{language}代码审查专家，重点关注{focus}"),
+        ("user", "审查代码：\n```{language}\n{code}\n```"),
+    ])
 
-SUMMARIZER = ChatPromptTemplate.from_messages([
-("system", "你是内容摘要专家"),
-("user", "将以下内容总结为{num}个要点：\n{content}")
-])
+    SUMMARIZER = ChatPromptTemplate.from_messages([
+        ("system", "你是内容摘要专家"),
+        ("user", "将以下内容总结为{num}个要点：\n{content}"),
+    ])
 
-TUTOR = ChatPromptTemplate.from_messages([
-("system", "你是{subject}导师，学生水平：{level}"),
-("user", "{question}")
-])
+    TUTOR = ChatPromptTemplate.from_messages([
+        ("system", "你是{subject}导师，学生水平：{level}"),
+        ("user", "{question}"),
+    ])
 ~~~
 
 其它文件中使用：
@@ -2084,9 +2069,9 @@ TUTOR = ChatPromptTemplate.from_messages([
 from templates import PromptLibrary
 
 messages = PromptLibrary.TRANSLATOR.format_messages(
-source_lang="英语",
-target_lang="中文",
-text="Hello World"
+    source_lang="英语",
+    target_lang="中文",
+    text="Hello World",
 )
 ~~~
 
@@ -2105,8 +2090,8 @@ text="Hello World"
 from langchain_core.prompts import ChatPromptTemplate
 
 FRIENDLY_ASSISTANT = ChatPromptTemplate.from_messages([
-("system", "你是一个友好的助手"),
-("user", "{input}")
+    ("system", "你是一个友好的助手"),
+    ("user", "{input}"),
 ])
 ~~~
 
@@ -2114,7 +2099,7 @@ FRIENDLY_ASSISTANT = ChatPromptTemplate.from_messages([
 将多个模板片段组合成复杂的提示词。
 **方法** **1：字符串组合**
 
-~~~
+~~~python
 # 定义可复用的部分
 role_part = "你是一个{domain}专家。"
 style_part = "回答风格：{style}。"
@@ -2122,8 +2107,8 @@ constraint_part = "限制：{constraint}。"
 # 组合
 full_system = role_part + style_part + constraint_part
 template = ChatPromptTemplate.from_messages([
-("system", full_system),
-("user", "{question}")
+    ("system", full_system),
+    ("user", "{question}"),
 ])
 ~~~
 
@@ -2133,11 +2118,11 @@ template = ChatPromptTemplate.from_messages([
 
 ~~~python
 template1 = ChatPromptTemplate.from_messages([
-("system", "你是助手")
+    ("system", "你是助手"),
 ])
 
 template2 = ChatPromptTemplate.from_messages([
-("user", "{input}")
+    ("user", "{input}"),
 ])
 
 # 组合（LangChain 1.0 支持）
