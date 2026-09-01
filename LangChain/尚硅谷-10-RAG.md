@@ -1,17 +1,14 @@
 # 第10章：RAG（Retrieval）
 讲师：尚硅谷-宋红康
 官网：尚硅谷
-Retrieval直接翻译过来即“检索”，本章Retrieval模块包括与检索步骤相关的所有内容，例如数据的获
-取、切分、向量化、向量存储、向量检索等模块。
+Retrieval直接翻译过来即“检索”，本章Retrieval模块包括与检索步骤相关的所有内容，例如数据的获取、切分、向量化、向量存储、向量检索等模块。
 官方文档地址：https://docs.langchain.com/oss/python/langchain/retrieval
 ## 1、Retrieval模块的设计意义
 ### 1.1 大模型的局限
 **1）知识滞后**
-LLM 训练数据有截止日期 ，无法及时反映 最新的信息 或动态变化。比如：难以应对诸如“请推荐当前
-热门影片”等时间敏感性问题。
+LLM 训练数据有截止日期 ，无法及时反映 最新的信息 或动态变化。比如：难以应对诸如“请推荐当前热门影片”等时间敏感性问题。
 **2）知识缺失**
-大型语言模型（LLM）的训练依赖于网络上 海量公开的静态数据 ，而某些 特定领域 （如企业内部资
-料、专有技术文档等）或 你的私有数据 是缺乏的，导致模型回复时生成不准确甚至虚构的回复。
+大型语言模型（LLM）的训练依赖于网络上 海量公开的静态数据 ，而某些 特定领域 （如企业内部资料、专有技术文档等）或 你的私有数据 是缺乏的，导致模型回复时生成不准确甚至虚构的回复。
 **3）幻觉**
 LLM 在生成回答时，可能会 “胡言乱语” ，这种现象称之为 LLM 的“幻觉”。“幻觉”可以体现为错误陈述、
 编造事实、错误的复杂推理或者复杂语境下理解能力不足等。
@@ -22,18 +19,13 @@ LLM 在生成回答时，可能会 “胡言乱语” ，这种现象称之为 L
 
 百解决这种情况的方案。
 **幻觉产生的原因：**
-训练知识存在偏差 ，这些 错误信息 被 LLM 学习后在输出中复现
-LLM 训练时 过度泛化 ，将普通的模式应用在 特定场合 导致不准确输出
-LLM 本身没有真正学习到训练数据中 深层次的含义 ，导致在一些需要深入理解或 复杂推理 的任
-务中出错
-LLM 缺乏某些领域的相关知识 ，在面临这些领域的相关问题时编造不存在的信息
+训练知识存在偏差 ，这些 错误信息 被 LLM 学习后在输出中复现LLM 训练时 过度泛化 ，将普通的模式应用在 特定场合 导致不准确输出LLM 本身没有真正学习到训练数据中 深层次的含义 ，导致在一些需要深入理解或 复杂推理 的任务中出错LLM 缺乏某些领域的相关知识 ，在面临这些领域的相关问题时编造不存在的信息
 **当前大家普遍达成共识的一个方案：**
 首先，为大模型提供一定的上下文信息，让其输出会变得更稳定。
 其次，利用本章的RAG，将检索出来的 文档和提示词 输送给大模型，生成更可靠的答案。
 
 ### 1.2 什么是RAG
-RAG（Retrieval-Augmented Generation，检索增强生成）是一种结合 信息检索 （Retrieval）与 文本
-生成 （Generation）的技术，旨在提升大语言模型在回答专业问题时的 准确性 和 可靠性 。
+RAG（Retrieval-Augmented Generation，检索增强生成）是一种结合 信息检索 （Retrieval）与 文本生成 （Generation）的技术，旨在提升大语言模型在回答专业问题时的 准确性 和 可靠性 。
 **典型的检索流程如下：（官方）**
 ![尚硅谷-10-RAG-p002-X18](./images/尚硅谷-10-RAG-p002-X18.png)
 
@@ -43,11 +35,9 @@ RAG（Retrieval-Augmented Generation，检索增强生成）是一种结合 信�
 **简单举例：**
 ![尚硅谷-10-RAG-p002-X20](./images/尚硅谷-10-RAG-p002-X20.png)
 
-如果说LangChain相当于给LLM这个“大脑”安装了“四肢和躯干”，RAG则是为LLM提供了接入“人类
-知识图书馆”的能力。
+如果说LangChain相当于给LLM这个“大脑”安装了“四肢和躯干”，RAG则是为LLM提供了接入“人类知识图书馆”的能力。
 **RAG的项目举例：**
-目前，已经出现了非常多的产品几乎完全建立在 RAG 之上，包括 客服系统 、 基于大模型的数据分
-析 ，以及成千上万的数据驱动 聊天应用 ，应用场景五花八门。
+目前，已经出现了非常多的产品几乎完全建立在 RAG 之上，包括 客服系统 、 基于大模型的数据分析 ，以及成千上万的数据驱动 聊天应用 ，应用场景五花八门。
 
 ![尚硅谷-10-RAG-p003-X24](./images/尚硅谷-10-RAG-p003-X24.png)
 
@@ -57,10 +47,8 @@ RAG（Retrieval-Augmented Generation，检索增强生成）是一种结合 信�
 
 ### 1.3 RAG优缺点
 **RAG的优点**
-1）相比提示词工程，RAG有 更丰富的上下文和数据样本 ，可以不需要用户提供过多的背景描述，就能
-生成比较符合用户预期的答案。
-2）相比于模型微调，RAG可以提升问答内容的 时效性 和 可靠性
-3）在一定程度上保护了业务数据的 隐私性 。
+1）相比提示词工程，RAG有 更丰富的上下文和数据样本 ，可以不需要用户提供过多的背景描述，就能生成比较符合用户预期的答案。
+2）相比于模型微调，RAG可以提升问答内容的 时效性 和 可靠性3）在一定程度上保护了业务数据的 隐私性 。
 **RAG的缺点**
 1）由于每次问答都涉及外部系统数据检索，因此RAG的 响应时延 相对较高。
 2）引用的外部知识数据会 消耗大量的模型Token 资源。
@@ -71,20 +59,16 @@ RAG（Retrieval-Augmented Generation，检索增强生成）是一种结合 信�
 指的是RAG架构中所外挂的知识库。这里有三点说明：
 1、原始数据源类型多样：如：视频、图片、文本、代码、文档等
 2、形式的多样性：
-可以是上百个.csv文件，可以是上千个.json文件，也可以是上万个.pdf文件
-可以是某一个业务流程外放的API，可以是某个网站的实时数据等
+可以是上百个.csv文件，可以是上千个.json文件，也可以是上万个.pdf文件可以是某一个业务流程外放的API，可以是某个网站的实时数据等
 **环节2：Load（加载）**
 文档加载器（Document Loaders）负责将来自不同数据源的非结构化文本，加载到 内存 ，成为 文档
 (Document)对象 。
-文档对象包含 文档内容 和相关 元数据信息 ，例如TXT、CSV、HTML、JSON、Markdown、PDF，甚
-至 YouTube 视频转录等。
+文档对象包含 文档内容 和相关 元数据信息 ，例如TXT、CSV、HTML、JSON、Markdown、PDF，甚至 YouTube 视频转录等。
 
 ![尚硅谷-10-RAG-p005-X36](./images/尚硅谷-10-RAG-p005-X36.png)
 
 文档加载器还支持“ 延迟加载 ”模式，以缓解处理大文件时的内存压力。
-LangChain封装好的loader地址：https://docs.langchain.com/oss/python/integrations/document_lo
-aders
-文档加载器的编程接口使用起来非常简单，以下给出加载TXT格式文档的例子。
+LangChain封装好的loader地址：https://docs.langchain.com/oss/python/integrations/document_lo aders文档加载器的编程接口使用起来非常简单，以下给出加载TXT格式文档的例子。
 ~~~python
 from langchain.document_loadersimport TextLoader
 
@@ -93,67 +77,50 @@ print(loader.load())
 ~~~
 
 **环节3：Transform（转换）**
-文档转换器(Document Transformers) 负责对加载的文档进行转换和处理，以便更好地适应下游任务
-的需求。
+文档转换器(Document Transformers) 负责对加载的文档进行转换和处理，以便更好地适应下游任务的需求。
 文档转换器提供了一致的接口（工具）来操作文档，主要包括以下几类：
-文本拆分器(Text Splitters) ：将长文本拆分成语义上相关的小块，以适应语言模型的上下文窗口
-限制。
+文本拆分器(Text Splitters) ：将长文本拆分成语义上相关的小块，以适应语言模型的上下文窗口限制。
 冗余过滤器(Redundancy Filters) ：识别并过滤重复的文档。
 元数据提取器(Metadata Extractors) ：从文档中提取标题、语调等结构化元数据。
 多语言转换器(Multi-lingual Transformers) ：实现文档的机器翻译。
 对话转换器(Conversational Transformers) ：将非结构化对话转换为问答格式的文档。
-总的来说，文档转换器是 LangChain 处理管道中非常重要的一个组件，它丰富了框架对文档的表示和操
-作能力。
+总的来说，文档转换器是 LangChain 处理管道中非常重要的一个组件，它丰富了框架对文档的表示和操作能力。
 在这些功能中，文档拆分器是必须的操作。下面单独说明。
 **环节3.1：Text** **Splitting（文档拆分）**
-拆分/分块的必要性 ：前一个环节加载后的文档对象可以直接传入文档拆分器进行拆分，而文档切
-块后才能 向量化 并存入数据库中。
+拆分/分块的必要性 ：前一个环节加载后的文档对象可以直接传入文档拆分器进行拆分，而文档切块后才能 向量化 并存入数据库中。
 文档拆分器的多样性 ：LangChain提供了丰富的文档拆分器，不仅能够切分普通文本，还能切分
 |  | **拆分/分块的挑战性** |
 | --- | --- |
 |  | 景 |
 
-**在构建RAG应用程序的整个流程中，拆分/分块是最具挑战性的环节之一，它显著影响检索效果**。目前还
-没有通用的方法可以明确指出哪一种分块策略最为有效。不同的使用场景和数据类型都会影响分块策略
-的选择。
+**在构建RAG应用程序的整个流程中，拆分/分块是最具挑战性的环节之一，它显著影响检索效果**。目前还没有通用的方法可以明确指出哪一种分块策略最为有效。不同的使用场景和数据类型都会影响分块策略的选择。
 **环节4：Embed（嵌入）**
-文档嵌入模型（Text Embedding Models）负责将 文本 转换为 向量表示 ，即**模型赋予了文本计算机**
-**可理解的数值表示**，使文本可用于向量空间中的各种运算，大大拓展了文本分析的可能性，是自然语言
-处理领域非常重要的技术。
+文档嵌入模型（Text Embedding Models）负责将 文本 转换为 向量表示 ，即**模型赋予了文本计算机****可理解的数值表示**，使文本可用于向量空间中的各种运算，大大拓展了文本分析的可能性，是自然语言处理领域非常重要的技术。
 ![尚硅谷-10-RAG-p006-X45](./images/尚硅谷-10-RAG-p006-X45.png)
 
-实现原理：通过 特定算法 （如Word2Vec）将语义信息编码为固定维度的向量，具体算法细节需
-后续深入。
+实现原理：通过 特定算法 （如Word2Vec）将语义信息编码为固定维度的向量，具体算法细节需后续深入。
 关键特性：**相似的词在向量空间中距离相近**，例如"猫"和"犬"的向量夹角小于"猫"和"汽车"。
 ![尚硅谷-10-RAG-p006-X46](./images/尚硅谷-10-RAG-p006-X46.jpg)
 
 文本嵌入为 LangChain 中的问答、检索、推荐等功能提供了重要支持。具体为：
-语义匹配 ：通过计算两个文本的向量余弦相似度，判断它们在语义上的相似程度，实现语义匹
-配。
-文本检索 ：通过计算不同文本之间的向量相似度，可以实现语义搜索，找到向量空间中最相似的
-文本。
-信息推荐 ：根据用户的历史记录或兴趣嵌入生成用户向量，计算不同信息的向量与用户向量的相
-似度，推荐相似的信息。
-知识挖掘 ：可以通过聚类、降维等手段分析文本向量的分布，发现文本之间的潜在关联，挖掘知
-识。
+语义匹配 ：通过计算两个文本的向量余弦相似度，判断它们在语义上的相似程度，实现语义匹配。
+文本检索 ：通过计算不同文本之间的向量相似度，可以实现语义搜索，找到向量空间中最相似的文本。
+信息推荐 ：根据用户的历史记录或兴趣嵌入生成用户向量，计算不同信息的向量与用户向量的相似度，推荐相似的信息。
+知识挖掘 ：可以通过聚类、降维等手段分析文本向量的分布，发现文本之间的潜在关联，挖掘知识。
 自然语言处理 ：将词语、句子等表示为稠密向量，为神经网络等下游任务提供输入。
 
 **环节5：Store（存储）**
-LangChain 还支持把文本嵌入存储到向量存储或临时缓存，以避免需要重新计算它们。这里就出现了数
-据库，支持这些嵌入的高效 存储 和 搜索 的需求。
+LangChain 还支持把文本嵌入存储到向量存储或临时缓存，以避免需要重新计算它们。这里就出现了数据库，支持这些嵌入的高效 存储 和 搜索 的需求。
 ![尚硅谷-10-RAG-p007-X51](./images/尚硅谷-10-RAG-p007-X51.png)
 
 **环节6：Retrieve（检索）**
 检索器（Retrievers）是一种用于 响应非结构化查询 的接口，它可以返回符合查询要求的文档。
 LangChain 提供了一些常用的检索器，如 向量检索器 、 文档检索器 、 网站研究检索器 等。
-通过配置不同的检索器，LangChain 可以灵活地平衡检索的精度、召回率与效率。检索结果将为后续的
-问答生成提供信息支持，以产生更加准确和完整的回答。
+通过配置不同的检索器，LangChain 可以灵活地平衡检索的精度、召回率与效率。检索结果将为后续的问答生成提供信息支持，以产生更加准确和完整的回答。
 ## 2、详细使用流程
 ### 2.1 环境准备
 #### 2.1.1 安装依赖
-我们在《第02章-模型调用》章节已经通过requirements.txt 文件安装过课程的依赖。当时考虑到本章
-RAG模块涉及的依赖较多且大，所以不在之前的依赖文件中。所以，这里大家需要补充安装RAG涉及到
-的依赖。完整版文件见《02-资料\requirements_full.txt》
+我们在《第02章-模型调用》章节已经通过requirements.txt 文件安装过课程的依赖。当时考虑到本章RAG模块涉及的依赖较多且大，所以不在之前的依赖文件中。所以，这里大家需要补充安装RAG涉及到的依赖。完整版文件见《02-资料\requirements_full.txt》
 ~~~bash
 pip install -r requirements_full.txt
 ~~~
@@ -174,9 +141,7 @@ No broken requirements found.
 将 knowledge.txt 置于项目根目录下
 将 asset文件夹 解压后置于项目根目录下
 ### 2.2 文档加载器 Document Loaders
-数据源可能包含多种格式的文件，如文本文档、Markdown，PDF 等。LangChain 实现和集成了众多文
-档加载器（https://docs.langchain.com/oss/python/integrations/document_loaders ），方便从不同
-格式的文件中加载数据。
+数据源可能包含多种格式的文件，如文本文档、Markdown，PDF 等。LangChain 实现和集成了众多文档加载器（https://docs.langchain.com/oss/python/integrations/document_loaders ），方便从不同格式的文件中加载数据。
 **常用** **Loaders**：
 TextLoader - 文本文件
 CSVLoader - CSV 文件
@@ -205,8 +170,7 @@ print(docs)
 page_content='LangChain 是一个用于构建基于大语言模型（LLM）应用的开发框架，旨在帮
 ~~~
 
-助开发者更高效地集成、管理和增强大语言模型的能力，构建端到端的应用程序。它提供了一套模
-块化工具和接口，支持从简单的文本生成到复杂的多步骤推理任务')]
+助开发者更高效地集成、管理和增强大语言模型的能力，构建端到端的应用程序。它提供了一套模块化工具和接口，支持从简单的文本生成到复杂的多步骤推理任务')]
 Documment对象中有两个重要的属性：
 page_content：真正的文档内容，字符串类型。
 metadata：文档内容的原数据，字典类型。
@@ -261,11 +225,8 @@ author: John Doe
 ~~~
 
 #### 2.2.3 加载JSON
-LangChain提供的JSON格式的文档加载器是 JSONLoader 。在实际应用场景中，JSON格式的数据占有
-很大比例，而且JSON的形式也是多样的。我们需要特别关注。
-JSONLoader 使用指定的 jq结构 来解析 JSON 文件。jq是一个轻量级的命令行 JSON 处理器 ，可以对
-JSON 格式的数据进行各种复杂的处理，包括数据过滤、映射、减少和转换，是处理 JSON 数据的 首选
-工具之一 。
+LangChain提供的JSON格式的文档加载器是 JSONLoader 。在实际应用场景中，JSON格式的数据占有很大比例，而且JSON的形式也是多样的。我们需要特别关注。
+JSONLoader 使用指定的 jq结构 来解析 JSON 文件。jq是一个轻量级的命令行 JSON 处理器 ，可以对JSON 格式的数据进行各种复杂的处理，包括数据过滤、映射、减少和转换，是处理 JSON 数据的 首选工具之一 。
 ~~~bash
 # 在requirements_full.txt中已经安装
 pip install jq
@@ -423,10 +384,8 @@ metadata..."}'
 
 #### 2.2.4 加载pdf
 PDF 存在多种来源格式，包括扫描版（图片 PDF）、电子文本版、混合版。并且布局格式也多种多样，
-包括单列布局、双列布局甚至竖排文本布局。并且包含段落、标题、页眉页脚、表格、数学公式、化学
-式、特殊符号、图片等各种元素。
-因此，PDF 解析存在很多挑战。对于复杂 PDF，需要进行文本提取、布局检测、表格解析、公式识别等
-处理。
+包括单列布局、双列布局甚至竖排文本布局。并且包含段落、标题、页眉页脚、表格、数学公式、化学式、特殊符号、图片等各种元素。
+因此，PDF 解析存在很多挑战。对于复杂 PDF，需要进行文本提取、布局检测、表格解析、公式识别等处理。
 
 **方式1：PyPDFLoader**
 LangChain加载PDF文件使用的是pypdf，先安装
@@ -463,10 +422,8 @@ print(len(docs))
 
 输出：略
 **方式2：MinerU**
-MinerU 提供了 PDF、Word、PPT、图片等文件的解析，支持图像提取、OCR、公式、表格解析等功
-能。
-调用在线服务：https://mineru.net/apiManage/docs。可以从本地批量上传文件进行解析，并接收解
-析结果。
+MinerU 提供了 PDF、Word、PPT、图片等文件的解析，支持图像提取、OCR、公式、表格解析等功能。
+调用在线服务：https://mineru.net/apiManage/docs。可以从本地批量上传文件进行解析，并接收解析结果。
 ~~~python
 import os
 import time
@@ -620,8 +577,7 @@ MINERU_API_TOKEN=<你的API TOKEN>
 ~~~
 
 #### 2.2.5 加载word
-可使用 UnstructuredWordDocumentLoader加载 Word 文件，需要 unstructured 包。（已在
-requirements_full.txt文件中安装）
+可使用 UnstructuredWordDocumentLoader加载 Word 文件，需要 unstructured 包。（已在requirements_full.txt文件中安装）
 举例：
 ~~~python
 from langchain_community.document_loaders import
@@ -645,8 +601,7 @@ print(docs)
 
 输出：略
 #### 2.2.6 加载Markdown
-可使用 UnstructuredMarkdownLoader 加载 Markdown 文件，需要 unstructured 包。（已在
-requirements_full.txt文件中安装）
+可使用 UnstructuredMarkdownLoader 加载 Markdown 文件，需要 unstructured 包。（已在requirements_full.txt文件中安装）
 举例1：使用UnstructuredMarkdownLoader加载md文件
 ~~~python
 # 1.导入相关的依赖
@@ -691,8 +646,7 @@ classification", model="bert-base-chinese")\n\nresult = classifier("这家
 ~~~
 
 举例2：精细分割文档，保留结构信息
-将Markdown文档按语义元素（标题、段落、列表、表格等）拆分成多个独立的小文档（ Element 对
-象），而不是返回单个大文档。通过指定 mode="elements" 轻松保持这种分离。
+将Markdown文档按语义元素（标题、段落、列表、表格等）拆分成多个独立的小文档（ Element 对象），而不是返回单个大文档。通过指定 mode="elements" 轻松保持这种分离。
 ~~~python
 # 1.导入相关的依赖
 from langchain_community.document_loaders import UnstructuredMarkdownLoader
@@ -883,8 +837,7 @@ print(vartuple)\n\nprintInfo1(10,20,num = 40)\n\nprint("-" * 20)\n# 如果
 ~~~
 
 #### 2.2.9 了解：BaseLoader、Document类
-一方面：LangChain在设计时，要保证Source中多种不同的数据源，在接下来的流程中可以用一种统一
-的形式读取、调用。
+一方面：LangChain在设计时，要保证Source中多种不同的数据源，在接下来的流程中可以用一种统一的形式读取、调用。
 |  | **PDFloader** |
 | --- | --- |
 | .page_content |  |
@@ -894,11 +847,9 @@ print(vartuple)\n\nprintInfo1(10,20,num = 40)\n\nprint("-" * 20)\n# 如果
 | .metadata |  |
 
 【解答】每一个在LangChain中集成的文档加载器，都要继承自 BaseLoader(文档加载器) ，
-BaseLoader提供了一个名为"load"的公开方法，用于从配置的不同 数据源 加载数据，全部作为
-Document 对象。实现逻辑如下所示：
+BaseLoader提供了一个名为"load"的公开方法，用于从配置的不同 数据源 加载数据，全部作为Document 对象。实现逻辑如下所示：
 **BaseLoader类分析**
-BaseLoader类定义了如何从不同的数据源加载文档，每个基于不同数据源实现的loader，都需要继承
-BaseLoader 。Baseloader要求不多，对于任何具体实现的loader，最少都要实现 load方法。
+BaseLoader类定义了如何从不同的数据源加载文档，每个基于不同数据源实现的loader，都需要继承BaseLoader 。Baseloader要求不多，对于任何具体实现的loader，最少都要实现 load方法。
 ~~~python
 class BaseLoader(ABC):
 """文档加载器接口。
@@ -1074,7 +1025,7 @@ class BaseMedia(Serializable):
 
 15 # 都采用它之后，它很可能会变成必填字段。
 ~~~yaml
-id: str | None = Field(default=None, coerce_numbers_to_str=True)
+`id`: str | None = Field(default=None, coerce_numbers_to_str=True)
 """文档的可选标识符。
 
 ~~~
@@ -1135,8 +1086,7 @@ chunk_overlap: int = 200,
 length_function: Callable[[str], int] = len,
 keep_separator: bool | Literal["start", "end"] = False, # noqa:
 FBT001,FBT002
-add_start_index: bool = False, # noqa: FBT001,FBT002
-strip_whitespace: bool = True, # noqa: FBT001,FBT002
+add_start_index: bool = False, # noqa: FBT001,FBT002 strip_whitespace: bool = True, # noqa: FBT001,FBT002
 ) -> None:
 """创建一个新的 `TextSplitter`。
 
@@ -1162,17 +1112,12 @@ msg = f"chunk_overlap must be >= 0, got {chunk_overlap}"
 raise ValueError(msg)
 if chunk_overlap > chunk_size:
 msg = (
-f"Got a larger chunk overlap ({chunk_overlap}) than chunk
-size "
+f"Got a larger chunk overlap ({chunk_overlap}) than chunk size "
 f"({chunk_size}), should be smaller."
 )
 raise ValueError(msg)
 self._chunk_size = chunk_size
-self._chunk_overlap = chunk_overlap
-self._length_function = length_function
-self._keep_separator = keep_separator
-self._add_start_index = add_start_index
-self._strip_whitespace = strip_whitespace
+self._chunk_overlap = chunk_overlap self._length_function = length_function self._keep_separator = keep_separator self._add_start_index = add_start_index self._strip_whitespace = strip_whitespace
 
 @abstractmethod
 def split_text(self, text: str) -> list[str]:
@@ -1212,8 +1157,7 @@ if self._add_start_index:
 offset = index + previous_chunk_len -
 self._chunk_overlap
 index = text.find(chunk, max(0, offset))
-metadata["start_index"] = index
-previous_chunk_len = len(chunk)
+metadata["start_index"] = index previous_chunk_len = len(chunk)
 new_doc = Document(page_content=chunk, metadata=metadata)
 documents.append(new_doc)
 return documents
@@ -1410,8 +1354,7 @@ print("-" * 50)
 from langchain.text_splitter import CharacterTextSplitter
 
 # 2.定义要分割的文本
-text = "这是一个示例文本啊。我们将使用CharacterTextSplitter将其分割成小块。分割基于字
-符数。"
+text = "这是一个示例文本啊。我们将使用CharacterTextSplitter将其分割成小块。分割基于字符数。"
 
 # text = """
 ~~~
@@ -1541,8 +1484,7 @@ add_start_index=True,
 )
 
 # 3.定义拆分的内容
-text="LangChain框架特性\n\n多模型集成(GPT/Claude)\n记忆管理功能\n链式调用设计。文档
-分析场景示例：需要处理PDF/Word等格式。"
+text="LangChain框架特性\n\n多模型集成(GPT/Claude)\n记忆管理功能\n链式调用设计。文档分析场景示例：需要处理PDF/Word等格式。"
 
 # 4.拆分器分割
 paragraphs = text_splitter.split_text(text)
@@ -1605,8 +1547,7 @@ add_start_index=True,
 # text="LangChain框架特性\n\n多模型集成(GPT/Claude)\n记忆管理功能\n链式调用设计。文
 档分析场景示例：需要处理PDF/Word等格式。"
 
-list=["LangChain框架特性\n\n多模型集成(GPT/Claude)\n记忆管理功能\n链式调用设计。文档
-分析场景示例：需要处理PDF/Word等格式。"]
+list=["LangChain框架特性\n\n多模型集成(GPT/Claude)\n记忆管理功能\n链式调用设计。文档分析场景示例：需要处理PDF/Word等格式。"]
 
 # 4.分割器分割
 # create_documents()：形参是字符串列表，返回值是Document的列表
@@ -1646,8 +1587,7 @@ page_content='格式。' metadata={'start_index': 69}
 text.split("\n\n") →
 [
 "LangChain框架特性",
-"多模型集成(GPT/Claude)\n记忆管理功能\n链式调用设计。文档分析场景示例：需要处理
-PDF/Word等格式。"
+"多模型集成(GPT/Claude)\n记忆管理功能\n链式调用设计。文档分析场景示例：需要处理PDF/Word等格式。"
 ]
 ~~~
 
@@ -1793,8 +1733,7 @@ AI依赖多种关键技术：
 举例4：使用split_documents()方法演示，利用PDFLoader加载文档，对文档的内容用递归切割器切割
 ~~~python
 # 1.导入相关依赖
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # 2.定义PyPDFLoader加载器
 loader = PyPDFLoader("../asset/load/04-load.pdf")
@@ -1863,8 +1802,7 @@ Word 2019', 'creationdate': '2025-06-20T17:18:19+08:00', 'moddate':
 text_splitter = RecursiveCharacterTextSplitter(
 chunk_size=200,
 chunk_overlap=20, # 增加重叠字符
-separators=["\n\n", "\n", "。", "！", "？", "……", "，", ""], # 添加中文标点
-length_function=len,
+separators=["\n\n", "\n", "。", "！", "？", "……", "，", ""], # 添加中文标点length_function=len,
 keep_separator=True #保留句尾标点（如 ……），避免切割后丢失语气和逻辑
 )
 ~~~
@@ -1924,8 +1862,7 @@ from langchain_text_splitters import TokenTextSplitter
 
 # 2.初始化 TokenTextSplitter
 text_splitter = TokenTextSplitter(
-chunk_size=33, # 最大 token 数为 33
-chunk_overlap=0, # 重叠 token 数为 0
+chunk_size=33, # 最大 token 数为 33 chunk_overlap=0, # 重叠 token 数为 0
 # model_name="gpt-4", # 选择 GPT-4 模型的编码器
 encoding_name="cl100k_base", # 使用 OpenAI 的编码器,将文本转换为 token 序列
 )
@@ -1993,14 +1930,12 @@ ENCODING_CONSTRUCTORS = {
 举例2：使用CharacterTextSplitter
 ~~~python
 # 1.导入相关依赖
-from langchain_text_splitters import CharacterTextSplitter
-import tiktoken # 用于计算Token数量
+from langchain_text_splitters import CharacterTextSplitter import tiktoken # 用于计算Token数量
 
 
 # 2.定义通过Token切割器
 text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-encoding_name="cl100k_base", # 使用 OpenAI 的编码器
-chunk_size=18,
+encoding_name="cl100k_base", # 使用 OpenAI 的编码器chunk_size=18,
 chunk_overlap=0,
 separator="。", # 指定中文句号为分隔符
 keep_separator=False, # chunk中是否保留分隔符
@@ -2061,11 +1996,7 @@ SemanticChunking（语义分块）是 LangChain 中一种更高级的文本分�
 举例：
 ~~~bash
 # pip install langchain_experimental
-from langchain_experimental.text_splitter import SemanticChunker
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain.embeddings import init_embeddings
-import os
-from dotenv import load_dotenv
+from langchain_experimental.text_splitter import SemanticChunker from langchain_openai.embeddings import OpenAIEmbeddings from langchain.embeddings import init_embeddings import os from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
@@ -2301,8 +2232,7 @@ print(langs)
 ~~~python
 # 1.导入相关依赖
 from langchain_text_splitters import Language,
-RecursiveCharacterTextSplitter
-from pprint import pprint
+RecursiveCharacterTextSplitter from pprint import pprint
 
 # 2.定义要分割的python代码片段
 PYTHON_CODE = """
@@ -2404,9 +2334,7 @@ LangChain中针对向量化模型的封装提供了两种接口，一种针对 �
 
 初始化方式：
 ~~~python
-from langchain.embeddings import init_embeddings
-import os
-from dotenv import load_dotenv
+from langchain.embeddings import init_embeddings import os from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
@@ -2437,9 +2365,7 @@ CLOSEAI_BASE_URL=https://api.openai-proxy.org/v1
 这两款产品的模型是一样的，区别只在于资费和服务保障。
 初始化方式1：
 ~~~python
-from langchain.embeddings import init_embeddings
-import os
-from dotenv import load_dotenv
+from langchain.embeddings import init_embeddings import os from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
@@ -2456,9 +2382,7 @@ base_url=os.getenv("SILICONFLOW_BASE_URL"),
 
 初始化方式2：
 ~~~python
-from langchain_openai import OpenAIEmbeddings
-import os
-from dotenv import load_dotenv
+from langchain_openai import OpenAIEmbeddings import os from dotenv import load_dotenv
 
 load_dotenv(override=True)
 ~~~
@@ -2466,16 +2390,14 @@ load_dotenv(override=True)
 6 # 初始化嵌入模型
 ~~~python
 embedding_model = OpenAIEmbeddings(
-model="Pro/BAAI/bge-m3", # 免费模型 ID: BAAI/bge-m3
-base_url=os.getenv("SILICONFLOW_BASE_URL"),
+model="Pro/BAAI/bge-m3", # 免费模型 ID: BAAI/bge-m3 base_url=os.getenv("SILICONFLOW_BASE_URL"),
 api_key=os.getenv("SILICONFLOW_API_KEY"),
 )
 ~~~
 
 需要.env文件中对应的配置信息：
 ~~~html
-SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
-SILICONFLOW_API_KEY=<YOUR_API_KEY>
+SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1 SILICONFLOW_API_KEY=<YOUR_API_KEY>
 ~~~
 
 #### 2.4.3 句子的向量化（embed_query）
@@ -2486,7 +2408,7 @@ SILICONFLOW_API_KEY=<YOUR_API_KEY>
 
 2 # 待嵌入的文本句子
 ~~~text
-text = "What was the name mentioned in the conversation?"
+text = "What was the `name` mentioned in the conversation?"
 
 ~~~
 
@@ -2515,7 +2437,7 @@ print(len(embedded_query))
 texts = [
 "Hi there!",
 "Oh, hello!",
-"What's your name?",
+"What's your `name`?",
 "My friends call me World",
 "Hello World!"
 ]
@@ -2559,27 +2481,26 @@ print(len(embeded_docs))
 for i in range(len(texts)):
 print(f"{texts[i]}:\n{embeded_docs[i][:3]}",end="\n\n")
 4
-id: 1
+`id`: 1
 title: Introduction to Python
 content: Python is a popular programming language.
 author: John Doe:
 [0.0011606216430664062, 0.005352020263671875, -0.00894927978515625]
 
-id: 2
+`id`: 2
 title: Data Science Basics
 content: Data science involves statistics and machine learning.
 author: Jane Smith:
 [0.0037555694580078125, 0.004573822021484375, -0.014251708984375]
 
-id: 3
+`id`: 3
 title: Web Development
 content: HTML, CSS and JavaScript are core web technologies.
 author: Mike Johnson:
 [0.00484466552734375, 0.0042724609375, -0.024658203125]
 
-id: 4
-title: Artificial Intelligence
-content: AI is transforming many industries.
+`id`: 4
+title: Artificial Intelligence content: AI is transforming many industries.
 author: Sarah Williams:
 [0.004291534423828125, 0.034515380859375, -0.01617431640625]
 
@@ -2631,14 +2552,11 @@ from pymilvus import MilvusClient
 # =========================
 # 1. 基本配置
 # =========================
-MILVUS_URI = "http://localhost:19530" # Milvus 服务的连接地址
-DB_NAME = "rag_tutorial" # 自定义数据库名称
-COLLECTION_NAME = "docs" # 向量集合名称（类似于传统数据库的表）
+MILVUS_URI = "http://localhost:19530" # Milvus 服务的连接地址DB_NAME = "rag_tutorial" # 自定义数据库名称COLLECTION_NAME = "docs" # 向量集合名称（类似于传统数据库的表）
 KNOWLEDGE_FILE = "../knowledge.txt" # 本地知识库文件路径
 
 # BGE-M3 在 SiliconFlow / Milvus 文档中都是 1024 维
-EMBED_MODEL_NAME = "Pro/BAAI/bge-m3" # 嵌入模型名称
-EMBED_DIM = 1024 # BGE-M3 模型输出的向量维度固定为 1024
+EMBED_MODEL_NAME = "Pro/BAAI/bge-m3" # 嵌入模型名称EMBED_DIM = 1024 # BGE-M3 模型输出的向量维度固定为 1024
 ~~~
 
 **②** **初始化Milvus**
@@ -2701,9 +2619,7 @@ COSINE 之外，常见的还有 L2 欧氏距离、 IP 内积等。)
 **③** **初始化** **Embedding** **模型**
 ~~~python
 import os
-from langchain_openai import OpenAIEmbeddings
-from dotenv import load_dotenv
-load_dotenv()
+from langchain_openai import OpenAIEmbeddings from dotenv import load_dotenv load_dotenv()
 
 # =========================
 # 3. 初始化 Embedding 模型
@@ -2714,9 +2630,7 @@ openai_api_base=os.environ["SILICONFLOW_BASE_URL"],
 openai_api_key=os.environ["SILICONFLOW_API_KEY"],
 dimensions=EMBED_DIM, # 可保留；最关键的是 collection 要按 1024 建
 )
-from langchain.embeddings import init_embeddings
-import os
-from dotenv import load_dotenv
+from langchain.embeddings import init_embeddings import os from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
@@ -2726,16 +2640,14 @@ load_dotenv(override=True)
 
 # 初始化嵌入模型
 embed_model = init_embeddings(
-model="openai:" + EMBED_MODEL_NAME, # 采用 OpenAI 兼容格式接口调用
-api_key=os.getenv("SILICONFLOW_API_KEY"),
+model="openai:" + EMBED_MODEL_NAME, # 采用 OpenAI 兼容格式接口调用api_key=os.getenv("SILICONFLOW_API_KEY"),
 base_url=os.getenv("SILICONFLOW_BASE_URL"),
 )
 ~~~
 
 **④** **读取文档并切分**
 ~~~python
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import TextLoader from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # =========================
 # 4. 读取文档并切分
@@ -2966,10 +2878,8 @@ AI 问答额度按自然月统计，每月 1 日 00:00 自动重置，未使用�
 
 119 这里的“超额调用”只计算超出套餐内含额度的部分，不是总调用量。
 ~~~text
-例如基础版用户某月总共调用 18000 次 API，则其中前 10000 次属于套餐内额度，超出的
-次按第一档计费。
-例如专业版用户某月总共调用 95000 次 API，则其中前 80000 次属于套餐内额度，超出的
-次中，前 10000 次按第一档计费，剩余 5000 次按第二档计费。
+例如基础版用户某月总共调用 18000 次 API，则其中前 10000 次属于套餐内额度，超出的次按第一档计费。
+例如专业版用户某月总共调用 95000 次 API，则其中前 80000 次属于套餐内额度，超出的次中，前 10000 次按第一档计费，剩余 5000 次按第二档计费。
 
 --- chunk 14 | len=103 ---
 3. OCR 页数额度
@@ -3318,14 +3228,13 @@ AI 问答额度按自然月统计，每月 1 日 00:00 自动重置，未使用�
 # init_embeddings:
 # - 批量文档 -> embed_documents
 # - 单条查询 -> embed_query
-vectors = embed_model.embed_documents([chunk.page_content for chunk in
-chunks])
+vectors = embed_model.embed_documents([chunk.page_content for chunk in chunks])
 
 
 # 构建复合 Milvus 简易模式的数据行格式
 data = [
 {
-"id": i, # 主键 ID
+"`id`": i, # 主键 ID
 "vector": vectors[i], # 对应的特征向量
 "text": chunks[i].page_content, # 原始文本内容（召回时用来做上下文）
 "source": KNOWLEDGE_FILE, # 元数据：来源文件
@@ -3383,8 +3292,8 @@ insert result: {'upsert_count': 43, 'ids': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 ~~~python
 results = client.query(
 collection_name=COLLECTION_NAME,
-filter="id >= 0",
-output_fields=["id", "chunk_id"]
+filter="`id` >= 0",
+output_fields=["`id`", "chunk_id"]
 )
 print(len(results))
 ~~~
@@ -3396,10 +3305,7 @@ print(len(results))
 
 **⑥** **初始化模型与Agent**
 ~~~python
-from langchain.agents import create_agent
-from langchain.chat_models import init_chat_model
-from dotenv import load_dotenv
-import os
+from langchain.agents import create_agent from langchain.chat_models import init_chat_model from dotenv import load_dotenv import os
 
 # 从.env文件中加载环境变量
 load_dotenv(override=True)
@@ -3448,9 +3354,7 @@ query_vector = embed_model.embed_query(question)
 # 在 Milvus 中执行向量搜索：查数据（search）
 results = client.search(
 collection_name=COLLECTION_NAME,
-data=[query_vector], # 向量数据库搜索接口接收一个列表
-limit=k, # 返回最相似的前 K 条记录
-output_fields=["text", "source", "chunk_id"] # 指定召回时一并返回的标量
+data=[query_vector], # 向量数据库搜索接口接收一个列表limit=k, # 返回最相似的前 K 条记录output_fields=["text", "source", "chunk_id"] # 指定召回时一并返回的标量
 ~~~
 
 字段
@@ -3466,7 +3370,7 @@ return results[0] # 返回第一条 query 的搜索结果列表
 |  |  |
 
 ~~~yaml
-id: 30 distance: 0.7474241852760315 source: knowledge.txt
+`id`: 30 distance: 0.7474241852760315 source: knowledge.txt
 ~~~
 
 2 补充说明：
@@ -3478,7 +3382,7 @@ id: 30 distance: 0.7474241852760315 source: knowledge.txt
 订单中满足条件的首购部分申请退款。
 5 若用户已开具专票，则需先完成红字发票流程后才能退款。
 ~~~yaml
-id: 17 distance: 0.7253392934799194 source: knowledge.txt
+`id`: 17 distance: 0.7253392934799194 source: knowledge.txt
 ==============================
 
 1. 成员数计算口径
@@ -3487,14 +3391,14 @@ id: 17 distance: 0.7253392934799194 source: knowledge.txt
 10 成员数按“已激活成员”计算，已邀请但尚未激活的成员暂不计入套餐人数上限。
 11 当团队成员被停用后，该成员在停用当日仍计入成员数，自次日开始不再计入。
 ~~~yaml
-id: 24 distance: 0.6977135539054871 source: knowledge.txt
+`id`: 24 distance: 0.6977135539054871 source: knowledge.txt
 ~~~
 
 13 企业版数据保留策略默认按合同执行。
 14 如果企业合同中未单独约定，则默认给予 30 天宽限期和 90 天只读保留期。
 15 如果企业版购买了“定制数据保留策略”，则以合同附表中的天数为准。
 ~~~yaml
-id: 7 distance: 0.6809771060943604 source: knowledge.txt
+`id`: 7 distance: 0.6809771060943604 source: knowledge.txt
 3. 专业版
 - 价格：199 元 / 用户 / 月
 - 成员人数上限：50 人
@@ -3510,8 +3414,7 @@ id: 7 distance: 0.6809771060943604 source: knowledge.txt
 
 28 - 人工客服支持：工单 + 工作日在线客服 + 紧急问题电话支持
 ~~~yaml
-id: 41 distance: 0.6790981888771057 source: knowledge.txt
-问：基础版 API 超额后会停用吗？
+`id`: 41 distance: 0.6790981888771057 source: knowledge.txt问：基础版 API 超额后会停用吗？
 ~~~
 
 31 答：不会。API 超额后继续服务，但会按阶梯计费；真正会停的是 AI 问答额度耗尽后的问答服
@@ -3653,8 +3556,7 @@ generate_answer(q)
 32 - 人工客服支持：工单 + 工作日在线客服 + 紧急问题电话支持
 ~~~text
 
-[5] chunk_id=41 score=0.6791 source=knowledge.txt
-问：基础版 API 超额后会停用吗？
+[5] chunk_id=41 score=0.6791 source=knowledge.txt问：基础版 API 超额后会停用吗？
 ~~~
 
 36 答：不会。API 超额后继续服务，但会按阶梯计费；真正会停的是 AI 问答额度耗尽后的问答服
@@ -3677,3 +3579,4 @@ generate_answer(q)
 44 根据检索到的上下文，您在7天内申请退款被拒的常见原因包括：超过首次购买7个自然日、AI问
 答使用量超过月度额度的50%、升级部分订单不适用首购退款规则，或者已经开具专票但尚未完成
 红字发票流程。如果上下文不足以回答您的具体问题，请提供更多细节。
+~~~

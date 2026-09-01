@@ -4,8 +4,7 @@
 ## 1、Tools概述
 ### 1.1 工具的重要性
 要构建更强大的AI工程应用，只有生成文本这样的“ 纸上谈兵 ”能力自然是不够的。
-工具是赋予大语言模型 与外部世界交互能力 的关键组件，从而能让智能体执行搜索、计算、数据库查
-询、邮件发送或调用第三方API等，进而构建功能强大的AI应用。借助工具，大模型才能从“ 认识世界 ”
+工具是赋予大语言模型 与外部世界交互能力 的关键组件，从而能让智能体执行搜索、计算、数据库查询、邮件发送或调用第三方API等，进而构建功能强大的AI应用。借助工具，大模型才能从“ 认识世界 ”
 走向“ 改变世界 ”。
 举例：
 ![尚硅谷-05-Tools-p001-X9](./images/尚硅谷-05-Tools-p001-X9.png)
@@ -223,8 +222,7 @@ final_response = model_with_tools.invoke(messages)
 print(f"final_response: \n{final_response}")
 ~~~
 
-说明：被 @tool 修饰的函数可以调用 invoke 接收模型返回的入参信息执行函数，并返回
-ToolMessage 实例，我们不再需要手动拼接 ToolMessage 。
+说明：被 @tool 修饰的函数可以调用 invoke 接收模型返回的入参信息执行函数，并返回`ToolMessage` 实例，我们不再需要手动拼接 `ToolMessage` 。
 ~~~html
 <class 'langchain_core.messages.tool.ToolMessage'>
 =====================> messages <=====================
@@ -277,14 +275,10 @@ tool_calls=[] invalid_tool_calls=[] usage_metadata={'input_tokens':
 所以如果真正要大模型根据工具调用结果进行回复，完整的调用流程包括如下四个步骤：
 
 步骤1：模型绑定工具 ：通过model.bind_tools([...])绑定一个或者多个工具。
-步骤2：模型生成工具调用请求 ：用户输入问题，调用模型（比如invoke()）。如果需要调用工具，模
-型返回包含工具调用信息（如工具名称和参数）的AIMessage。
-步骤3：开发者手动执行工具 ：用户从响应中提取工具调用信息并手动调用对应的工具（比如工
-具.invoke()）。
-步骤4：将工具执行结果ToolMessage传递给模型生成最终结果 ：将之前用户提问内容和手动执行工具
-结果ToolMessage返回模型，模型最终生成回复。
-特别注意：大模型调用工具是单次推理，直接响应，**需要开发者手动执行工具**并管理循环，适合简
-单、确定的任务。
+步骤2：模型生成工具调用请求 ：用户输入问题，调用模型（比如invoke()）。如果需要调用工具，模型返回包含工具调用信息（如工具名称和参数）的`AIMessage`。
+步骤3：开发者手动执行工具 ：用户从响应中提取工具调用信息并手动调用对应的工具（比如工具.invoke()）。
+步骤4：将工具执行结果`ToolMessage`传递给模型生成最终结果 ：将之前用户提问内容和手动执行工具结果`ToolMessage`返回模型，模型最终生成回复。
+特别注意：大模型调用工具是单次推理，直接响应，**需要开发者手动执行工具**并管理循环，适合简单、确定的任务。
 ## 2、工具的定义方式1：不使用@tool
 ### 2.1 模型绑定工具并发送请求
 ~~~python
@@ -389,8 +383,7 @@ usage_metadata={
 
 ### 2.2 工具描述的各部分详解
 #### 2.2.1 了解：convert_to_openai_tool
-执行 model.bind_tools([get_weather]) ，底层最终会调用 convert_to_openai_tool 生成工具描述。所
-以我们可以直接调用后者查看解析后的工具描述。
+执行 model.bind_tools([get_weather]) ，底层最终会调用 convert_to_openai_tool 生成工具描述。所以我们可以直接调用后者查看解析后的工具描述。
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
@@ -425,8 +418,7 @@ rprint(convert_to_openai_tool(get_weather))
 **结果字段说明：**
 (1) type：定义当前数据节点必须是什么数据类型。常见类型有 string, number, integer, boolean,
 object, array, null。object即是json对象。
-(2) properties：用于定义JSON 对象（Object）中可以包含哪些属性（键），以及每个属性对应的
-值类型和说明。
+(2) properties：用于定义JSON 对象（Object）中可以包含哪些属性（键），以及每个属性对应的值类型和说明。
 (3) required：当 type为 "object"时使用，是一个数组，列出了对象中必须存在的属性名。
 **问题：为什么不使用@tool装饰器修饰的函数，也可以理解为工具呢？**
 查看 convert_to_openai_tool 底层源码：
@@ -439,8 +431,7 @@ oai_function = cast(
 )
 ~~~
 
-相当于加了@tool修饰的函数走上面的分支，没有加@tool修饰的函数走下面的分支，后者会基于函数定
-义和docstring生成pydantic模式的描述，然后转换为规范的tool_schema。
+相当于加了@tool修饰的函数走上面的分支，没有加@tool修饰的函数走下面的分支，后者会基于函数定义和docstring生成pydantic模式的描述，然后转换为规范的tool_schema。
 #### 2.2.2 description说明
 convert_to_openai_tool 会从 docstring(文档字符串) 加载工具的描述信息，上面的案例中，
 docstring 为空，所以抽取的 description 为空。
@@ -483,10 +474,7 @@ rprint(convert_to_openai_tool(get_weather))
 
 #### 2.2.3 参数说明
 convert_to_openai_tool 会从 docstring 加载参数说明，这里的 docstring 必须遵循 Google 风格 。
-Google 风格 docstring 说明：https://google.github.io/styleguide/pyguide.html
-Google 风格 docstring 示例：https://www.sphinx-doc.org/en/master/usage/extensions/exa
-mple_google.html
-Python docstring 通用约定：https://peps.python.org/pep-0257/
+Google 风格 docstring 说明：https://google.github.io/styleguide/pyguide.html Google 风格 docstring 示例：https://www.sphinx-doc.org/en/master/usage/extensions/exa mple_google.html Python docstring 通用约定：https://peps.python.org/pep-0257/
 基础用法不必完整阅读规范，只需要按照下面的示例仿写即可。
 
 ~~~python
@@ -508,8 +496,7 @@ return f"{city}天气晴朗"
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
-使用 Args: 、 Returns: 、 Raises: 等关键字，这种方式可读性强。Agent通过工具的这些注释来理解
-工具的用途和调用时机，因此清晰、准确的文档字符串是工具能被正确调用的前提。
+使用 Args: 、 Returns: 、 Raises: 等关键字，这种方式可读性强。Agent通过工具的这些注释来理解工具的用途和调用时机，因此清晰、准确的文档字符串是工具能被正确调用的前提。
 输出如下：
 ~~~text
 {
@@ -725,8 +712,7 @@ rprint(convert_to_openai_tool(get_weather))
 
 ### 3.1 自定义工具描述：description
 **情况1：仅提供docstring信息**
-在bind_tools()调用时，先将函数封装为 BaseTool 类型的对象，再传递给 convert_to_openai_tool 函
-数，生成工具的描述。
+在bind_tools()调用时，先将函数封装为 BaseTool 类型的对象，再传递给 convert_to_openai_tool 函数，生成工具的描述。
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain.tools import tool
@@ -738,8 +724,7 @@ return f"{city}天气晴朗"
 print(convert_to_openai_tool(get_weather))
 ~~~
 
-@tool 会从 docstring 生成描述信息，同样要求遵循 Google docstring 规范 。如果没有 docstring
-则报错，如下。
+@tool 会从 docstring 生成描述信息，同样要求遵循 Google docstring 规范 。如果没有 docstring则报错，如下。
 ~~~yaml
 Traceback...
 ValueError: Function must have a docstring if description not provided.
@@ -961,8 +946,7 @@ fahrenheit-华氏度',
 }
 ~~~
 
-**要注意**：不使用 @tool 装饰器时，docstring不合法会被视为普通文本，作为 description ，但如果使
-用了 @tool 时 docstring 不合法，将会抛出异常
+**要注意**：不使用 @tool 装饰器时，docstring不合法会被视为普通文本，作为 description ，但如果使用了 @tool 时 docstring 不合法，将会抛出异常
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
@@ -1084,10 +1068,8 @@ print(convert_to_openai_tool(get_weather))
 开发中，习惯使用函数名作为工具名称，不推荐自定义工具名称。
 ### 3.3 自定义args_schema
 #### 3.3.1 方式1：使用Pydantic模型定义
-当工具的参数变得复杂，需要 枚举值 、 范围限制 或 更复杂的业务逻辑验证 时，Pydantic 模型是理想
-的选择，提供强大的类型检查和数据验证。
-使用Pydantic 的主要优势在于能够**精确控制工具参数的格式和验证规则**，让大模型更准确地理解如何调
-用工具。
+当工具的参数变得复杂，需要 枚举值 、 范围限制 或 更复杂的业务逻辑验证 时，Pydantic 模型是理想的选择，提供强大的类型检查和数据验证。
+使用Pydantic 的主要优势在于能够**精确控制工具参数的格式和验证规则**，让大模型更准确地理解如何调用工具。
 **3.3.1.1** **pydantic类型的定义**
 **①** **BaseModel基类**
 通过继承核心基类 BaseModel 定义数据模型，从而声明字段结构、类型约束、默认值以0及校验规则。
@@ -1106,8 +1088,7 @@ print(WeatherInput(city="北京"))
 city='北京'
 ~~~
 
-注意：BaseModel子类初始化时，不接收位置参数，字段值必须以关键字参数的形式传入，否则
-报错。
+注意：BaseModel子类初始化时，不接收位置参数，字段值必须以关键字参数的形式传入，否则报错。
 ~~~python
 from pydantic import BaseModel
 
@@ -1130,8 +1111,7 @@ given
 def __init__(self, /, **data: Any) -> None:
 ~~~
 
-由此可知，所有关键字参数都会被收集到字典 data 中，然后 data 会按照参数类型注解进行校验，失
-败时抛出异常。
+由此可知，所有关键字参数都会被收集到字典 data 中，然后 data 会按照参数类型注解进行校验，失败时抛出异常。
 **②** **Field**
 Field() ：用来“ 定制字段 ”的函数，可用于设置默认值、描述等。
 举例1：设置默认值
@@ -1241,8 +1221,7 @@ city='北京' unit='celsius' include_forecast=False
 
 **3.3.1.2** **使用Pydantic定义args_schema**
 通过 @tool(args_schema=PydanticModelCls) 将这个 Pydantic 模型与工具函数关联。
-利用 Pydantic 的类型系统进行参数验证，当大模型需要调用工具前，Pydantic 会自动验证参数的类型
-和有效性。
+利用 Pydantic 的类型系统进行参数验证，当大模型需要调用工具前，Pydantic 会自动验证参数的类型和有效性。
 举例：
 ~~~python
 from pydantic import BaseModel, Field
@@ -1316,10 +1295,8 @@ convert_to_openai_tool(get_weather)
 ~~~
 
 #### 3.3.2 方式2：使用Json Schema定义
-在 LangChain 中，还可以直接使用 JSON Schema 字典 来定义工具的参数模式。这种方式提供了极大
-的灵活性。
-因为工具参数模式可以基于数据库配置或用户输入在 运行时动态生成 ，所以这种方式特别适合参数结
-构需要动态生成的场景。
+在 LangChain 中，还可以直接使用 JSON Schema 字典 来定义工具的参数模式。这种方式提供了极大的灵活性。
+因为工具参数模式可以基于数据库配置或用户输入在 运行时动态生成 ，所以这种方式特别适合参数结构需要动态生成的场景。
 举例：
 ~~~json
 {
@@ -1354,8 +1331,7 @@ convert_to_openai_tool(get_weather)
 ~~~
 
 举例：
-通过 @tool(args_schema=json_schema_dict) 将一个符合 JSON Schema 标准的字典与工具函数关
-联。
+通过 @tool(args_schema=json_schema_dict) 将一个符合 JSON Schema 标准的字典与工具函数关联。
 ~~~python
 from langchain.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
@@ -1645,8 +1621,7 @@ Name: get_weather_and_forecast
 
 20 如果你愿意，我也可以帮你继续看一下适合出行/穿衣的建议。
 ### 4.3 案例3：多工具调用
-大模型调用工具是单次推理，即每次运行调用一个工具，当调用多个工具时，需要用户自己管理多次调
-用循环。
+大模型调用工具是单次推理，即每次运行调用一个工具，当调用多个工具时，需要用户自己管理多次调用循环。
 ~~~python
 
 from langchain_core.tools import tool
@@ -1995,8 +1970,7 @@ Name: get_news
 ## 5、拓展：强制使用工具
 ### 5.1 tool_choice参数说明
 bind_tools 可以传递参数 tool_choice ，用于控制是否强制使用工具。
-该字段最终会作为 payload 的 tool_choice 字段传递给模型，OpenAI和Deepseek的官方API服务对于
-tool_choice 的取值做了相同的规定。
+该字段最终会作为 payload 的 tool_choice 字段传递给模型，OpenAI和Deepseek的官方API服务对于tool_choice 的取值做了相同的规定。
 OpenAI官方文档
 ![尚硅谷-05-Tools-p035-X168](./images/尚硅谷-05-Tools-p035-X168.png)
 
@@ -2441,8 +2415,7 @@ prompt="如果工具失败，尝试使用其他方法解决问题。"
 ~~~
 
 第3层：调用级重试
-在大模型应用（如 LangChain）中，网络请求和外部工具调用是最容易掉链子的地方。 @retry 就像是
-一个 容错保险 。
+在大模型应用（如 LangChain）中，网络请求和外部工具调用是最容易掉链子的地方。 @retry 就像是一个 容错保险 。
 
 ~~~python
 from tenacity import retry, stop_after_attempt
@@ -2462,8 +2435,7 @@ question}]})
 ① 你调用 call_agent("你好") 。
 ② 程序进入函数，执行 agent.invoke(...) 。
 ③ 如果执行成功：正常返回结果， @retry 什么都不做。
-④ 如果执行失败（报错）： @retry 会拦截这个错误，不让程序直接崩溃。它会默默地帮你再次触发
-agent.invoke(...) 。
+④ 如果执行失败（报错）： @retry 会拦截这个错误，不让程序直接崩溃。它会默默地帮你再次触发agent.invoke(...) 。
 ⑤ 如果连续 3 次都报错：它终于放弃了，把第 3 次的报错真正抛出来，程序此时才会报错中止。
 **4.** **返回字符串**
 1 # ✅ 好：返回字符串
@@ -2489,18 +2461,15 @@ return {"id": user_id, "name": "张三"}
 （Tools）生态中，**强烈建议工具返回字符串（str）**。因为：
 1）大模型（LLM）的本质只吃“文本”
 2）避免大模型“胡思乱想”（乱码与格式问题）
-如果你返回一个包含中文的字典 {"name": "张三"} ，LangChain 在强制将其转换为字符串时，默认可
-能会采用 Unicode 编码，变成 {"name": "\u5f20\u4e09"} 。
+如果你返回一个包含中文的字典 {"`name`": "张三"} ，LangChain 在强制将其转换为字符串时，默认可能会采用 Unicode 编码，变成 {"`name`": "\u5f20\u4e09"} 。
 大模型虽然能理解 Unicode，但极易受到干扰。直接看到中文 张三 的大模型，和看到
 |  |  | **\u5f20\u4e09** |
 | --- | --- | --- |
 |  |  | ensure_ascii=False) |
 
-json.dumps()是 Python 标准库 json模块中的函数，用于将 Python 对象（如字典、列表）序列化
-成一个 JSON 格式的字符串。
+json.dumps()是 Python 标准库 json模块中的函数，用于将 Python 对象（如字典、列表）序列化成一个 JSON 格式的字符串。
 ensure_ascii=False : 这个参数默认值为 True，表示所有非 ASCII 字符（如中文）会被转换成
-\uXXXX形式的转义序列。设置为 False后，中文、表情符号等字符就能在 JSON 字符串中正常显
-示，而不是一堆乱码。
+\uXXXX形式的转义序列。设置为 False后，中文、表情符号等字符就能在 JSON 字符串中正常显示，而不是一堆乱码。
 
 **5.** **选择同步** **vs** **异步**
 同步工具 ：简单场景，CPU 密集型任务
