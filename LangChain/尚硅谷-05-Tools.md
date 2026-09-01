@@ -21,26 +21,28 @@
 
 ~~~python
 from langchain_core.tools import tool
+
+
 @tool
 def get_weather(city: str) -> str:
-"""
-获取指定城市的天气信息
-参数:
-city: 城市名称，如"北京"、"上海"
-返回:
-天气信息字符串
-"""
-# 你的实现
-return city + "晴天，温度 15°C"
+    """
+    获取指定城市的天气信息
+    参数:
+    city: 城市名称，如"北京"、"上海"
+    返回:
+    天气信息字符串
+    """
+    # 你的实现
+    return city + "晴天，温度 15°C"
 ~~~
 
-~~~
+~~~python
 # 使用 .invoke() 方法
 result = get_weather.invoke({"city": "北京"})
 print(result)
 ~~~
 
-> ~~~
+> ~~~text
 > 北京晴天，温度 15°C
 > ~~~
 
@@ -54,7 +56,6 @@ from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
 
-
 # 从.env文件中加载环境变量
 load_dotenv(override=True)
 
@@ -62,20 +63,21 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 
 from langchain_core.tools import tool
 
+
 # 定义工具
 @tool
 def get_weather(city: str) -> str:
-"""获取指定城市的天气"""
-# 你的实现
-return "晴天，温度 15°C"
+    """获取指定城市的天气"""
+    # 你的实现
+    return "晴天，温度 15°C"
 
 
 # 绑定工具
@@ -87,12 +89,12 @@ response = model_with_tools.invoke("北京天气如何？")
 
 # 检查 AI 是否要调用工具
 if response.tool_calls:
-print("AI 想调用工具：", response.tool_calls)
+    print("AI 想调用工具：", response.tool_calls)
 else:
-print("AI 直接回答：", response.content)
+    print("AI 直接回答：", response.content)
 ~~~
 
-> ~~~
+> ~~~text
 > AI 想调用工具： [{'name': 'get_weather', 'args': {'city': '北京'}, 'id':
 > 'call_fR3LE8Wjqh9lnDosQ61Y892E', 'type': 'tool_call'}]
 > ~~~
@@ -118,41 +120,44 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 ~~~
 
 参考1：不使用@tool修饰
 ~~~python
 from langchain.messages import HumanMessage, ToolMessage
+
+
 def get_weather(city: str):
-"""获取天气的工具"""
-return f"{city}天气晴朗"
+    """获取天气的工具"""
+    return f"{city}天气晴朗"
+
+
 # 将模型和工具绑定
 model_with_tools = model.bind_tools([get_weather])
-messages = [
-HumanMessage("今天北京天气如何")
-]
+messages = [HumanMessage("今天北京天气如何")]
 # 模型生成调用工具请求
 response = model_with_tools.invoke(messages)
 # 添加AIMessage
 messages.append(response)
 tool_calls = response.tool_calls
 for tool_call in tool_calls:
-if tool_call["name"] == "get_weather":
-# 拼接出ToolMessage实例
-tool_response = ToolMessage(
-content=get_weather(**tool_call["args"]),
-tool_call_id=tool_call["id"],
-name=tool_call["name"]
-)
-messages.append(tool_response)
+    if tool_call["name"] == "get_weather":
+        # 拼接出ToolMessage实例
+        tool_response = ToolMessage(
+            content=get_weather(**tool_call["args"]),
+            tool_call_id=tool_call["id"],
+            name=tool_call["name"],
+        )
+        messages.append(tool_response)
+
 print("=====================> messages <=====================")
 for msg in messages:
-msg.pretty_print()
+    msg.pretty_print()
 print("=====================> messages <=====================")
 final_response = model_with_tools.invoke(messages)
 print(f"final_response: \n{final_response}")
@@ -165,36 +170,39 @@ print(f"final_response: \n{final_response}")
 参考2：使用@tool修饰
 ~~~python
 from langchain.messages import HumanMessage, ToolMessage
+
+
 @tool
 def get_weather(city: str):
-"""获取天气的工具"""
-return f"{city}天气晴朗~"
+    """获取天气的工具"""
+    return f"{city}天气晴朗~"
+
+
 # 将模型和工具绑定
 model_with_tools = model.bind_tools([get_weather])
-messages = [
-HumanMessage("今天北京天气如何")
-]
+messages = [HumanMessage("今天北京天气如何")]
 # 模型生成调用工具请求
 response = model_with_tools.invoke(messages)
 # 添加AIMessage
 messages.append(response)
 tool_calls = response.tool_calls
 for tool_call in tool_calls:
-if tool_call["name"] == "get_weather":
-# 返回的是ToolMessage类型消息
-tool_response = get_weather.invoke(tool_call)
-print(type(tool_response))
-messages.append(tool_response)
+    if tool_call["name"] == "get_weather":
+        # 返回的是ToolMessage类型消息
+        tool_response = get_weather.invoke(tool_call)
+        print(type(tool_response))
+        messages.append(tool_response)
+
 print("=====================> messages <=====================")
 for msg in messages:
-msg.pretty_print()
+    msg.pretty_print()
 print("=====================> messages <=====================")
 final_response = model_with_tools.invoke(messages)
 print(f"final_response: \n{final_response}")
 ~~~
 
 说明：被 `@tool` 修饰的函数可以调用 `invoke` 接收模型返回的入参信息执行函数，并返回`ToolMessage` 实例，我们不再需要手动拼接 `ToolMessage` 。
-> ~~~
+> ~~~text
 > <class 'langchain_core.messages.tool.ToolMessage'>
 > =====================> messages <=====================
 > ================================ Human Message
@@ -251,33 +259,36 @@ print(f"final_response: \n{final_response}")
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
+
 # 从.env文件中加载环境变量
 load_dotenv(override=True)
 CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 
 from rich import print as rprint
+
+
 # 定义工具
 def get_weather(city: str):
-return f"{city}天气晴朗"
+    return f"{city}天气晴朗"
+
+
 # 将模型和工具绑定
 model_with_tools = model.bind_tools([get_weather])
-response = model_with_tools.invoke(
-"今天北京天气如何"
-)
+response = model_with_tools.invoke("今天北京天气如何")
 rprint(response)
 # print(response.tool_calls)
 ~~~
 
 输出如下
 
-> ~~~
+> ~~~text
 > AIMessage(
 > content='',
 > additional_kwargs={'refusal': None},
@@ -342,14 +353,16 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 
 from rich import print as rprint
 
+
 def get_weather(city: str):
-return f"{city}天气晴朗"
+    return f"{city}天气晴朗"
+
 
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
 输出如下
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -399,16 +412,20 @@ oai_function = cast(
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
+
+
 def get_weather(city: str):
-"""
-天气查询工具
-"""
-return f"{city}天气晴朗"
+    """
+    天气查询工具
+    """
+    return f"{city}天气晴朗"
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
 输出
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -443,13 +460,17 @@ rprint(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
+
+
 def get_weather(city: str):
-"""
-天气查询工具
-Args:
-city: 城市名称
-"""
-return f"{city}天气晴朗"
+    """
+    天气查询工具
+    Args:
+    city: 城市名称
+    """
+    return f"{city}天气晴朗"
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
@@ -481,21 +502,22 @@ AI 依赖 docstring 来理解工具。
 # ❌ 不好：太模糊
 @tool
 def tool1(x: str) -> str:
-"""做一些事情"""
-...
+    """做一些事情"""
+    ...
+
+    # ✅ 好：清晰明确
 
 
-# ✅ 好：清晰明确
 @tool
 def search_products(query: str) -> str:
-"""
-在产品数据库中搜索产品
-Args:
-query: 搜索关键词，如"笔记本电脑"、"手机"
-Returns:
-产品列表的 JSON 字符串
-"""
-...
+    """
+    在产品数据库中搜索产品
+    Args:
+    query: 搜索关键词，如"笔记本电脑"、"手机"
+    Returns:
+    产品列表的 JSON 字符串
+    """
+    ...
 ~~~
 
 #### 2.2.4 参数类型说明
@@ -503,16 +525,20 @@ Returns:
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
+
+
 def get_weather(city):
-"""
-天气查询工具
-"""
-return f"{city}天气晴朗"
+    """
+    天气查询工具
+    """
+    return f"{city}天气晴朗"
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
 6 天气查询工具
-~~~python
+~~~text
 """
 return f"{city}天气晴朗"
 
@@ -520,7 +546,7 @@ rprint(convert_to_openai_tool(get_weather))
 ~~~
 
 输出如下
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -546,18 +572,20 @@ rprint(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
+
+
 def get_weather(city):
-"""
-天气查询工具
-Args:
-city: 城市名称
-"""
-print("天气晴朗")
-rprint(convert_to_openai_tool(get_weather))
+    """
+    天气查询工具
+    Args:
+    city: 城市名称
+    """
+    print("天气晴朗")
+    rprint(convert_to_openai_tool(get_weather))
 ~~~
 
 报错如下：
-> ~~~
+> ~~~text
 > Traceback...
 > ValueError: Arg city in docstring not found in function signature.
 > ~~~
@@ -569,13 +597,17 @@ rprint(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
-def get_weather(city: str="北京"):
-"""
-天气查询工具
-Args:
-city: 城市名称
-"""
-return f"{city}天气晴朗"
+
+
+def get_weather(city: str = "北京"):
+    """
+    天气查询工具
+    Args:
+    city: 城市名称
+    """
+    return f"{city}天气晴朗"
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
@@ -607,19 +639,23 @@ rprint(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
-def get_weather(dt: str, city: str="北京"):
-"""
-天气查询工具
-Args:
-dt: 日期
-city: 城市名称
-"""
-return f"{city}天气晴朗"
+
+
+def get_weather(dt: str, city: str = "北京"):
+    """
+    天气查询工具
+    Args:
+    dt: 日期
+    city: 城市名称
+    """
+    return f"{city}天气晴朗"
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
 输出
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -658,16 +694,18 @@ rprint(convert_to_openai_tool(get_weather))
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain.tools import tool
 
+
 @tool
 def get_weather(city: str):
-return f"{city}天气晴朗"
+    return f"{city}天气晴朗"
+
 
 print(convert_to_openai_tool(get_weather))
 ~~~
 
 `@tool` 会从 `docstring` 生成描述信息，同样要求遵循 `Google docstring 规范 `。如果没有 `docstring`则报错，如下。
 
-> ~~~
+> ~~~text
 > Traceback...
 > ValueError: Function must have a docstring if description not provided.
 > ~~~
@@ -676,17 +714,21 @@ print(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain.tools import tool
+
+
 @tool
 def get_weather(city: str):
-"""
-天气查询工具
-"""
-return f"{city}天气晴朗"
+    """
+    天气查询工具
+    """
+    return f"{city}天气晴朗"
+
+
 print(convert_to_openai_tool(get_weather))
 ~~~
 
 输出如下
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -716,12 +758,16 @@ print(convert_to_openai_tool(get_weather))
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain.tools import tool
 from rich import print as rprint
+
+
 @tool(description="根据城市名称查询当日天气的工具")
 def get_weather(city: str):
-"""
-天气查询工具
-"""
-return f"{city}天气晴朗"
+    """
+    天气查询工具
+    """
+    return f"{city}天气晴朗"
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
@@ -756,29 +802,33 @@ rprint(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
+
+
 @tool
-def get_weather(city: str, units: str = "celsius", include_forecast: bool =
-False) -> str:
-"""
-获取当日天气，可选择是否同时查询未来五日天气预报
-Args:
-city: 城市
-units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
-include_forecast: 是否包含未来五日的天气预报
-"""
-temp = 22 if units == "celsius" else 72
-result = f'{city}当天气温: {temp} {"摄氏度" if units == "celsius" else "华
-氏度"}'
-if include_forecast:
-result += "\n未来五天都是晴天"
-return result
+def get_weather(
+    city: str, units: str = "celsius", include_forecast: bool = False
+) -> str:
+    """
+    获取当日天气，可选择是否同时查询未来五日天气预报
+    Args:
+    city: 城市
+    units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
+    include_forecast: 是否包含未来五日的天气预报
+    """
+    temp = 22 if units == "celsius" else 72
+    result = f'{city}当天气温: {temp} {"摄氏度" if units == "celsius" else "华氏度"}'
+    if include_forecast:
+        result += "\n未来五天都是晴天"
+    return result
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
 
 
 输出如下
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -813,22 +863,26 @@ rprint(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from rich import print as rprint
+
+
 @tool(parse_docstring=True)
-def get_weather(city: str, units: str = "celsius", include_forecast: bool =
-False) -> str:
-"""
-获取当日天气，可选择是否同时查询未来五日天气预报
-Args:
-city: 城市
-units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
-include_forecast: 是否包含未来五日的天气预报
-"""
-temp = 22 if units == "celsius" else 72
-result = f'{city}当天气温: {temp} {"摄氏度" if units == "celsius" else "华
-氏度"}'
-if include_forecast:
-result += "\n未来五天都是晴天"
-return result
+def get_weather(
+    city: str, units: str = "celsius", include_forecast: bool = False
+) -> str:
+    """
+    获取当日天气，可选择是否同时查询未来五日天气预报
+    Args:
+    city: 城市
+    units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
+    include_forecast: 是否包含未来五日的天气预报
+    """
+    temp = 22 if units == "celsius" else 72
+    result = f'{city}当天气温: {temp} {"摄氏度" if units == "celsius" else "华氏度"}'
+    if include_forecast:
+        result += "\n未来五天都是晴天"
+    return result
+
+
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
@@ -872,29 +926,33 @@ fahrenheit-华氏度',
 
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
+
+
 @tool(parse_docstring=True)
-def get_weather(city: str, units: str = "celsius", include_forecast: bool =
-False) -> str:
-"""
-获取当日天气，可选择是否同时查询未来五日天气预报
-Args:
-city: 城市
-units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
-include_forecast: 是否包含未来五日的天气预报
-"""
-temp = 22 if units == "celsius" else 72
-result = f'{city}当天气温: {temp} {"摄氏度" if units == "celsius" else "华
-氏度"}'
-if include_forecast:
-result += "\n未来五天都是晴天"
-return result
+def get_weather(
+    city: str, units: str = "celsius", include_forecast: bool = False
+) -> str:
+    """
+    获取当日天气，可选择是否同时查询未来五日天气预报
+    Args:
+    city: 城市
+    units: 气温单位，可选：celsius-摄氏度，fahrenheit-华氏度
+    include_forecast: 是否包含未来五日的天气预报
+    """
+    temp = 22 if units == "celsius" else 72
+    result = f'{city}当天气温: {temp} {"摄氏度" if units == "celsius" else "华氏度"}'
+    if include_forecast:
+        result += "\n未来五天都是晴天"
+    return result
+
+
 convert_to_openai_tool(get_weather)
 ~~~
 
 
 
 报错如下
-> ~~~
+> ~~~text
 > Traceback...
 > ValueError: Found invalid Google-Style docstring.
 > ~~~
@@ -904,17 +962,21 @@ convert_to_openai_tool(get_weather)
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain.tools import tool
+
+
 @tool(name_or_callable="getWeather")
 def get_weather(city: str):
-"""
-天气查询工具
-"""
-return f"{city}天气晴朗"
+    """
+    天气查询工具
+    """
+    return f"{city}天气晴朗"
+
+
 print(convert_to_openai_tool(get_weather))
 ~~~
 
 输出如下
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -940,19 +1002,21 @@ print(convert_to_openai_tool(get_weather))
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain.tools import tool
+
+
 @tool("getWeather")
 def get_weather(city: str):
-"""
-天气查询工具
-"""
-print("天气晴朗")
-print(convert_to_openai_tool(get_weather))
+    """
+    天气查询工具
+    """
+    print("天气晴朗")
+    print(convert_to_openai_tool(get_weather))
 ~~~
 
 
 
 输出如下
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -989,14 +1053,15 @@ print(convert_to_openai_tool(get_weather))
 ~~~python
 from pydantic import BaseModel
 
-class WeatherInput(BaseModel):
-city: str
 
-print(WeatherInput(city="北京"))
+class WeatherInput(BaseModel):
+    city: str
+
+    print(WeatherInput(city="北京"))
 ~~~
 
 输出如下
-> ~~~
+> ~~~text
 > city='北京'
 > ~~~
 
@@ -1005,14 +1070,15 @@ print(WeatherInput(city="北京"))
 ~~~python
 from pydantic import BaseModel
 
-class WeatherInput(BaseModel):
-city: str
 
-print(WeatherInput("北京"))
+class WeatherInput(BaseModel):
+    city: str
+
+    print(WeatherInput("北京"))
 ~~~
 
 报错如下
-> ~~~
+> ~~~text
 > TypeError
 > ......
 > TypeError: BaseModel.__init__() takes 1 positional argument but 2 were
@@ -1021,7 +1087,7 @@ print(WeatherInput("北京"))
 
 这是因为BaseModel的初始化函数签名如下
 ~~~python
-def __init__(self, /, **data: Any) -> None:
+def __init__(self, /, **data: Any) -> None: ...
 ~~~
 
 由此可知，所有关键字参数都会被收集到字典 `data `中，然后 `data` 会按照参数类型注解进行校验，失败时抛出异常。
@@ -1033,16 +1099,15 @@ def __init__(self, /, **data: Any) -> None:
 ~~~python
 from pydantic import BaseModel, Field
 
-class WeatherInput(BaseModel):
-city: str = Field(
-default= "北京"
-)
 
-print(WeatherInput())
+class WeatherInput(BaseModel):
+    city: str = Field(default="北京")
+
+    print(WeatherInput())
 ~~~
 
 输出
-> ~~~
+> ~~~text
 > city='北京'
 > ~~~
 
@@ -1054,21 +1119,18 @@ print(WeatherInput())
 ~~~python
 from pydantic import BaseModel, Field
 
-class WeatherInput(BaseModel):
-city: str = Field(
-default= "北京",
-description="城市"
-)
-include_forecast: bool = Field(
-default=False,
-description="是否包含未来五日天气预报"
-)
 
-print(WeatherInput())
+class WeatherInput(BaseModel):
+    city: str = Field(default="北京", description="城市")
+    include_forecast: bool = Field(
+        default=False, description="是否包含未来五日天气预报"
+    )
+
+    print(WeatherInput())
 ~~~
 
 输出
-> ~~~
+> ~~~text
 > city='北京' include_forecast=False
 > ~~~
 
@@ -1083,24 +1145,25 @@ print(WeatherInput())
 from pydantic import BaseModel
 from typing import Literal
 
+
 class WeatherInput(BaseModel):
-city: str
-unit: Literal["celsius", "fahrenheit"]
+    city: str
+    unit: Literal["celsius", "fahrenheit"]
 
-print("===============> 合法 <===============")
-print(WeatherInput(city="北京", unit="celsius"))
+    print("===============> 合法 <===============")
+    print(WeatherInput(city="北京", unit="celsius"))
 
-print("===============> 非法 <===============")
-try:
-print(WeatherInput(city="北京", unit="kelvin"))
-except Exception as e:
-print("报错类型：", type(e).__name__)
-print(e)
+    print("===============> 非法 <===============")
+    try:
+        print(WeatherInput(city="北京", unit="kelvin"))
+    except Exception as e:
+        print("报错类型：", type(e).__name__)
+        print(e)
 ~~~
 
 输出
 
-> ~~~
+> ~~~text
 > ===============> 合法 <===============
 > city='北京' unit='celsius'
 > ===============> 非法 <===============
@@ -1117,25 +1180,21 @@ print(e)
 ~~~python
 from pydantic import BaseModel, Field
 
-class WeatherInput(BaseModel):
-city: str = Field(
-default= "北京",
-description="城市"
-)
-unit: Literal["celsius", "fahrenheit"] = Field(
-default="celsius",
-description="气温单位"
-)
-include_forecast: bool = Field(
-default=False,
-description="是否包含未来五日天气预报"
-)
 
-print(WeatherInput())
+class WeatherInput(BaseModel):
+    city: str = Field(default="北京", description="城市")
+    unit: Literal["celsius", "fahrenheit"] = Field(
+        default="celsius", description="气温单位"
+    )
+    include_forecast: bool = Field(
+        default=False, description="是否包含未来五日天气预报"
+    )
+
+    print(WeatherInput())
 ~~~
 
 输出
-> ~~~
+> ~~~text
 > city='北京' unit='celsius' include_forecast=False
 > ~~~
 
@@ -1152,29 +1211,27 @@ from langchain.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
 class WeatherInput(BaseModel):
-city: str = Field(
-default= "北京",
-description="城市"
-)
-unit: Literal["celsius", "fahrenheit"] = Field(
-default="celsius",
-description="气温单位"
-)
-include_forecast: bool = Field(
-default=False,
-description="是否包含未来五日天气预报"
-)
+    city: str = Field(
+    default= "北京",
+    description="城市"
+    )
+    unit: Literal["celsius", "fahrenheit"] = Field(
+    default="celsius",
+    description="气温单位"
+    )
+    include_forecast: bool = Field(
+    default=False,
+    description="是否包含未来五日天气预报"
+    )
 
 @tool(args_schema=WeatherInput)
-def get_weather(city: str, unit: str = "celsius", include_forecast: bool =
-False) -> str:
-"""获取当日天气，可选未来五日天气预报"""
-temp = 22 if unit == "celsius" else 72
-result = f'{city}当天气温: {temp} {"摄氏度" if unit == "celsius" else "华氏
-度"}'
-if include_forecast:
-result += "\n未来五天都是晴天"
-return result
+def get_weather(city: str, unit: str = "celsius", include_forecast: bool = False) -> str:
+    """获取当日天气，可选未来五日天气预报"""
+    temp = 22 if unit == "celsius" else 72
+    result = f'{city}当天气温: {temp} {"摄氏度" if unit == "celsius" else "华氏度"}'
+    if include_forecast:
+        result += "\n未来五天都是晴天"
+    return result
 
 convert_to_openai_tool(get_weather)
 ~~~
@@ -1274,21 +1331,19 @@ weather_schema = {
 }
 
 @tool(args_schema=weather_schema)
-def get_weather(city: str, unit: str = "celsius", include_forecast: bool =
-False) -> str:
-"""获取当日天气，可选未来五日天气预报"""
-temp = 22 if unit == "celsius" else 72
-result = f'{city}当天气温: {temp} {"摄氏度" if unit == "celsius" else "华氏
-度"}'
-if include_forecast:
-result += "\n未来五天都是晴天"
-return result
+def get_weather(city: str, unit: str = "celsius", include_forecast: bool = False) -> str:
+    """获取当日天气，可选未来五日天气预报"""
+    temp = 22 if unit == "celsius" else 72
+    result = f'{city}当天气温: {temp} {"摄氏度" if unit == "celsius" else "华氏度"}'
+    if include_forecast:
+        result += "\n未来五天都是晴天"
+    return result
 
 print(convert_to_openai_tool(get_weather))
 ~~~
 
 输出
-> ~~~
+> ~~~text
 > {
 > 'type': 'function',
 > 'function': {
@@ -1326,7 +1381,6 @@ from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
 
-
 # 从.env文件中加载环境变量
 load_dotenv(override=True)
 
@@ -1334,10 +1388,10 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 ~~~
 
@@ -1351,18 +1405,23 @@ from langchain.tools import tool
 from langchain.messages import HumanMessage
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
-class WeatherSchema(BaseModel):
-city: str = Field(default="北京", description="城市名称")
-if_forecast: bool = Field(default=False, description="是否包含明日天气预
-报")
 
-@tool("get_weather_and_forecast", description="查询当日天气，可以包含明日天气预
-报", args_schema=WeatherSchema)
+class WeatherSchema(BaseModel):
+    city: str = Field(default="北京", description="城市名称")
+    if_forecast: bool = Field(default=False, description="是否包含明日天气预报")
+
+
+@tool(
+    "get_weather_and_forecast",
+    description="查询当日天气，可以包含明日天气预报",
+    args_schema=WeatherSchema,
+)
 def get_weather(city: str, if_forecast: bool):
-res = f"{city} 今天天气不错"
-if if_forecast:
-res += "\n明天也不错"
-return res
+    res = f"{city} 今天天气不错"
+    if if_forecast:
+        res += "\n明天也不错"
+    return res
+
 
 print(convert_to_openai_tool(get_weather))
 
@@ -1375,19 +1434,19 @@ messages.append(response)
 tool_calls = response.tool_calls
 
 for tool_call in tool_calls:
-if tool_call["name"] == "get_weather_and_forecast":
-tool_msg = get_weather.invoke(tool_call)
-messages.append(tool_msg)
+    if tool_call["name"] == "get_weather_and_forecast":
+        tool_msg = get_weather.invoke(tool_call)
+        messages.append(tool_msg)
 
-final_response = model_with_tools.invoke(messages)
-messages.append(final_response)
-for msg in messages:
-msg.pretty_print()
+        final_response = model_with_tools.invoke(messages)
+        messages.append(final_response)
+        for msg in messages:
+            msg.pretty_print()
 ~~~
 
 输出
 
-> ~~~
+> ~~~text
 > {'type': 'function', 'function': {'name': 'get_weather_and_forecast',
 > 'description': '查询当日天气，可以包含明日天气预报', 'parameters':
 > {'properties': {'city': {'default': '北京', 'description': '城市名称',
@@ -1423,7 +1482,6 @@ from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
 
-
 # 从.env文件中加载环境变量
 load_dotenv(override=True)
 
@@ -1431,10 +1489,10 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 ~~~
 
@@ -1443,18 +1501,22 @@ base_url=CLOSEAI_BASE_URL
 from langchain.tools import tool
 from langchain.messages import HumanMessage
 from langchain_core.utils.function_calling import convert_to_openai_tool
+
+
 @tool("get_weather_and_forecast", parse_docstring=True)
-def get_weather(city: str="北京", if_forecast: bool=False):
-"""
-查询当日天气，可以包含明日天气预报
-Args:
-city: 城市名称
-if_forecast: 是否包含明日天气预报
-"""
-res = f"{city} 今天天气不错"
-if if_forecast:
-res += "\n明天要下雨"
-return res
+def get_weather(city: str = "北京", if_forecast: bool = False):
+    """
+    查询当日天气，可以包含明日天气预报
+    Args:
+    city: 城市名称
+    if_forecast: 是否包含明日天气预报
+    """
+    res = f"{city} 今天天气不错"
+    if if_forecast:
+        res += "\n明天要下雨"
+    return res
+
+
 print(convert_to_openai_tool(get_weather))
 model_with_tools = model.bind_tools([get_weather])
 messages = [HumanMessage("今天杭州天气如何？明天呢？")]
@@ -1463,14 +1525,14 @@ messages.append(response)
 tool_calls = response.tool_calls
 # 将工具调用的结果添加到消息列表中
 for tool_call in tool_calls:
-if tool_call["name"] == "get_weather_and_forecast":
-# 返回值tool_msg类型是ToolMessage
-tool_msg = get_weather.invoke(tool_call)
-messages.append(tool_msg)
-final_response = model_with_tools.invoke(messages)
-messages.append(final_response)
-for msg in messages:
-msg.pretty_print()
+    if tool_call["name"] == "get_weather_and_forecast":
+        # 返回值tool_msg类型是ToolMessage
+        tool_msg = get_weather.invoke(tool_call)
+        messages.append(tool_msg)
+        final_response = model_with_tools.invoke(messages)
+        messages.append(final_response)
+        for msg in messages:
+            msg.pretty_print()
 ~~~
 
 **注意**：要正确解析docstring，必须在@tool中将 **parse_docstring** 设置为 **True** 。
@@ -1479,7 +1541,7 @@ msg.pretty_print()
 
 输出
 
-> ~~~
+> ~~~text
 > {'type': 'function', 'function': {'name': 'get_weather_and_forecast',
 > 'description': '查询当日天气，可以包含明日天气预报', 'parameters':
 > {'properties': {'city': {'default': '北京', 'description': '城市名称',
@@ -1510,97 +1572,77 @@ msg.pretty_print()
 ### 4.3 案例3：多工具调用
 大模型调用工具是单次推理，即每次运行调用一个工具，当调用多个工具时，需要用户自己管理多次调用循环。
 ~~~python
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
-# 1.定义工具
-# 定义股票查询工具
+
+
 @tool(parse_docstring=True)
 def get_stock_price(company: str, timeframe: str = "today") -> str:
-"""获取指定公司的股票价格信息
-Args:
-company: 公司名称（如：苹果公司, 微软公司, 谷歌公司）
-timeframe: 时间范围（today-今日, week-本周, month-本月）
-"""
-# 模拟股票数据
-mock_data = {
-"苹果公司": {"today": 185.20, "week": 183.50, "month": 180.75},
-"微软公司": {"today": 415.86, "week": 412.30, "month": 405.42},
-"谷歌公司": {"today": 15.42, "week": 15.20, "month": 14.85}
-}
-if company in mock_data:
-price = mock_data[company].get(timeframe, "未知时间范围")
-return f"{company} {timeframe}价格: {price}美元"
-else:
-return f"未找到股票代码 {company} 的数据"
-# 定义新闻搜索工具
+    """获取指定公司的股票价格信息。"""
+    mock_data = {
+        "苹果公司": {"today": 185.20, "week": 183.50, "month": 180.75},
+        "微软公司": {"today": 415.86, "week": 412.30, "month": 405.42},
+        "谷歌公司": {"today": 15.42, "week": 15.20, "month": 14.85},
+    }
+    if company in mock_data:
+        price = mock_data[company].get(timeframe, "未知时间范围")
+        return f"{company} {timeframe}价格: {price}美元"
+    return f"未找到股票代码 {company} 的数据"
+
+
 @tool(parse_docstring=True)
 def search_news(company: str) -> str:
-"""搜索指定公司的财经新闻
-Args:
-company: 公司名称
-Returns:
-公司的财经新闻，每个新闻占一行
-"""
-# 模拟新闻数据
-mock_news = {
-"苹果公司": [
-"苹果发布新款iPhone，股价上涨3%",
-"苹果与欧盟达成反垄断和解协议",
-"苹果将在印度扩大生产规模"
-],
-"微软公司": [
-"微软Azure云业务季度增长超预期",
-"微软完成对Nuance的收购",
-"微软推出新一代AI助手Copilot"
-],
-"谷歌公司": [
-"谷歌发布新AI模型，性能提升20%",
-"谷歌与OpenAI合作，开发新的AI助手",
-"谷歌在欧洲展开AI研究项目"
-]
-}
-news_list = mock_news.get(company, [f"未找到{company}的相关新闻"])
-return "\n".join(news_list)
-# rprint(convert_to_openai_tool(search_news))
-# 2.初始化模型并绑定工具
+    """搜索指定公司的财经新闻。"""
+    mock_news = {
+        "苹果公司": [
+            "苹果发布新款iPhone，股价上涨3%",
+            "苹果与欧盟达成反垄断和解协议",
+            "苹果将在印度扩大生产规模",
+        ],
+        "微软公司": [
+            "微软Azure云业务季度增长超预期",
+            "微软完成对Nuance的收购",
+            "微软推出新一代AI助手Copilot",
+        ],
+        "谷歌公司": [
+            "谷歌发布新AI模型，性能提升20%",
+            "谷歌与OpenAI合作，开发新的AI助手",
+            "谷歌在欧洲展开AI研究项目",
+        ],
+    }
+    return "\n".join(mock_news.get(company, [f"未找到{company}的相关新闻"]))
+
+
 tools = [get_stock_price, search_news]
 model_with_tools = model.bind_tools(tools)
-message_list = []
-human_message = HumanMessage(content="苹果公司今天的股价是多少？最近有什么新闻？")
-# human_message = HumanMessage(content="比较一下微软和苹果的股价")
-# human_message = HumanMessage(content="腾讯最近有什么重大新闻？")
-# human_message = HumanMessage(content="海水为什么是咸的？")
-message_list.append(human_message)
-# 3.工具调用
+message_list = [HumanMessage(content="苹果公司今天的股价是多少？最近有什么新闻？")]
+
 while True:
-response = model_with_tools.invoke(message_list)
-message_list.append(response)
-# 如果模型不需要调用工具，直接退出循环
-if not response.tool_calls:
-print("没有工具调用，直接返回答案")
-break
-# 如果有调用工具，处理工具调用响应
-# 4.开发者根据模型的响应，调用工具并获取结果
-for tool_call in response.tool_calls:
-if tool_call["name"] == "get_stock_price":
-stock_result = get_stock_price.invoke(tool_call)
-print("stock_result", stock_result)
-message_list.append(stock_result)
-if tool_call["name"] == "search_news":
-news_result = search_news.invoke(tool_call)
-print("news_result", news_result)
-message_list.append(news_result)
-# print("response", response)
-# print(response.content)
+    response = model_with_tools.invoke(message_list)
+    message_list.append(response)
+    if not response.tool_calls:
+        print("没有工具调用，直接返回答案")
+        break
+
+    for tool_call in response.tool_calls:
+        if tool_call["name"] == "get_stock_price":
+            stock_result = get_stock_price.invoke(tool_call)
+            print("stock_result", stock_result)
+            message_list.append(stock_result)
+        elif tool_call["name"] == "search_news":
+            news_result = search_news.invoke(tool_call)
+            print("news_result", news_result)
+            message_list.append(news_result)
+
 for msg in message_list:
-msg.pretty_print()
+    msg.pretty_print()
 ~~~
 
 
 
 输出：
 
-> ~~~
+> ~~~text
 > stock_result content='苹果公司 today价格: 185.2美元'
 > name='get_stock_price' tool_call_id='call_cpGOhWce8rlIFSZ2G9w7ouON'
 > news_result content='苹果发布新款iPhone，股价上涨3%\n苹果与欧盟达成反垄断和解协
@@ -1646,24 +1688,23 @@ msg.pretty_print()
 
 ### 4.4 案例4：多工具调用
 
-~~~
+~~~python
 from langchain.tools import tool
 from langchain.messages import HumanMessage
 @tool(parse_docstring=True)
 def get_weather(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f'{city}当天晴朗'
 @tool(parse_docstring=True)
 def get_news() -> str:
-"""
-获取当日新闻
-"""
-return "近期，受全球储蓄芯片短缺等多重因素影响，多地回收商称废旧手机回收市场迎来“火热
-潮”，回收价格普遍上涨，旧手机成“香饽饽”。"
+    """
+    获取当日新闻
+    """
+    return "近期，受全球储蓄芯片短缺等多重因素影响，多地回收商称废旧手机回收市场迎来“火热潮”，回收价格普遍上涨，旧手机成“香饽饽”。"
 model_with_tools = model.bind_tools([get_weather, get_news])
 messages = [
 HumanMessage("今天杭州天气如何？今天新闻是什么？别瞎编")
@@ -1676,7 +1717,7 @@ response.pretty_print()
 
 输出
 
-> ~~~
+> ~~~text
 > ==================================•[1m Ai Message
 > •[0m==================================
 > 我来帮您查询杭州的天气和今日新闻。
@@ -1692,28 +1733,29 @@ response.pretty_print()
 
 此时可以遍历tool_calls列表，挨个调用工具。
 
-~~~
+~~~python
 messages.append(response)
 for tool_call in response.tool_calls:
-if tool_call["name"] == "get_weather":
-tool_msg = get_weather.invoke(tool_call)
-print(tool_msg)
-messages.append(tool_msg)
-elif tool_call["name"] == "get_news":
-tool_msg = get_news.invoke(tool_call)
-print(tool_msg)
-messages.append(tool_msg)
-else:
-raise Exception("不存在的工具")
+    if tool_call["name"] == "get_weather":
+        tool_msg = get_weather.invoke(tool_call)
+        print(tool_msg)
+        messages.append(tool_msg)
+    elif tool_call["name"] == "get_news":
+        tool_msg = get_news.invoke(tool_call)
+        print(tool_msg)
+        messages.append(tool_msg)
+    else:
+        raise Exception("不存在的工具")
+
 final_response = model.invoke(messages)
 messages.append(final_response)
 for msg in messages:
-msg.pretty_print()
+    msg.pretty_print()
 ~~~
 
 输出
 
-> ~~~
+> ~~~text
 > content='杭州当天晴朗' name='get_weather'
 > tool_call_id='call_00_PhpRzVvHYLkqOgQMj4keeAso'
 > content='近期，受全球储蓄芯片短缺等多重因素影响，多地回收商称废旧手机回收市场迎来“火
@@ -1786,10 +1828,10 @@ CLOSEAI_API_KEY = os.getenv("CLOSEAI_API_KEY")
 CLOSEAI_BASE_URL = os.getenv("CLOSEAI_BASE_URL")
 
 model = init_chat_model(
-model="gpt-5.4-mini",
-model_provider="openai",
-api_key=CLOSEAI_API_KEY,
-base_url=CLOSEAI_BASE_URL
+    model="gpt-5.4-mini",
+    model_provider="openai",
+    api_key=CLOSEAI_API_KEY,
+    base_url=CLOSEAI_BASE_URL,
 )
 ~~~
 
@@ -1797,18 +1839,20 @@ base_url=CLOSEAI_BASE_URL
 ~~~python
 from langchain.tools import tool
 from langchain.messages import HumanMessage
+
+
 @tool(parse_docstring=True)
 def get_weather(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
 model_with_tools = model.bind_tools([get_weather], tool_choice="none")
-messages = [
-HumanMessage("今天北京天气如何？别瞎编")
-]
+messages = [HumanMessage("今天北京天气如何？别瞎编")]
 response = model_with_tools.invoke(messages)
 response.pretty_print()
 ~~~
@@ -1816,7 +1860,7 @@ response.pretty_print()
 用户要求查询天气，并提供了天气查询工具，但模型不会调用。
 输出
 
-> ~~~
+> ~~~text
 > ==================================•[1m Ai Message
 > •[0m==================================
 > 我无法直接获取实时天气数据。
@@ -1835,25 +1879,27 @@ response.pretty_print()
 ~~~python
 from langchain.tools import tool
 from langchain.messages import HumanMessage
+
+
 @tool(parse_docstring=True)
 def get_weather(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
 model_with_tools = model.bind_tools([get_weather], tool_choice="auto")
-messages = [
-HumanMessage("今天杭州天气如何？别瞎编")
-]
+messages = [HumanMessage("今天杭州天气如何？别瞎编")]
 response = model_with_tools.invoke(messages)
 response.pretty_print()
 ~~~
 
 输出
 
-> ~~~
+> ~~~text
 > ==================================•[1m Ai Message
 > •[0m==================================
 > 我来帮您查询杭州今天的天气情况。
@@ -1869,25 +1915,26 @@ response.pretty_print()
 from langchain.tools import tool
 from langchain.messages import HumanMessage
 
+
 @tool(parse_docstring=True)
 def get_weather(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
 model_with_tools = model.bind_tools([get_weather], tool_choice="auto")
-messages = [
-HumanMessage("你好啊")
-]
+messages = [HumanMessage("你好啊")]
 response = model_with_tools.invoke(messages)
 response.pretty_print()
 ~~~
 
 输出
 
-> ~~~
+> ~~~text
 > ==================================•[1m Ai Message
 > •[0m==================================
 > 你好！很高兴见到你！有什么我可以帮助你的吗？
@@ -1898,18 +1945,20 @@ response.pretty_print()
 ~~~python
 from langchain.tools import tool
 from langchain.messages import HumanMessage
+
+
 @tool(parse_docstring=True)
 def get_weather(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
 model_with_tools = model.bind_tools([get_weather], tool_choice="required")
-messages = [
-HumanMessage("今天杭州天气如何？别瞎编")
-]
+messages = [HumanMessage("今天杭州天气如何？别瞎编")]
 response = model_with_tools.invoke(messages)
 response.pretty_print()
 ~~~
@@ -1933,25 +1982,27 @@ city: 杭州
 ~~~python
 from langchain.tools import tool
 from langchain.messages import HumanMessage
+
+
 @tool(parse_docstring=True)
 def get_weather(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
 model_with_tools = model.bind_tools([get_weather], tool_choice="required")
-messages = [
-HumanMessage("你好啊")
-]
+messages = [HumanMessage("你好啊")]
 response = model_with_tools.invoke(messages)
 response.pretty_print()
 ~~~
 
 即便此时不需要，模型依然会调用工具
 输出
-> ~~~
+> ~~~text
 > ==================================•[1m Ai Message
 > •[0m==================================
 > Tool Calls:
@@ -1968,33 +2019,37 @@ response.pretty_print()
 from langchain.tools import tool
 from langchain.messages import HumanMessage
 
+
 @tool(parse_docstring=True)
 def get_weather1(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
 @tool(parse_docstring=True)
 def get_weather2(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
-model_with_tools = model.bind_tools([get_weather1, get_weather2],
-tool_choice="get_weather2")
-messages = [
-HumanMessage("杭州今天天气如何？")
-]
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
+model_with_tools = model.bind_tools(
+    [get_weather1, get_weather2], tool_choice="get_weather2"
+)
+messages = [HumanMessage("杭州今天天气如何？")]
 response = model_with_tools.invoke(messages)
 response.pretty_print()
 ~~~
 
 输出
-> ~~~
+> ~~~text
 > ==================================•[1m Ai Message
 > •[0m==================================
 > Tool Calls:
@@ -2008,28 +2063,32 @@ response.pretty_print()
 ~~~python
 from langchain.tools import tool
 from langchain.messages import HumanMessage
+
+
 @tool(parse_docstring=True)
 def get_weather1(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
+
+
 @tool(parse_docstring=True)
 def get_weather2(city: str) -> str:
-"""
-获取当日天气
-Args:
-city: 城市名称
-"""
-return f'{city}当天晴朗'
+    """
+    获取当日天气
+    Args:
+    city: 城市名称
+    """
+    return f"{city}当天晴朗"
 
-model_with_tools = model.bind_tools([get_weather1, get_weather2],
-tool_choice="get_weather1")
-messages = [
-HumanMessage("杭州今天天气如何？")
-]
+
+model_with_tools = model.bind_tools(
+    [get_weather1, get_weather2], tool_choice="get_weather1"
+)
+messages = [HumanMessage("杭州今天天气如何？")]
 response = model_with_tools.invoke(messages)
 response.pretty_print()
 ~~~
@@ -2053,15 +2112,15 @@ response.pretty_print()
 # ✅ 好
 @tool(parse_docstring=True)
 def search_flights(origin: str, destination: str, date: str) -> str:
-"""
-搜索航班信息
-Args:
-origin: 出发城市，如"北京"
-destination: 目的地城市，如"上海"
-date: 出发日期，格式 YYYY-MM-DD
-Returns:
-可用航班的 JSON 列表
-"""
+    """
+    搜索航班信息
+    Args:
+    origin: 出发城市，如"北京"
+    destination: 目的地城市，如"上海"
+    date: 出发日期，格式 YYYY-MM-DD
+    Returns:
+    可用航班的 JSON 列表
+    """
 ~~~
 
 
@@ -2072,23 +2131,27 @@ Returns:
 # ❌ 不好：一个工具做太多事
 @tool
 def do_everything(action: str, data: str) -> str:
-"""做各种事情"""
-if action == "weather": ...
-elif action == "calculate": ...
-elif action == "search": ...
+    """做各种事情"""
+    if action == "weather":
+        ...
+    elif action == "calculate":
+        ...
+    elif action == "search":
+        ...
+
+        # ✅ 好：每个工具做一件事
 
 
-# ✅ 好：每个工具做一件事
 @tool
 def get_weather(city: str) -> str:
-"""获取天气"""
-...
+    """获取天气"""
+    ...
 
 
 @tool
 def calculator(operation: str, a: float, b: float) -> str:
-"""计算"""
-...
+    """计算"""
+    ...
 ~~~
 
 
@@ -2099,19 +2162,19 @@ def calculator(operation: str, a: float, b: float) -> str:
 ~~~python
 @tool
 def divide(a: float, b: float) -> str:
-"""
-除法计算
-Args:
-a: 被除数
-b: 除数
-"""
-try:
-if b == 0:
-return "错误：除数不能为零"
-result = a / b
-return f"{a} / {b} = {result}"
-except Exception as e:
-return f"计算错误：{e}"
+    """
+    除法计算
+    Args:
+    a: 被除数
+    b: 除数
+    """
+    try:
+        if b == 0:
+            return "错误：除数不能为零"
+        result = a / b
+        return f"{a} / {b} = {result}"
+    except Exception as e:
+        return f"计算错误：{e}"
 ~~~
 
 
@@ -2130,12 +2193,13 @@ prompt="如果工具失败，尝试使用其他方法解决问题。"
 
 ~~~python
 from tenacity import retry, stop_after_attempt
+
+
 # 1. 配置重试规则：如果失败，最多尝试 3 次（即第 1 次正常调用 + 2 次重试）
 @retry(stop=stop_after_attempt(3))
 def call_agent(question):
-# 2. 核心业务逻辑：调用 LangChain 的 Agent
-return agent.invoke({"messages": [{"role": "user", "content":
-question}]})
+    # 2. 核心业务逻辑：调用 LangChain 的 Agent
+    return agent.invoke({"messages": [{"role": "user", "content": question}]})
 ~~~
 
 它的工作流程：
@@ -2154,16 +2218,16 @@ question}]})
 # ✅ 好：返回字符串
 @tool
 def get_user_info(user_id: str) -> str:
-"""获取用户信息"""
-user = {"id": user_id, "name": "张三"}
-return json.dumps(user, ensure_ascii=False) # 转成 JSON 字符串
+    """获取用户信息"""
+    user = {"id": user_id, "name": "张三"}
+    return json.dumps(user, ensure_ascii=False)  # 转成 JSON 字符串
 
 
 # ❌ 不好：返回字典（某些情况可能有问题）
 @tool
 def get_user_info(user_id: str) -> dict:
-"""获取用户信息"""
-return {"id": user_id, "name": "张三"}
+    """获取用户信息"""
+    return {"id": user_id, "name": "张三"}
 ~~~
 
 在编写传统的 Python 代码时，返回字典（ `dict` ）显然更方便后续代码处理。但在 LangChain 的工具
@@ -2196,10 +2260,11 @@ return {"id": user_id, "name": "张三"}
 # 同步
 @tool
 def sync_tool(x: str) -> str:
-return process(x)
+    return process(x)
+
 
 # 异步
 @tool
 async def async_tool(x: str) -> str:
-return await async_process(x)
+    return await async_process(x)
 ~~~
