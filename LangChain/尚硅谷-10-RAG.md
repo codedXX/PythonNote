@@ -47,11 +47,12 @@ RAG（Retrieval-Augmented Generation，检索增强生成）是一种结合 信�
 
 ### 1.3 RAG优缺点
 **RAG的优点**
-1）相比提示词工程，RAG有 更丰富的上下文和数据样本 ，可以不需要用户提供过多的背景描述，就能生成比较符合用户预期的答案。
-2）相比于模型微调，RAG可以提升问答内容的 时效性 和 可靠性3）在一定程度上保护了业务数据的 隐私性 。
+- 相比提示词工程，RAG有 更丰富的上下文和数据样本 ，可以不需要用户提供过多的背景描述，就能生成比较符合用户预期的答案。
+- 相比于模型微调，RAG可以提升问答内容的 时效性 和 可靠性。
+- 在一定程度上保护了业务数据的 隐私性。
 **RAG的缺点**
-1）由于每次问答都涉及外部系统数据检索，因此RAG的 响应时延 相对较高。
-2）引用的外部知识数据会 消耗大量的模型Token 资源。
+- 由于每次问答都涉及外部系统数据检索，因此RAG的 响应时延 相对较高。
+- 引用的外部知识数据会 消耗大量的模型Token 资源。
 ### 1.4 RAG工作流程
 ![尚硅谷-10-RAG-p004-X31](./images/尚硅谷-10-RAG-p004-X31.jpg)
 
@@ -143,10 +144,10 @@ No broken requirements found.
 ### 2.2 文档加载器 Document Loaders
 数据源可能包含多种格式的文件，如文本文档、Markdown，PDF 等。LangChain 实现和集成了众多文档加载器（https://docs.langchain.com/oss/python/integrations/document_loaders ），方便从不同格式的文件中加载数据。
 **常用** **Loaders**：
-TextLoader - 文本文件
-CSVLoader - CSV 文件
-PyPDFLoader - PDF 文件
-WebBaseLoader - 网页
+- TextLoader - 文本文件
+- CSVLoader - CSV 文件
+- PyPDFLoader - PDF 文件
+- WebBaseLoader - 网页
 LangChain的设计：对于 Source 中多种不同的数据源，我们可以用一种统一的形式读取、调用。上述
 | **load** |  |
 | --- | --- |
