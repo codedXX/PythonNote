@@ -10,11 +10,17 @@
 工具是构建智能体的核心要素之一！
 ![尚硅谷-05-Tools-p001-X10](./images/尚硅谷-05-Tools-p001-X10.png)
 
+
+
 ### 1.2 工具调用的方式
+
 在LangChain中，工具（Tools）实际上是指明确定义了输入和输出的 `可调用函数` 。因此， `工具调用
 (Tool Calling) `也被称为 `函数调用(Function Calling)` 。
-具体有两种调用方式：
+
+具体有`两种调用方式`：
+
 **方式1：直接调用**
+
 这种方式，适合测试时使用。
 
 ~~~python
@@ -44,9 +50,14 @@ print(result)
 > 北京晴天，温度 15°C
 > ~~~
 
+> **这里为什么可以直接调用get_weather.invoke，不需要走模型吗？**
+>
+> * 可以直接调用，因为 `@tool` 把普通 Python 函数包装成了一个 LangChain 的 **Tool/Runnable 对象**，而 Runnable 统一提供了 `.invoke()` 接口。
+
 
 
 **方式2：绑定到模型（主流）**
+
 这种方式，让AI来调用，开发中使用。
 
 ~~~python
@@ -97,7 +108,10 @@ else:
 > 'call_fR3LE8Wjqh9lnDosQ61Y892E', 'type': 'tool_call'}]
 > ~~~
 
+
+
 ### 1.3 工具调用的整体流程
+
 大模型能根据对话上下文决定何时调用工具以及传递哪些参数。
 经典流程如下：
 ![尚硅谷-05-Tools-p003-X26](./images/尚硅谷-05-Tools-p003-X26.png)
