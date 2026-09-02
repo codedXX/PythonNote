@@ -181,7 +181,7 @@ response = model.invoke(messages)
 print(response.content)
 ~~~
 
-> ~~~
+> ~~~python
 > 机器学习，简单说，就是**让计算机通过数据自己学规律**，而不是每一步都靠人手工写死规则。
 > ### 直观理解
 > 比如你想让电脑识别“这是一张猫的图片”：
@@ -221,7 +221,7 @@ print(response.content)
 **举例2：对象格式**
 
 ~~~python
-from langchain_core.messages import SystemMessage,HumanMessage,AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
@@ -250,7 +250,7 @@ response = model.invoke(messages)
 print(response.content)
 ~~~
 
-> ~~~
+> ~~~python
 > 机器学习，简单来说，就是**让计算机通过数据自己找规律、学会做判断**，而不是每一步都由人手工写死规则。
 > ### 直观理解
 > 比如你想让电脑识别“垃圾邮件”：
@@ -293,25 +293,25 @@ print(response.content)
 #### 1.5.1 SystemMessage参数列表
 `content ：`消息内容，字段名可以省略
 
-~~~text
+~~~python
 SystemMessage("你是个善解人意的助手")
 ~~~
 
 相当于
-~~~text
-SystemMessage(content = "你是个善解人意的助手")
+~~~python
+SystemMessage(content="你是个善解人意的助手")
 ~~~
 
 #### 1.5.2 HumanMessage参数列表
 `content ：`消息内容，字段名可以省略
 
-~~~text
+~~~python
 HumanMessage("你好啊~")
 ~~~
 
 相当于
-~~~text
-HumanMessage(content = "你好啊~")
+~~~python
+HumanMessage(content="你好啊~")
 ~~~
 
 `metadata ：`元数据字段，可以有很多，自定义
@@ -335,7 +335,7 @@ HumanMessage(
 此处通过CloseAI平台调用 gpt-5.4-mini 展示 `name` 的作用。
 
 ~~~python
-from langchain_core.messages import SystemMessage,HumanMessage,AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
@@ -403,12 +403,12 @@ print(response.content)
 #### 1.5.3 AIMessage参数列表
 `content` ：模型输出的原始内容，字段名可以省略
 
-~~~text
+~~~python
 AIMessage("你好~")
 ~~~
 
 相当于
-~~~text
+~~~python
 AIMessage(content="你好~")
 ~~~
 
@@ -440,7 +440,7 @@ tool_calls=[
 
 举例1：`AIMessage`给出最终答案
 
-~~~text
+~~~python
 AIMessage(content="北京今天晴天，温度 15°C")
 ~~~
 
@@ -448,7 +448,7 @@ AIMessage(content="北京今天晴天，温度 15°C")
 
 举例2：`AIMessage`调用工具
 
-~~~text
+~~~python
 AIMessage(
 content="",
 tool_calls=[{
@@ -464,7 +464,7 @@ tool_calls=[{
 举例3：更丰富的参数
 
 ~~~python
-from langchain_core.messages import SystemMessage,HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
@@ -487,7 +487,7 @@ response = model.invoke(messages)
 rprint(response)
 ~~~
 
-> ~~~
+> ~~~python
 > AIMessage(
 > content='你好，好久不见！我叫小智，是一名助人为乐的助手，很高兴再次见到你。\n\n我
 > 可以帮你做很多事情，比如：\n- 回答问题、解释知识\n- 写作润色、改写内容\n- 翻译中英
@@ -547,7 +547,7 @@ rprint(response)
 rprint(response.usage_metadata)
 ~~~
 
-> ~~~
+> ~~~python
 > {
 > 'input_tokens': 34,
 > 'output_tokens': 118,
@@ -568,7 +568,7 @@ rprint(response.usage_metadata)
 `name` ：工具名称
 `tool_call_id` ：工具调用唯一ID，`ToolMessage`必须紧邻匹配的`AIMessage`，和前者tool_calls中的id一致。
 
-~~~text
+~~~python
 ToolMessage(
 content="<工具输出>",
 name="get_weather"
@@ -636,7 +636,7 @@ print(response)
 
 
 输出如下：
-> ~~~
+> ~~~python
 > content='今天北京天气晴朗，万里无云。' additional_kwargs={'refusal': None}
 > response_metadata={'token_usage': {'completion_tokens': 15,
 > 'prompt_tokens': 48, 'total_tokens': 63, 'completion_tokens_details':
@@ -660,7 +660,7 @@ print(response)
 
 **举例2：工具调用（对象格式）**
 ~~~python
-from langchain_core.messages import AIMessage, ToolMessage,HumanMessage
+from langchain_core.messages import AIMessage, ToolMessage, HumanMessage
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 import os
@@ -733,7 +733,7 @@ print(response)
 
 输出如下：
 
-> ~~~
+> ~~~python
 > content='今天北京天气晴朗，万里无云。' additional_kwargs={'refusal': None}
 > response_metadata={'token_usage': {'completion_tokens': 15,
 > 'prompt_tokens': 48, 'total_tokens': 63, 'completion_tokens_details':
@@ -759,7 +759,7 @@ print(response)
 #### 1.6.1 对话历史管理
 关键规则：每次调用必须传递完整的对话历史！
 也就是说：
-~~~text
+~~~python
 第 1 轮：
 [system, user] → AI回复 → 保存回复
 
@@ -774,7 +774,7 @@ print(response)
 
 错误举例1❌：
 
-~~~text
+~~~python
 # 第一次
 response1 = model.invoke("我叫张三")
 # 第二次（没传历史）
@@ -782,7 +782,7 @@ response2 = model.invoke("我叫什么？") # AI 不记得！
 ~~~
 
 错误举例2❌：
-~~~text
+~~~python
 conversation = [{"role": "user", "content": "问题1"}]
 response1 = model.invoke(conversation)
 
@@ -792,7 +792,7 @@ response2 = model.invoke(conversation) # 丢失了历史
 
 错误举例3❌：
 
-~~~text
+~~~python
 conversation = []
 conversation.append({"role": "user", "content": "问题1"})
 response1 = model.invoke(conversation)
@@ -803,7 +803,7 @@ response2 = model.invoke(conversation) # AI 不知道之前的回答
 ~~~
 
 正确做法✅：
-~~~text
+~~~python
 conversation = []
 # 第一次
 conversation.append({"role": "user", "content": "我叫张三"})
@@ -816,11 +816,14 @@ response2 = model.invoke(conversation) # AI 记得！
 ~~~
 
 #### 1.6.2 对话历史优化
-问题：对话历史会越来越长，消耗大量 tokens 和成本。
-解决方案：只保留最近 N 轮对话。具体的：
+`问题`：对话历史会越来越长，消耗大量 tokens 和成本。
+
+`解决方案`：只保留最近 N 轮对话。具体的：
 
 * 总是保留 system 消息（定义角色）
 * 只保留最近 N 轮对话，丢弃更早的历史
+
+
 
 举例：
 定义保留最近对话轮数的函数：
@@ -835,7 +838,7 @@ def keep_recent_messages(messages, max_pairs=3):
 ~~~
 
 测试：
-~~~text
+~~~python
 # 初始化
 long_conversation = [
 {"role": "system", "content": "你是 Python 导师"}
@@ -873,7 +876,7 @@ response = model.invoke(optimized)
 print(f"\nAI 回复: {response.content}")
 ~~~
 
-> ~~~
+> ~~~python
 > 原始消息数: 7
 > 优化后消息数: 5
 > 保留的内容: system + 最近2轮对话
@@ -946,7 +949,7 @@ while True:
 ~~~python
 from LangChain.messages import HumanMessage
 
-msg1 = HumanMessage(content = "你好啊")
+msg1 = HumanMessage(content="你好啊")
 msg2 = HumanMessage("你好啊")
 
 print(msg1)
@@ -1007,7 +1010,7 @@ print(response.content)
 
 输出如下
 
-> ~~~
+> ~~~python
 > 图里是一瓶香水，放在浅米色/暖黄色背景上，整体风格很简洁高级。
 > 这瓶香水是透明玻璃瓶身，金色瓶盖和装饰，瓶身里能看到淡金色液体。光线从侧面照过来，在桌
 > 面上投下了长长的阴影，营造出一种温暖、柔和的氛围。
@@ -1083,7 +1086,7 @@ print(response.content)
 
 输出
 
-> ~~~
+> ~~~python
 > 图里是一瓶香水。
 > 它是透明玻璃瓶身、金色瓶盖和金色装饰，看起来很精致，放在暖色背景上，带有柔和的光影效
 > 果。
@@ -1139,7 +1142,7 @@ print(response.content)
 
 输出
 
-> ~~~
+> ~~~python
 > 这张图里展示的是一瓶**化妆品或香水**，具体特征如下：
 > - **瓶子设计**：透明或半透明的玻璃瓶，里面装有浅色液体（可能是粉色、米色或淡金色）
 > - **瓶盖**：金色或香槟色的金属盖子，设计精致优雅
@@ -1180,7 +1183,7 @@ print(response.content_blocks)
 
 输出
 
-> ~~~
+> ~~~python
 > ==================== -> response <- ====================
 > content='你好，请说出您的问题，我会用一句话回答。' additional_kwargs=
 > {'refusal': None, 'reasoning_content': '好的，用户说“一句话回答”，那说明他希望
@@ -1321,7 +1324,7 @@ print(prompt)
 
 * **④** **局限性：**当我们需要用这种方式模拟多轮聊天时，开发者必须在字符串中手动拼接和伪造对话角色，例如：
 
-~~~text
+~~~python
 "Human：你好\nAI：你好！有什么我能帮忙的吗？\nHuman：..."
 ~~~
 
@@ -1374,12 +1377,12 @@ chat_template = ChatPromptTemplate.from_messages(
     ]
 )
 # 格式化聊天提示词模版中的变量
-prompt = chat_template.invoke({"name":"小明", "user_input":"你叫什么名字？"})
+prompt = chat_template.invoke({"name": "小明", "user_input": "你叫什么名字？"})
 # 打印格式化后的聊天提示词模版内容
 print(prompt)
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='你是一个有帮助的AI机器人，你的名字是小明。',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='你好，
 > 最近怎么样？', additional_kwargs={}, response_metadata={}),
@@ -1411,7 +1414,7 @@ prompt = prompt_template.invoke(
 print(prompt)
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='你是一个AI开发工程师. 你的名字是 小谷AI.',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='你能开
 > 发哪些AI应用?', additional_kwargs={}, response_metadata={}),
@@ -1476,7 +1479,7 @@ print(type(prompt))
 print(prompt)
 ~~~
 
-> ~~~
+> ~~~python
 > <class 'str'>
 > 
 > System: 你是一个AI开发工程师. 你的名字是 小谷AI.
@@ -1505,7 +1508,7 @@ print(type(prompt))
 print(prompt)
 ~~~
 
-> ~~~
+> ~~~python
 > <class 'list'>
 > [SystemMessage(content='你是一个AI开发工程师. 你的名字是 小谷AI.',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='你能开
@@ -1558,7 +1561,7 @@ output = model.invoke(prompt_value)
 print(output.content)
 ~~~
 
-> ~~~
+> ~~~python
 > 你今年 18 岁，舅舅今年 38 岁。
 > 一共是：
 > 18 + 38 = **56 岁**
@@ -1618,12 +1621,12 @@ chat_template = ChatPromptTemplate.from_messages(
     ]
 )
 # 3. 使用invoke执行
-messages = chat_template.invoke({"name":"小谷AI"})
+messages = chat_template.invoke({"name": "小谷AI"})
 # 4.打印格式化后的聊天提示词模版内容
 print(messages)
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[HumanMessage(content='Hello, 小谷AI!', additional_kwargs={},
 > response_metadata={})]
 > ~~~
@@ -1639,10 +1642,10 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "很高兴认识你"),
 ])
 
-print(prompt.invoke({"role":"小智"}))
+print(prompt.invoke({"role": "小智"}))
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='你的名字是小智.', additional_kwargs={},
 > response_metadata={}), HumanMessage(content='很高兴认识你',
 > additional_kwargs={}, response_metadata={})]
@@ -1660,10 +1663,10 @@ prompt = ChatPromptTemplate.from_messages([
     {"role": "human", "content": "很高兴认识你"},
 ])
 
-print(prompt.invoke({"role":"小智"}))
+print(prompt.invoke({"role": "小智"}))
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='你的名字是小智.', additional_kwargs={},
 > response_metadata={}), HumanMessage(content='很高兴认识你',
 > additional_kwargs={}, response_metadata={})]
@@ -1672,7 +1675,7 @@ print(prompt.invoke({"role":"小智"}))
 **类型4：Message列表类型**
 
 ~~~python
-from langchain_core.messages import SystemMessage,HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 
 chat_prompt_template = ChatPromptTemplate.from_messages([
     SystemMessage(content="我是一个贴心的智能助手"),
@@ -1695,17 +1698,17 @@ print(type(messages))
 **注意：**在XxxMessage中不能有占位符。即：
 
 ~~~python
-from langchain_core.messages import SystemMessage,HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage
 chat_prompt_template = ChatPromptTemplate.from_messages([
     SystemMessage(content="我是一个贴心的智能助手"),
     HumanMessage(content="我的问题是:{word}英文怎么说？"),
 ])
-messages = chat_prompt_template.invoke({"word":"人工智能"})
+messages = chat_prompt_template.invoke({"word": "人工智能"})
 print(messages)
 print(type(messages))
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='我是一个贴心的智能助手', additional_kwargs=
 > {}, response_metadata={}), HumanMessage(content='我的问题是:{word}英文怎么
 > 说？', additional_kwargs={}, response_metadata={})]
@@ -1757,7 +1760,7 @@ formatted_messages = chat_prompt.invoke(
 print(formatted_messages)
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='你是一个物理学家', additional_kwargs={},
 > response_metadata={}), HumanMessage(content='给我解释相对论，用浅显易懂的语
 > 言', additional_kwargs={}, response_metadata={})]
@@ -1785,10 +1788,10 @@ prompt_template = ChatPromptTemplate.from_messages([
     nested_prompt_template2,
 ])
 
-prompt_template.invoke({"name":"小智","question":"你为什么这么帅？"})
+prompt_template.invoke({"name": "小智", "question": "你为什么这么帅？"})
 ~~~
 
-> ~~~
+> ~~~python
 > ChatPromptValue(messages=[SystemMessage(content='我是一个人工智能助手，我的名
 > 字叫小智', additional_kwargs={}, response_metadata={}),
 > HumanMessage(content='很高兴认识你,我的问题是你为什么这么帅？',
@@ -1815,7 +1818,7 @@ prompt_template = ChatPromptTemplate.from_messages([
 prompt_template.invoke({})
 ~~~
 
-> ~~~
+> ~~~python
 > ChatPromptValue(messages=[SystemMessage(content='我是一个人工智能助手',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='很高兴
 > 认识你', additional_kwargs={}, response_metadata={})])
@@ -1852,10 +1855,10 @@ prompt = ChatPromptTemplate.from_messages([
     nested_prompt,  # MessageLike (BaseChatPromptTemplate)
 ])
 
-prompt.invoke({"role":"人工智能专家","user_input":"介绍一下大模型的应用场景"})
+prompt.invoke({"role": "人工智能专家", "user_input": "介绍一下大模型的应用场景"})
 ~~~
 
-> ~~~
+> ~~~python
 > ChatPromptValue(messages=[SystemMessage(content='你是一个AI工程师。',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='你
 > 好！', additional_kwargs={}, response_metadata={}),
@@ -1891,11 +1894,11 @@ customer_support_template = template.partial(
 )
 
 # 现在只需要提供 task
-messages = customer_support_template.invoke({"task":"解释退款政策"})
+messages = customer_support_template.invoke({"task": "解释退款政策"})
 print(messages)
 ~~~
 
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='你是客服专员，目标用户是普通用户',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='解释退
 > 款政策', additional_kwargs={}, response_metadata={})]
@@ -1919,10 +1922,10 @@ sales_template = base_template.partial(
     department="销售部门",
     role="销售顾问",
 )
-sales_template.invoke({"task":"为什么每年年底汽车会促销"})
+sales_template.invoke({"task": "为什么每年年底汽车会促销"})
 ~~~
 
-> ~~~
+> ~~~python
 > ChatPromptValue(messages=[SystemMessage(content='你是销售部门的销售顾问',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='为什么
 > 每年年底汽车会促销', additional_kwargs={}, response_metadata={})])
@@ -1963,7 +1966,7 @@ print(prompt_value)
 
 
 输出
-> ~~~
+> ~~~python
 > messages=[SystemMessage(content='你是一个有用的AI助手', additional_kwargs=
 > {}, response_metadata={}), HumanMessage(content='你好!',
 > additional_kwargs={}, response_metadata={}), AIMessage(content='今天我能帮
@@ -1990,7 +1993,7 @@ prompt_template.invoke({"msgs": [HumanMessage(content="hi!")]})
 # prompt_template.format_messages(msgs=[HumanMessage(content="hi!")])
 ~~~
 
-> ~~~
+> ~~~python
 > ChatPromptValue(messages=[SystemMessage(content='You are a helpful
 > assistant', additional_kwargs={}, response_metadata={}),
 > HumanMessage(content='hi!', additional_kwargs={}, response_metadata=
@@ -2025,7 +2028,7 @@ prompt_template.invoke(
 )
 ~~~
 
-> ~~~
+> ~~~python
 > ChatPromptValue(messages=[SystemMessage(content='你是一个非常友好的AI助手',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='5 + 2
 > = ?', additional_kwargs={}, response_metadata={}), AIMessage(content='5
