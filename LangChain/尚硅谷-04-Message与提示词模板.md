@@ -884,7 +884,8 @@ print(f"\nAI 回复: {response.content}")
 > AI 回复: 你第一个问题问的是：**“列表和元组有什么区别？用一句解释”**
 > ~~~
 >
-> 
+
+
 
 #### 1.6.3 多轮对话聊天机器人
 基于模型初始化、流式响应以及消息列表的拼接来创建多轮聊天机器人。
@@ -943,6 +944,7 @@ while True:
 ### 1.7 拓展-消息属性：content、content_blocks
 #### 1.7.1 content
 消息的 `content` 可以理解为数据内容，它是弱类型的，支持字符串和列表（列表元素通常为字典）。
+
 **举例1：存储字符串**
 如果只是纯文本内容，直接传递字符串就好。
 
@@ -957,8 +959,9 @@ print(msg2)
 ~~~
 
 说明：当content内容只有字符串时，可以省略参数名称。
+
 **举例2：存储字典列表**
-如果需要发送的不只是文本，如多模态内容，则需要content的 `字典列表` 形式。
+如果需要发送的`不只是文本`，如`多模态内容`，则需要content的 `字典列表` 形式。
 字典内容遵循模型供应商的API规范，以` openai: gpt-4.1 `为例。
 参考官方文档：https://developers.openai.com/api/reference/python/resources/chat/subresource s/completions/methods/create
 ![尚硅谷-04-Message与提示词模板-p020-X97](./images/尚硅谷-04-Message与提示词模板-p020-X97.png)
@@ -1036,8 +1039,10 @@ Anthropic, Google 等）的 API 格式各异，导致开发者需要写大量的
 
 
 **①** **输入格式化**
+
 对于复杂的对话（带图片或工具结果），建议使用` content_blocks` 列表形式构建 `HumanMessage`或 `AIMessage` 。
 借助 `content_blocks` ，我们可以用一套标准代码，无缝地在不同厂商的模型之间切换。
+
 **举例1：OpenAI模型**
 
 ~~~python
@@ -1095,6 +1100,7 @@ print(response.content)
 
 
 **举例2：Anthropic模型**
+
 ~~~python
 import base64
 from langchain.messages import HumanMessage
@@ -1152,12 +1158,18 @@ print(response.content)
 > 这类产品通常属于**化妆品或美妆护肤品类**，包装设计显得简约而奢华。
 > ~~~
 
+
+
 **②** **输出格式化**
+
 `content_blocks` 还可用于输出格式化，以deepseek官网的 `deepseek-v4-flash` 为例，其输出包含思考内容，后者位于 `additional_kwargs` 的 `reasoning_content` 字段下。比如：
 ![尚硅谷-04-Message与提示词模板-p024-X120](./images/尚硅谷-04-Message与提示词模板-p024-X120.png)
 
 不同的模型其输出格式可能不同，仅为提取思考内容，切换模型都可能需要更改代码，非常不方便。
 content_blocks提供了 `统一的输出格式` ，可以将不同格式的响应统一为标准格式。
+
+
+
 **注意**：content_blocks是` 懒加载 `的，即调用时才会解析。
 
 ~~~python
@@ -1215,11 +1227,80 @@ print(response.content_blocks)
 
 链”或者“引用（Citations）”信息时。
 
+
+
+> ⭐️⭐️⭐️⭐️"content_blocks是` 懒加载 `的"，这句话是什么意思？
+>
+> 
+>
+> “懒加载”指的是：调用 `model.invoke()` 时，LangChain 先保存模型返回的原始数据，例如：
+>
+> ```
+> response.content
+> response.additional_kwargs
+> ```
+>
+> 它不会立即把这些数据整理成 `content_blocks`。当你第一次访问：
+>
+> ```
+> response.content_blocks
+> ```
+>
+> ⭐️**LangChain 才在本地进行解析和转换。这个过程不会再次请求模型。**
+>
+> 所以：
+>
+> ```
+> print(response)
+> ```
+>
+> 只打印 `AIMessage` 中已有的字段，不一定显示 `content_blocks`。
+>
+> ```
+> print(response.content)
+> ```
+>
+> 只访问最终文本，也不会触发 `content_blocks`。
+>
+> ```
+> print(response.content_blocks)
+> ```
+>
+> 会访问并显示标准化后的内容块。
+>
+> 但不一定非要 `print`，以下操作也会触发解析：
+>
+> ```
+> blocks = response.content_blocks
+> 
+> for block in response.content_blocks:
+>     print(block)
+> 
+> first_block = response.content_blocks[0]
+> ```
+>
+> 注意：触发解析和显示结果是两回事。下面代码会触发解析，但脚本中不会自动显示：
+>
+> ```
+> response.content_blocks
+> ```
+>
+> 如果要在脚本中看到结果，需要：
+>
+> ```
+> print(response.content_blocks)
+> ```
+>
+> 官方文档将其描述为对消息内容进行延迟解析的标准化属性：[LangChain Messages](https://docs.langchain.com/oss/python/langchain/messages)。
+
 ## 2、提示词模板(Prompt Templates)
 
 ### 2.1 为什么推荐提示词模板？
 在 LangChain 开发中，构造提示词既可以直接使用 Python 字符串拼接（如 f-string、format() 或
 +），也可以使用 LangChain 提供的` PromptTemplate` 或 `ChatPromptTemplate `。
+
+
+
 **举例1：字符串拼接方式**
 
 ~~~python
@@ -1251,6 +1332,7 @@ print(f"AI 回复：{response.content}...\n")
 
 ~~~python
 from langchain.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 topic = "Python"
 difficulty = "初学者"
@@ -1265,7 +1347,6 @@ prompt = template.format(difficulty=difficulty, topic=topic)
 response = model.invoke(prompt)
 print(f"AI 回复：{response.content}...\n")
 
-from langchain_core.prompts import ChatPromptTemplate
 
 prompt_template = ChatPromptTemplate([
     ("system", "你是一个AI开发工程师. 你的名字是 {name}."),
@@ -1302,6 +1383,7 @@ print(prompt)
 ### 2.2 提示词机制演进
 LangChain 1.0的架构变革中，核心的演进之一体现在 Prompt 机制上：**一个结构化的、富含元数据的消**
 **息列表已经取代单一字符串，成为与模型交互的标准数据格式。**
+
 **1、旧时代：LLM** **+** **PromptTemplate（输入与输出均为字符串）**
 
 * **①** **模型接口：**对应于 LangChain 中的LLM类，主要面向早期的 `文本补全模型 `。
@@ -1320,15 +1402,18 @@ prompt = prompt_template.format(type="详细", topic="量子力学")
 print(prompt)
 ~~~
 
-  
-
 * **④** **局限性：**当我们需要用这种方式模拟多轮聊天时，开发者必须在字符串中手动拼接和伪造对话角色，例如：
 
-~~~python
-"Human：你好\nAI：你好！有什么我能帮忙的吗？\nHuman：..."
-~~~
+  ~~~python
+  "Human：你好\nAI：你好！有什么我能帮忙的吗？\nHuman：..."
+  ~~~
 
 ​	这种方式不仅导致Prompt 的结构混乱、难以维护，也极易让模型混淆对话的边界与上下文，影响生成质	量。
+
+> `from_template()` 是一个便捷的类方法：你只要写模板字符串，LangChain 会自动从 `{变量名}` 中识别需要的输入变量。
+
+
+
 **2、新时代：ChatModel+ChatPromptTemplate（输入与输出均为消息列表）**
 
 * **①** **模型接口：**对应 LangChain 1.0 的主流接口 ChatModel。
@@ -1336,8 +1421,8 @@ print(prompt)
 * **②** **工作方式：**现代聊天模型 API 已原生 `支持角色概念` 。它们不再接受单一字符串，
   而是要求输入 `一个结构化的消息列表` 。为构建复杂、可靠的多轮对话智能体系统奠定了坚实的基础。
 
-* **③** **Prompt** **工具：`ChatPromptTemplate `因此成为LangChain 1.0 中最核心的 Prompt工具。它的职责是接收变量，并输出一个 List「BaseMessage］（消息列表），该列表可直接传递给聊天模型。
-  **二者对比：**
+* **③** **Prompt** **工具：`ChatPromptTemplate `因此成为LangChain 1.0 中最核心的 Prompt工具。它的职责是接收变量，并输出一个 List「BaseMessage］（消息列表），该列表可直接传递给聊天模型。**
+  `二者对比：`
 
   | **特性** | **PromptTemplate** | **ChatPromptTemplate**  |
   | -------- | ------------------ | ----------------------- |
@@ -1347,10 +1432,63 @@ print(prompt)
   | 适用场景 | 简单提示           | 聊天、对话、多轮交互    |
 
 ​	因此，用于生成消息列表的 ChatPromptTemplate，也自然取代了生成字符串的 PromptTemplate，成为构建	现代LangChain 应用的首选工具。
+
+
+
+> ⭐️**“输出格式”指：模板填入变量后，最终生成的数据长什么样。**
+>
+> 
+>
+> `PromptTemplate` 输出的是一段普通字符串：
+>
+> ```
+> from langchain_core.prompts import PromptTemplate
+> 
+> template = PromptTemplate.from_template("请解释：{topic}")
+> 
+> result = template.format(topic="量子力学")
+> 
+> print(result)
+> ```
+>
+> 输出：
+>
+> ```
+> 请解释：量子力学
+> ```
+>
+> 而 `ChatPromptTemplate` 输出的是“消息列表”，每条消息都有角色，例如 `system`、`human`（用户）、`ai`（助手）。
+>
+> ```
+> from langchain_core.prompts import ChatPromptTemplate
+> 
+> template = ChatPromptTemplate.from_messages([
+>     ("system", "你是一位耐心的老师。"),
+>     ("human", "请解释：{topic}")
+> ])
+> 
+> result = template.invoke({"topic": "量子力学"})
+> 
+> print(result.to_messages())
+> ```
+>
+> 输出大致是：
+>
+> ```
+> [
+>     SystemMessage(content='你是一位耐心的老师。'),
+>     HumanMessage(content='请解释：量子力学。')
+> ]
+> ```
+
+
+
 ### 2.3 ChatPromptTemplate的使用
+
 在LangChain 1.0中，ChatPromptTemplate 是用于生成消息列表的核心组件。
 ChatPromptTemplate是创建 `聊天消息列表` 的提示模板。它比普通 PromptTemplate 更适合处理多角色、多轮次的对话场景。支持 `System / Human / AI `等不同角色的消息模板。
-消息类型：
+
+`消息类型：`
 
 | **角色字符串** | **含义** | **用途** |
 | --- | --- | --- |
@@ -1358,12 +1496,19 @@ ChatPromptTemplate是创建 `聊天消息列表` 的提示模板。它比普通 
 | "user" / "human" | 用户消息 | 用户的输入/问题 |
 | "assistant" / "ai" | AI 消息 | AI 的回复（用于对话历史） |
 
-#### 2.3.1 两种实例化方式
-ChatPromptTemplate 可以通过 `初始化方法 `或 `from_messages `方法来实例化提示词模板。实例化时需要传入 `messages参数` 。常见类型是：tuple构成的列表，参数类型（role : str，content : str ）
 
-**方式1(推荐)：调用from_messages()**
+
+#### 2.3.1 两种实例化方式
+
+ChatPromptTemplate 可以通过 `初始化方法 `或 `from_messages `方法来实例化提示词模板。实例化时需要传入 `messages参数` 。**常见类型**是：tuple构成的列表，参数类型（role : str，content : str ）
+
+
+
+**方式1`(推荐)`：调用from_messages()**
 该方法允许传入一个由元组（Tuple）构成的列表，列表中的每一个元组都代表一条具有特定角色的消息。
+
 举例1：
+
 ~~~python
 # 导入相关依赖
 from langchain_core.prompts import ChatPromptTemplate
@@ -1392,7 +1537,10 @@ print(prompt)
 > response_metadata={})]
 > ~~~
 
+
+
 **方式2：使用实例初始化方法**
+
 举例：
 
 ~~~python
@@ -1424,11 +1572,18 @@ print(prompt)
 > additional_kwargs={}, response_metadata={})]
 > ~~~
 
-> 说明：from_messages()的底层，也是调用的类的 __init()__方法
+> `说明：`from_messages()的底层，也是调用的类的 __init()__方法
+
+
 
 #### 2.3.2 模板调用的3种方式
+
 对比： `invoke() 、 format() 、 format_messages()`
+
+
+
 **方式1：使用** **invoke()**
+
 返回ChatPromptValue
 
 ~~~python
@@ -1452,13 +1607,22 @@ print(len(prompt.messages))
 ~~~
 
 > <class 'langchain_core.prompt_values.ChatPromptValue'>
+>
+> 
+>
 > messages=[`SystemMessage`(content='你是一个AI开发工程师. 你的名字是 小谷AI.',
 > additional_kwargs={}, response_metadata={}), `HumanMessage`(content='你能开发哪些AI应用?', additional_kwargs={}, response_metadata={}), `AIMessage`(content='我能开发很多AI应用,
 > 比如聊天机器人, 图像识别, 自然语言处理等.', additional_kwargs={}, response_metadata={}),
 > `HumanMessage`(content='你能帮我做什么?', additional_kwargs={}, response_metadata={})]
+>
+> 
+>
 > 4
 
+
+
 **方式2：使用format()**
+
 返回字符串
 
 ~~~python
@@ -1488,8 +1652,12 @@ print(prompt)
 > Human: 你能帮我做什么?
 > ~~~
 
+
+
 **方式3：使用format_messages()**
+
 返回消息列表
+
 ~~~python
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -1510,6 +1678,7 @@ print(prompt)
 
 > ~~~python
 > <class 'list'>
+> 
 > [SystemMessage(content='你是一个AI开发工程师. 你的名字是 小谷AI.',
 > additional_kwargs={}, response_metadata={}), HumanMessage(content='你能开
 > 发哪些AI应用?', additional_kwargs={}, response_metadata={}),
@@ -1518,6 +1687,8 @@ print(prompt)
 > invalid_tool_calls=[]), HumanMessage(content='你能帮我做什么?',
 > additional_kwargs={}, response_metadata={})]
 > ~~~
+
+
 
 #### 2.3.3 结合LLM调用
 
@@ -1568,9 +1739,13 @@ print(output.content)
 > 所以，你和舅舅一共 **56 岁**。
 > ~~~
 
+
+
 #### 2.3.4 更丰富的初始化参数类型
+
 前面讲了ChatPromptTemplate的两种创建方式。我们看到不管使用实例初始化方法，还是使用from_messages()，参数类型都是` 列表类型` 。列表中的元素可以是多种类型，前面我们主要测试了元组类型。
-源码：
+
+**源码：**
 
 ~~~python
 def __init__(self,
@@ -1588,7 +1763,7 @@ def __init__(self,
 ) -> None: ...
 ~~~
 
-源码：
+**源码：**
 
 ~~~python
 @classmethod
@@ -1606,10 +1781,15 @@ def from_messages(
 ) -> ChatPromptTemplate: ...
 ~~~
 
-结论：参数是列表类型，列表的元素可以是字符串、字典、字符串构成的元组、消息类型、提示词模板类型、消息提示词模板类型等
+**结论：**
+
+* `参数是列表类型，列表的元素可以是字符串、字典、字符串构成的元组、消息类型、提示词模板类型、消息提示词模板类型等`
+
+
 
 **类型1：str列表类型**
-列表参数格式是str类型（不推荐），**因为默认角色都是human**
+
+列表参数格式是str类型`（不推荐）`，**因为`默认角色都是human`**
 
 ~~~python
 #1.导入相关依赖
@@ -1634,7 +1814,9 @@ print(messages)
 
 
 **类型2：tuple列表类型**
+
 列表参数格式是元组类型
+
 ~~~python
 # 示例: 元组形式的消息
 prompt = ChatPromptTemplate.from_messages([
@@ -1654,6 +1836,7 @@ print(prompt.invoke({"role": "小智"}))
 
 
 **类型3：dict列表类型**
+
 列表参数格式是dict类型
 
 ~~~python
@@ -1671,6 +1854,8 @@ print(prompt.invoke({"role": "小智"}))
 > response_metadata={}), HumanMessage(content='很高兴认识你',
 > additional_kwargs={}, response_metadata={})]
 > ~~~
+
+
 
 **类型4：Message列表类型**
 
@@ -1695,6 +1880,8 @@ print(type(messages))
 >
 > <class 'langchain_core.prompt_values.ChatPromptValue'>
 
+
+
 **注意：**在XxxMessage中不能有占位符。即：
 
 ~~~python
@@ -1718,10 +1905,13 @@ print(type(messages))
 
 
 **类型5：MessagePromptTemplate列表类型**
+
 LangChain提供不同类型的MessagePromptTemplate。最常用的是`SystemMessagePromptTemplate` 、 `HumanMessagePromptTemplate` 和`AIMessagePromptTemplate` ，分别创建系统消息、人工消息和AI消息。
 
+
+
 **基本概念：**
-`HumanMessage`PromptTemplate，专用于生成` 用户消息（HumanMessage）` 的模板类
+`HumanMessagePromptTemplate`，专用于生成` 用户消息（HumanMessage）` 的模板类
 
 * `模板化 `：支持使用变量占位符，可以在运行时填充具体值
 * `格式化` ：能够将模板与输入变量结合生成最终的聊天消息
@@ -1731,6 +1921,8 @@ LangChain提供不同类型的MessagePromptTemplate。最常用的是`SystemMess
 
 
 **SystemMessagePromptTemplate、AIMessagePromptTemplate**：类似于上面，不再赘述
+
+
 
 **举例1：**
 
@@ -1769,8 +1961,10 @@ print(formatted_messages)
 
 
 **类型6：BaseChatPromptTemplate列表类型**
+
 使用 BaseChatPromptTemplate，可以理解为ChatPromptTemplate里嵌套了ChatPromptTemplate。
-举例1：带参数
+
+**举例1：带参数**
 
 ~~~python
 from langchain_core.prompts import ChatPromptTemplate
@@ -1800,7 +1994,8 @@ prompt_template.invoke({"name": "小智", "question": "你为什么这么帅？"
 
 
 
-举例2：不带参数
+**举例2：不带参数**
+
 ~~~python
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -1826,7 +2021,7 @@ prompt_template.invoke({})
 
 
 
-举例3：综合使用
+**举例3：综合使用**
 
 ~~~python
 from langchain_core.prompts import (
@@ -1868,15 +2063,21 @@ prompt.invoke({"role": "人工智能专家", "user_input": "介绍一下大模�
 > 提示词', additional_kwargs={}, response_metadata={})])
 > ~~~
 
+
+
 ### 2.4 高级特性
+
 #### 2.4.1 部分变量预填充：partial()
 预填充某些固定不变的变量，创建模板的变体。
+
 **使用场景：**
 
 * 某些变量在所有调用中都相同
 * 需要为不同用户/场景创建定制模板
 
-举例1：
+
+
+**举例1：**
 
 ~~~python
 from langchain_core.prompts import ChatPromptTemplate
@@ -1904,7 +2105,7 @@ print(messages)
 > 款政策', additional_kwargs={}, response_metadata={})]
 > ~~~
 
-举例2：
+**举例2：**
 
 ~~~python
 # 场景：为不同部门创建专用模板
@@ -1931,13 +2132,18 @@ sales_template.invoke({"task": "为什么每年年底汽车会促销"})
 > 每年年底汽车会促销', additional_kwargs={}, response_metadata={})])
 > ~~~
 
+
+
 #### 2.4.2 消息占位符
 
 当你不确定消息提示模板使用什么角色，或者希望在格式化过程中 `插入消息列表` 时，该怎么办？ 这就需要使用消息占位符，负责在特定位置添加消息列表。
 **使用场景：**多轮对话系统存储历史消息以及Agent的中间步骤处理此功能非常有用。
 
+
+
 **方式1：JSON形式**
-举例1：
+
+**举例1：**
 
 ~~~python
 from langchain_core.prompts import ChatPromptTemplate
@@ -1980,7 +2186,8 @@ print(prompt_value)
 
 
 **方式2：MessagesPlaceholder实例**
-举例1：
+
+**举例1：**
 
 ~~~python
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -2004,7 +2211,7 @@ prompt_template.invoke({"msgs": [HumanMessage(content="hi!")]})
 
 
 
-举例2：存储对话历史内容
+**举例2：存储对话历史内容**
 
 ~~~python
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -2045,7 +2252,7 @@ prompt_template.invoke(
 
 
 
-举例1：
+**举例1：**
 templates.py文件声明如下
 
 ~~~python
@@ -2089,7 +2296,7 @@ messages = PromptLibrary.TRANSLATOR.format_messages(
 
 
 
-举例2：
+**举例2：**
 
 ~~~python
 # templates/
@@ -2109,6 +2316,7 @@ FRIENDLY_ASSISTANT = ChatPromptTemplate.from_messages([
 
 #### 2.4.4 模板组合
 将多个模板片段组合成复杂的提示词。
+
 **方法** **1：字符串组合**
 
 ~~~python

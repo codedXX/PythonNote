@@ -1,6 +1,4 @@
 # 第01章：LangChain 1.2 概述
-讲师：尚硅谷-宋红康
-官网：尚硅谷
 ## 1、为什么需要LangChain？
 ### 1.1 从传统应用到智能体时代
 ![尚硅谷-01-LangChain概述-p001-X8](./images/尚硅谷-01-LangChain概述-p001-X8.png)

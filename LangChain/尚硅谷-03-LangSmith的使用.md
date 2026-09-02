@@ -1,6 +1,4 @@
 # 第03章：LangSmith基本使用
-讲师：尚硅谷-宋红康
-官网：尚硅谷
 ## 1、LangSmith概述
 ### 1.1 什么是LangSmith?
 LangSmith 是 LangChain 生态系统中专门用于 LLM（大语言模型）应用**调试、监控、评估和管理** 的平
