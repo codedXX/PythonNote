@@ -65,9 +65,10 @@ LangChain定义了很多消息类型，通过 role 区分。常用的有四种�
 - **调试友好**：更容易追踪和调试对话流程
 
 ### 1.3 消息格式
-LangChain支持两种消息格式。
-**格式1：JSON格式**
+LangChain支持**两种消息格式**。
+🔹**格式1：JSON格式**
 **1、系统消息**
+
 ~~~json
 {"role": "system", "content": "你是个善解人意的助手"}
 ~~~
@@ -88,25 +89,25 @@ LangChain支持两种消息格式。
 "call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s"}
 ~~~
 
-**格式2：对象格式**
+🔹**格式2：对象格式**
 **1、系统消息**
 
-~~~text
+~~~python
 SystemMessage(content="你是个善解人意的助手")
 ~~~
 
 **2、用户消息**
-~~~text
+~~~python
 HumanMessage(content="你好啊~")
 ~~~
 
 **3、助手消息**
-~~~text
+~~~python
 AIMessage("我也很高兴认识你")
 ~~~
 
 **4、工具调用消息**
-~~~text
+~~~python
 ToolMessage(
 content="<工具输出>",
 tool_call_id="call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s" # 一定要和AI消息中的调用ID匹配
@@ -324,7 +325,7 @@ HumanMessage(
 )
 ~~~
 
-`name` 和 `id` 都属于元数据字段，当消息类型相同，对消息进行区分。但不是所有模型都支持这一功能，是否支持取决于模型供应商，需要查看官方手册。比如：
+`name` 和 `id` 都属于元数据字段，当消息类型相同，对消息进行区分。但`不是所有模型都支持这一功能`，是否支持取决于模型供应商，需要查看官方手册。比如：
 
 - OpenAI的API手册告诉我们，`HumanMessage`支持 `name` 作为元数据字段，如下图所示。而DeepSeek的API官方文档明确支持 `name` 作为元数据，但实测发现模型无法识别。
 
@@ -436,13 +437,17 @@ tool_calls=[
 `usage_metadata `：用量信息。
 以上三个字段，在` 《02-模型的创建与调用.md》中invoke()返回值说明 `中讲过。
 **举例：**
+
 举例1：`AIMessage`给出最终答案
 
 ~~~text
 AIMessage(content="北京今天晴天，温度 15°C")
 ~~~
 
+
+
 举例2：`AIMessage`调用工具
+
 ~~~text
 AIMessage(
 content="",
@@ -454,7 +459,10 @@ tool_calls=[{
 )
 ~~~
 
+
+
 举例3：更丰富的参数
+
 ~~~python
 from langchain_core.messages import SystemMessage,HumanMessage
 from langchain.chat_models import init_chat_model
@@ -532,7 +540,8 @@ rprint(response)
 > )
 > ~~~
 >
-> 
+
+
 
 ~~~python
 rprint(response.usage_metadata)
@@ -1314,7 +1323,7 @@ print(prompt)
 
 ~~~text
 "Human：你好\nAI：你好！有什么我能帮忙的吗？\nHuman：..."
-  ~~~
+~~~
 
 ​	这种方式不仅导致Prompt 的结构混乱、难以维护，也极易让模型混淆对话的边界与上下文，影响生成质	量。
 **2、新时代：ChatModel+ChatPromptTemplate（输入与输出均为消息列表）**
