@@ -119,7 +119,8 @@ else:
 我们现在编写的LangChain应用对应上图中的**AI助手或应用**。
 
 ### 1.4 从Message流转看工具的调用
-前提：模型的初始化
+**前提：模型的初始化**
+
 ~~~python
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
@@ -139,7 +140,10 @@ model = init_chat_model(
 )
 ~~~
 
-参考1：不使用@tool修饰
+
+
+**参考1：不使用@tool修饰**
+
 ~~~python
 from langchain.messages import HumanMessage, ToolMessage
 
@@ -179,7 +183,8 @@ print(f"final_response: \n{final_response}")
 
 
 
-参考2：使用@tool修饰
+**参考2：使用@tool修饰**
+
 ~~~python
 from langchain.messages import HumanMessage, ToolMessage
 
@@ -250,13 +255,117 @@ print(f"final_response: \n{final_response}")
 > {'cache_read': 256}, 'output_token_details': {}}
 > ~~~
 
+> ⭐**那for msg in messages:\
+> &#x20;   msg.pretty\_print()
+> 是什么意思？**
+>
+> * ```
+>   for msg in messages:
+>       msg.pretty_print()
+>   ```
+>
+>   意思是：遍历 `messages` 中的每一条消息，并用 LangChain 提供的格式化方式打印出来。
+>
+>   例如 `messages` 可能包含：
+>
+>   ```
+>   HumanMessage  # 用户消息
+>   AIMessage     # 模型的工具调用请求
+>   ToolMessage   # 工具返回结果
+>   ```
+>
+>   输出大致类似：
+>
+>   ```
+>   ================================ Human Message =================================
+>   
+>   今天北京天气如何
+>   
+>   ================================== Ai Message ==================================
+>   
+>   Tool Calls:
+>     get_weather (call_xxx)
+>     Args:
+>       city: 北京
+>   
+>   ================================= Tool Message =================================
+>   
+>   北京天气晴朗
+>   ```
+>
+>   它和：
+>
+>   ```
+>   print(msg)
+>   ```
+>
+>   的区别是，`pretty_print()` 会更清楚地显示消息类型、内容以及工具调用参数。
+>
+>   注意：不要写成：
+>
+>   ```
+>   print(msg.pretty_print())
+>   ```
+>
+>   因为 `pretty_print()` 通常已经负责打印，并且返回值是 `None`。你当前代码中的写法是正确的。
+>
+> ⭐**这里的final\_response = model\_with\_tools.invoke(messages)\
+> print(f"final\_response: \n{final\_response}")是什么意思？**
+>
+> * 这两行表示：把已经补充了工具执行结果的完整消息记录，再次发送给模型，让模型生成最终的自然语言回答。
+>
+>   ```
+>   final_response = model_with_tools.invoke(messages)
+>   ```
+>
+>   此时 `messages` 大概包含：
+>
+>   ```
+>   HumanMessage：用户问“北京天气如何”
+>   AIMessage：模型请求调用 get_weather
+>   ToolMessage：工具返回“北京天气晴朗”
+>   ```
+>
+>   模型看到 `ToolMessage` 后，就可以整理成最终答案，例如：
+>
+>   ```
+>   北京今天天气晴朗。
+>   ```
+>
+>   `final_response` 通常仍然是一个 `AIMessage`：
+>
+>   ```
+>   print(type(final_response))
+>   # AIMessage
+>   ```
+>
+>   这句：
+>
+>   ```
+>   print(f"final_response: \n{final_response}")
+>   ```
+>
+>   是 f-string 格式化输出：
+>
+>   - `final_response:`：输出标题
+>   - `\n`：换行
+>   - `{final_response}`：把消息对象转换成字符串输出
+>
+>   如果只想看最终文本，更推荐：
+>
+>   ```
+>   print(final_response.content)
+>   ```
+>
+>   另外，⭐⭐⭐`如果模型第一次没有调用工具，就不需要再次调用 final_response；只有在完成工具调用并把 ToolMessage 加入 messages 后，才需要第二次调用模型`。
 
 
-对应图示（以参考1为例）：
+
+**对应图示（以参考1为例）：**
 ![尚硅谷-05-Tools-p006-X39](./images/尚硅谷-05-Tools-p006-X39.png)
 
-**工具调用流程总结：**
-所以如果真正要大模型根据工具调用结果进行回复，完整的调用流程包括如下四个步骤：
+⭐⭐**工具调用流程总结：**
+所以如果真正要大模型根据工具调用结果进行回复，完整的调用流程包括如下**四个步骤：**
 
 * `步骤1：模型绑定工具 ：`通过model.bind_tools([...])绑定一个或者多个工具。
 * `步骤2：模型生成工具调用请求` ：用户输入问题，调用模型（比如invoke()）。如果需要调用工具，模型返回包含工具调用信息（如工具名称和参数）的`AIMessage`。
@@ -467,6 +576,8 @@ rprint(convert_to_openai_tool(get_weather))
 * Google 风格 docstring 示例：https://www.sphinx-doc.org/en/master/usage/extensions/exa mple_google.html 
 * Python docstring 通用约定：https://peps.python.org/pep-0257/
 
+
+
 基础用法不必完整阅读规范，只需要按照下面的示例仿写即可。
 
 ~~~python
@@ -486,8 +597,13 @@ def get_weather(city: str):
 rprint(convert_to_openai_tool(get_weather))
 ~~~
 
-使用 `Args:` 、 `Returns:` 、 `Raises:` 等关键字，这种方式可读性强。Agent通过工具的这些注释来理解工具的用途和调用时机，因此清晰、准确的文档字符串是工具能被正确调用的前提。
-输出如下：
+使用 `Args:` 、 `Returns:` 、 `Raises:` 等关键字，这种方式可读性强。Agent通过工具的这些注释来理解工具
+
+的用途和调用时机，因此清晰、准确的文档字符串是工具能被正确调用的前提。
+
+
+
+**输出如下：**
 
 ~~~text
 {
@@ -509,7 +625,8 @@ rprint(convert_to_openai_tool(get_weather))
 }
 ~~~
 
-AI 依赖 docstring 来理解工具。
+`AI 依赖 docstring 来理解工具。`
+
 ~~~python
 # ❌ 不好：太模糊
 @tool
@@ -696,7 +813,7 @@ rprint(convert_to_openai_tool(get_weather))
 
 ## 3、工具的定义方式2：使用@tool装饰器(推荐)
 使用` @tool `装饰器修饰，可以自动将普通 Python 函数转化为智能体可调用的工具。
-此方式 `最直接 `，代码量极少，非常适合快速验证想法或创建参数简单的工具。
+此方式 `最直接`，代码量极少，非常适合快速验证想法或创建参数简单的工具。
 
 ### 3.1 自定义工具描述：description
 **情况1：仅提供docstring信息**
@@ -742,22 +859,12 @@ print(convert_to_openai_tool(get_weather))
 输出如下
 > ~~~text
 > {
-> 'type': 'function',
-> 'function': {
-> 'name': 'get_weather',
-> 'description': '天气查询工具',
-> 'parameters': {
-> 'properties': {
-> 'city': {
-> 'type': 'string'
-> }
-> },
-> 'required': [
-> 'city'
-> ],
-> 'type': 'object'
-> }
-> }
+>     'type': 'function',
+>     'function': {
+>         'name': 'get_weather',
+>         'description': '获取城市的天气',
+>         'parameters': {'properties': {'city': {'type': 'string'}}, 'required': ['city'], 'type': 'object'}
+>     }
 > }
 > ~~~
 
@@ -765,6 +872,8 @@ print(convert_to_openai_tool(get_weather))
 
 **情况2：添加工具描述：description**
 `@tool` 的参数 `description` 可以更改工具描述，优先级高于` docstring` 的函数说明
+
+* 在同时声明了description和docstring的情况下，`description的优先级更高`
 
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
@@ -810,6 +919,10 @@ rprint(convert_to_openai_tool(get_weather))
 当我们没有向 `@tool` 传递 `description` 参数时，默认情况下， `tool` 会将 `docstring` 整体视为
 
 `description` ，如下
+
+> * 当我们没有向`@tool`传递`description`参数时，默认情况下，`tool`会将`docstring`整体视为`description`
+>
+> * 不使用`@tool`装饰器时，docstring不合法会被视为普通文本，作为`description`，但如果使用了`@tool`时`docstring`不合法，将会抛出异常
 
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
@@ -961,15 +1074,16 @@ def get_weather(
 convert_to_openai_tool(get_weather)
 ~~~
 
-
-
 报错如下
 > ~~~text
 > Traceback...
 > ValueError: Found invalid Google-Style docstring.
 > ~~~
 
+
+
 ### 3.2 更改工具名称：name_or_callable
+
 默认情况，使用函数名作为工具名称，但可以向@tool 传参 `name_or_callable` ，以更改工具名称。
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
@@ -1009,7 +1123,7 @@ print(convert_to_openai_tool(get_weather))
 > }
 > ~~~
 
-说明：@tool中参数name_or_callable名称可以省略
+**说明：**@tool中参数name_or_callable名称可以省略
 
 ~~~python
 from langchain_core.utils.function_calling import convert_to_openai_tool
@@ -1024,8 +1138,6 @@ def get_weather(city: str):
     print("天气晴朗")
     print(convert_to_openai_tool(get_weather))
 ~~~
-
-
 
 输出如下
 > ~~~text
@@ -1049,17 +1161,25 @@ def get_weather(city: str):
 > }
 > ~~~
 
-说明：不要使用config或runtime作为参数名，这些是LangChain内部保留的。
+**说明：**不要使用config或runtime作为参数名，这些是LangChain内部保留的。
 
-> 开发中，习惯使用函数名作为工具名称，不推荐自定义工具名称。
+> `开发中，习惯使用函数名作为工具名称，不推荐自定义工具名称。`
+
+
 
 ### 3.3 自定义args_schema
+
 #### 3.3.1 方式1：使用Pydantic模型定义
 当工具的参数变得复杂，需要 `枚举值 `、 `范围限制` 或 `更复杂的业务逻辑验证` 时，Pydantic 模型是理想的选择，提供强大的类型检查和数据验证。
+
 使用Pydantic 的主要优势在于能够**精确控制工具参数的格式和验证规则**，让大模型更准确地理解如何调用工具。
 
+
+
 **3.3.1.1** **pydantic类型的定义**
+
 **①** **BaseModel基类**
+
 通过继承核心基类 `BaseModel` 定义数据模型，从而声明字段结构、类型约束、默认值以0及校验规则。
 
 ~~~python
@@ -1077,7 +1197,7 @@ class WeatherInput(BaseModel):
 > city='北京'
 > ~~~
 
-> 注意：BaseModel子类初始化时，不接收位置参数，字段值必须以关键字参数的形式传入，否则报错。
+> **注意：**`BaseModel子类初始化时，不接收位置参数，字段值必须以关键字参数的形式传入，否则报错`。
 
 ~~~python
 from pydantic import BaseModel
@@ -1104,9 +1224,13 @@ def __init__(self, /, **data: Any) -> None: ...
 
 由此可知，所有关键字参数都会被收集到字典 `data `中，然后 `data` 会按照参数类型注解进行校验，失败时抛出异常。
 
+
+
 **②** **Field**
-`Field()` ：用来“ `定制字段 `”的函数，可用于设置默认值、描述等。
-举例1：设置默认值
+
+`Field()` ：用来“ `定制字段 `”的函数，可用于设置`默认值、描述`等。
+
+**举例1：设置默认值**
 
 ~~~python
 from pydantic import BaseModel, Field
@@ -1125,7 +1249,7 @@ class WeatherInput(BaseModel):
 
 
 
-举例2：设置参数的描述信息
+**举例2：设置参数的描述信息**
 
 每个字段的 description 参数至关重要，它直接影响大模型理解参数含义的能力。
 ~~~python
@@ -1149,9 +1273,15 @@ class WeatherInput(BaseModel):
 
 
 **③** **Literal**
+
 可以使用 Literal类型限定参数为固定选项。
-`Literal` ：表示字段不能是任意某种类型的值，而只能是几个固定字面量之一。
-举例1：
+
+`Literal` ：表示字段不能是任意某种类型的值，而`只能是几个固定字面量之一`。
+
+* `Literal` 的主要作用是限制“具体值”，但因为这些具体值本身有类型，所以也会间接限制类型。
+* 
+
+**举例1：**
 
 ~~~python
 from pydantic import BaseModel
@@ -1176,7 +1306,7 @@ class WeatherInput(BaseModel):
 输出
 
 > ~~~text
-> ===============> 合法 <===============
+> **===============> 合法 <===============
 > city='北京' unit='celsius'
 > ===============> 非法 <===============
 > 报错类型： ValidationError
@@ -1188,7 +1318,10 @@ class WeatherInput(BaseModel):
 > https://errors.pydantic.dev/2.12/v/literal_error
 > ~~~
 
-举例2：
+
+
+**举例2：**
+
 ~~~python
 from pydantic import BaseModel, Field
 
@@ -1213,9 +1346,14 @@ class WeatherInput(BaseModel):
 
 
 **3.3.1.2** **使用Pydantic定义args_schema**
-通过 `@tool(args_schema=PydanticModelCls)` 将这个 Pydantic 模型与工具函数关联。
-利用 Pydantic 的类型系统进行参数验证，当大模型需要调用工具前，Pydantic 会自动验证参数的类型和有效性。
-举例：
+
+通过 `@tool(args_schema=PydanticModelCls)` 将这个 Pydantic `模型与工具函数关联`。
+
+利用 Pydantic 的类型系统进行参数验证，`当大模型需要调用工具前，Pydantic 会自动验证参数的类型和有效性`。
+
+
+
+**举例：**
 
 ~~~python
 from pydantic import BaseModel, Field
@@ -1290,24 +1428,28 @@ convert_to_openai_tool(get_weather)
 #### 3.3.2 方式2：使用Json Schema定义
 
 在 LangChain 中，还可以直接使用 `JSON Schema 字典 `来定义工具的参数模式。这种方式提供了极大的灵活性。
+
 因为工具参数模式可以基于数据库配置或用户输入在 `运行时动态生成` ，所以这种方式特别适合参数结构需要动态生成的场景。
-举例：
+
+
+
+**举例：**
 
 ~~~json
 {
 "type": "function",
 "function": {
-"name": "get_weather",
-"description": "获取当日天气，可选未来五日天气预报",
-"parameters": {
-"type": "object",
-"properties": {
-"location": {"type": "string"},
-"units": {"type": "string"},
-"include_forecast": {"type": "boolean"}
-},
-"required": ["location", "units", "include_forecast"]
-},
+    "name": "get_weather",
+    "description": "获取当日天气，可选未来五日天气预报",
+    "parameters": {
+        "type": "object",
+        "properties": {
+        "location": {"type": "string"},
+        "units": {"type": "string"},
+        "include_forecast": {"type": "boolean"}
+    },
+    "required": ["location", "units", "include_forecast"]
+    },
 }
 }
 ~~~
@@ -1317,15 +1459,18 @@ convert_to_openai_tool(get_weather)
 {
 "type": "object",
 "properties": {
-"location": {"type": "string"},
-"units": {"type": "string"},
-"include_forecast": {"type": "boolean"}
+    "location": {"type": "string"},
+    "units": {"type": "string"},
+    "include_forecast": {"type": "boolean"}
 },
 "required": ["location", "units", "include_forecast"]
 }
 ~~~
 
-举例：
+
+
+**举例：**
+
 通过 `@tool(args_schema=json_schema_dict) `将一个符合 JSON Schema 标准的字典与工具函数关联。
 
 ~~~python
@@ -1335,9 +1480,9 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 weather_schema = {
 "type": "object",
 "properties": {
-"location": {"type": "string"},
-"units": {"type": "string"},
-"include_forecast": {"type": "boolean"}
+    "location": {"type": "string"},
+    "unit": {"type": "string"},
+    "include_forecast": {"type": "boolean"}
 },
 "required": ["location", "units", "include_forecast"]
 }
@@ -1387,7 +1532,9 @@ print(convert_to_openai_tool(get_weather))
 ## 4、工具的应用案例
 ### 4.1 案例1：使用args_schema
 arg_schema给出明确的参数信息
-模型初始化：
+
+**模型初始化：**
+
 ~~~python
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
@@ -1487,8 +1634,12 @@ for tool_call in tool_calls:
 > ~~~
 
 ### 4.2 案例2：撰写docstring
-可以在docstring中撰写参数的描述信息，此时参数默认值和类型都要通过函数签名传递。
-模型初始化：
+可以在docstring中撰写参数的`描述信息`，此时`参数默认值和类型都要通过函数签名传递`。
+
+
+
+**模型初始化：**
+
 ~~~python
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
@@ -1530,11 +1681,14 @@ def get_weather(city: str = "北京", if_forecast: bool = False):
 
 
 print(convert_to_openai_tool(get_weather))
+
 model_with_tools = model.bind_tools([get_weather])
 messages = [HumanMessage("今天杭州天气如何？明天呢？")]
+
 response = model_with_tools.invoke(messages)
 messages.append(response)
 tool_calls = response.tool_calls
+
 # 将工具调用的结果添加到消息列表中
 for tool_call in tool_calls:
     if tool_call["name"] == "get_weather_and_forecast":
@@ -1547,7 +1701,7 @@ for tool_call in tool_calls:
             msg.pretty_print()
 ~~~
 
-**注意**：要正确解析docstring，必须在@tool中将 **parse_docstring** 设置为 **True** 。
+⭐⭐**注意**：要`正确解析docstring`，必须在@tool中将 **parse_docstring** 设置为 **True** 。
 
 
 
@@ -1581,8 +1735,11 @@ for tool_call in tool_calls:
 > 如果你愿意，我也可以帮你继续看一下适合出行/穿衣的建议。
 > ~~~
 
+
+
 ### 4.3 案例3：多工具调用
-大模型调用工具是单次推理，即每次运行调用一个工具，当调用多个工具时，需要用户自己管理多次调用循环。
+
+大模型调用工具是单次推理，即`每次运行调用一个工具`，当调用多个工具时，需要用户`自己管理多次调用循环`。
 ~~~python
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
@@ -1698,11 +1855,126 @@ for msg in message_list:
 
 
 
+> ⭐⭐**但我有个问题，这个代码不是成了无限循环吗？每次开头都是response = model_with_tools.invoke(message_list)，那不是一直都会命中两个tool吗？永远无法停下来**?
+>
+>
+> 不会必然无限循环，因为 `message_list` 会在每一轮发生变化。
+>
+> **第一次调用时：**
+>
+> ```python
+> message_list = [
+>     HumanMessage("苹果公司今天的股价是多少？最近有什么新闻？")
+> ]
+> ```
+>
+> 模型看到用户问题，于是返回两个工具调用：
+>
+> ```python
+> get_stock_price
+> search_news
+> ```
+>
+> 然后程序把这些内容追加进去：
+>
+> ```python
+> message_list.append(response)       # AIMessage，包含 tool_calls
+> message_list.append(stock_result)   # ToolMessage
+> message_list.append(news_result)    # ToolMessage
+> ```
+>
+> 此时消息列表变成：
+>
+> ```python
+> HumanMessage：用户的问题
+> AIMessage：请调用 get_stock_price 和 search_news
+> ToolMessage：股票价格结果
+> ToolMessage：新闻搜索结果
+> ```
+>
+> **第二次执行：**
+>
+> ```python
+> response = model_with_tools.invoke(message_list)
+> ```
+>
+> ⭐`模型看到工具执行结果后，通常会直接生成最终答案：`
+>
+> ```
+> 苹果公司今天的股价是 185.20 美元，最近的新闻有……
+> ```
+>
+> 这次返回的 `response.tool_calls` 是空列表：
+>
+> ```python
+> not response.tool_calls == True
+> ```
+>
+> 于是执行：
+>
+> ```python
+> break
+> ```
+>
+> 循环结束。
+>
+> 关键是：
+>
+> ```python
+> model_with_tools
+> ```
+>
+> ⭐只是让模型“可以调用这些工具”，并不是强制模型每次都调用工具。默认情况下，模型可以选择：
+>
+> - `请求调用工具；`
+> - `根据已有工具结果直接回答。`
+>
+> 可以把它理解成：
+>
+> ```
+> 第一次：问题 → 请求工具
+> 第二次：工具结果 → 最终回答
+> ```
+>
+> 不过，确实存在模型反复调用工具的可能，例如：
+>
+> - 工具结果不完整；
+> - 工具结果格式不符合预期；
+> - 模型认为还需要继续查询；
+> - 工具调用消息没有正确追加；
+> - 使用了强制工具调用配置。
+>
+> 因此生产代码通常要限制最大循环次数：
+>
+> ```python
+> max_iterations = 5
+> 
+> for _ in range(max_iterations):
+>     response = model_with_tools.invoke(message_list)
+>     message_list.append(response)
+> 
+>     if not response.tool_calls:
+>         break
+> 
+>     for tool_call in response.tool_calls:
+>         if tool_call["name"] == "get_stock_price":
+>             message_list.append(get_stock_price.invoke(tool_call))
+>         elif tool_call["name"] == "search_news":
+>             message_list.append(search_news.invoke(tool_call))
+> else:
+>     print("超过最大工具调用次数")
+> ```
+>
+> 所以，这段代码不是“每次都会命中两个工具”，而是每一轮都把最新的消息列表交给模型；模型在收到工具结果后，通常会停止调用工具并返回最终答案。
+
+
+
 ### 4.4 案例4：多工具调用
 
 ~~~python
 from langchain.tools import tool
 from langchain.messages import HumanMessage
+
 @tool(parse_docstring=True)
 def get_weather(city: str) -> str:
     """
@@ -1711,12 +1983,15 @@ def get_weather(city: str) -> str:
     city: 城市名称
     """
     return f'{city}当天晴朗'
+
 @tool(parse_docstring=True)
 def get_news() -> str:
     """
     获取当日新闻
     """
     return "近期，受全球储蓄芯片短缺等多重因素影响，多地回收商称废旧手机回收市场迎来“火热潮”，回收价格普遍上涨，旧手机成“香饽饽”。"
+
+
 model_with_tools = model.bind_tools([get_weather, get_news])
 messages = [
 HumanMessage("今天杭州天气如何？今天新闻是什么？别瞎编")
