@@ -8,9 +8,11 @@ LangGraph 运行时底层基于自研的 Pregel 运行时，其核心思想借�
 
 **LangChain 1.x** 现在聚焦于 Agent 开发，核心入口是 create_agent，围绕 Agent 提供模型、工具、消息、结构化输出、Middleware` 和记忆管理等高层抽象。
 
-**LangGraph** 是更底层的编排框架与 Agent Runtime，负责复杂工作流和有状态 Agent 的执行，提供持久化、流式输出、Durable Execution、Human-in-the-loop 等运行时能力。create_agent 底层基于 LangGraph` 实现。
+**LangGraph** 是更底层的编排框架与 Agent Runtime，负责复杂工作流和有状态 Agent 的执行，提供持久化、流式输出、Durable Execution、Human-in-the-loop 等运行时能力。create_agent 底层基于 LangGraph实现。
 
-二者的定位对比如下： 
+
+
+**二者的定位对比如下：** 
 
 | 对比维度 | LangChain      | LangGraph                    |
 | ---- | -------------- | ---------------------------- |
@@ -22,21 +24,23 @@ LangGraph 运行时底层基于自研的 Pregel 运行时，其核心思想借�
 
 > `LangChain` 提供易于使用的 Agent 高层抽象，`LangGraph` 提供可靠、可持久化且可精细控制的底层执行能力。
 
-对于大多数 Agent 项目，从 LangChain 的 create_agent 开始即可；需要复杂工作流编排、确定性步骤与 Agent 步骤混合、长时间运行或底层状态控制时，再引入 LangGraph。
+
+
+对于大多数 Agent 项目，从 LangChain 的 create_agent 开始即可；`需要复杂工作流编排、确定性步骤与 Agent 步骤混合、长时间运行或底层状态控制时，再引入 LangGraph`。
 
 ![ChatGPT Image 2026年6月25日 18_25_23](images/ChatGPT Image 2026年6月25日 18_25_23.png)
 
 ## 1.1. 构成图的基本要素
 
-LangGraph 运行时主要由三个基本要素构成：State（状态）、Node（节点） 和 Edge（边）
+LangGraph 运行时主要由**下三个基本要素构成：State（状态）、Node（节点） 和 Edge（边）**下
 
-State（状态）：LangGraph 运行过程中的共享数据结构，用于表示应用在某一时刻的状态快照。它承载了图运行所需的上下文信息、中间结果和后续节点需要读取的数据，是节点之间传递信息的核心载体。它与我们在学习 LangChain Agent 时使用的 State 是同一概念。
+* `State（状态）`：LangGraph 运行过程中的共享数据结构，用于表示应用在某一时刻的状态快照。它承载了图运行所需的上下文信息、中间结果和后续节点需要读取的数据，是节点之间传递信息的核心载体。它与我们在学习 LangChain Agent 时使用的 State 是同一概念。
+* `Node（节点）`：LangGraph 中的具体执行单元，通常实现为一个函数。节点会读取当前 State，执行相应的业务逻辑，并返回对 State 的局部更新。节点本身并不直接修改全局状态，状态的合并与提交由运行时统一完成。
+* `Edges（边）`：用于定义节点之间的流转关系，决定一个节点执行完成后下一步应该进入哪个节点。Edge 可以是固定流转，也可以根据当前 State 进行条件判断，从而实现分支、循环等复杂控制流程。
 
-Node（节点）：LangGraph 中的具体执行单元，通常实现为一个函数。节点会读取当前 State，执行相应的业务逻辑，并返回对 State 的局部更新。节点本身并不直接修改全局状态，状态的合并与提交由运行时统一完成。
 
-Edges（边）：用于定义节点之间的流转关系，决定一个节点执行完成后下一步应该进入哪个节点。Edge 可以是固定流转，也可以根据当前 State 进行条件判断，从而实现分支、循环等复杂控制流程。
 
-下图展示了一个非常简单的运行图，只有两个计算节点，其拓扑结构为
+**下图展示了一个非常简单的运行图，只有两个计算节点，其拓扑结构为**下
 
 ```
 START --> node_1 --> node_2 --> END
@@ -52,17 +56,19 @@ LangGraph 的图运行过程基于 Superstep（超步） 来组织和推进。Su
 
 下文以 **node_1执行完毕后的Superstep** 为例说明。
 
-每个 Superstep 通常可以分为三个阶段：
 
-1. 计划/路由阶段（Plan / Routing）：根据当前的 State（状态） 和 Edge（边） 的逻辑，确定本轮超步中应该被执行的节点。
+
+**每个 Superstep 通常可以分为三个阶段：**
+
+1. `计划/路由阶段（Plan / Routing）`：根据当前的 State（状态） 和 Edge（边） 的逻辑，确定本轮超步中应该被执行的节点。
 
 ![image-20260521160436752](images/image-20260521160436752.png)
 
-2. 执行阶段（Execution）：运行本轮被选中的节点。如果本轮有多个节点同时被触发，它们会并行执行。每个节点都会基于本轮开始时的状态快照进行计算，并输出各自对状态的局部更新。在本阶段中，一个节点产生的更新不会立即被其他节点读取到。
+2. `执行阶段（Execution）`：运行本轮被选中的节点。如果本轮有多个节点同时被触发，它们会并行执行。每个节点都会基于本轮开始时的状态快照进行计算，并输出各自对状态的局部更新。在本阶段中，一个节点产生的更新不会立即被其他节点读取到。
 
 ![image-20260521160523119](images/image-20260521160523119.png)
 
-3. 状态更新/提交阶段（Update / Commit）：当本轮所有节点都执行完成后，LangGraph 会将它们的输出统一合并到 State 中，生成新的状态快照。这个新状态会作为下一轮 Superstep 的输入。
+3. `状态更新/提交阶段（Update / Commit）`：当本轮所有节点都执行完成后，LangGraph 会将它们的输出统一合并到 State 中，生成新的状态快照。这个新状态会作为下一轮 Superstep 的输入。
 
 ![image-20260521160659113](images/image-20260521160659113.png)
 
@@ -78,15 +84,17 @@ LangGraph 提供了两种不同的 API 来构建运行图：`Graph API`（图式
 
 ### 1.3.1. Graph API
 
-Graph API 采用声明式方式构建工作流。开发者需要显式定义 State、Node 和 Edge，将业务流程组织成一个可视化的图结构。
+`Graph API` 采用`声明式`方式构建工作流。开发者需要`显式定义 State、Node 和 Edge`，将业务流程组织成一个`可视化的图结构`。
 
 当流程中存在较复杂的分支、多个节点之间共享状态、并行执行、结果汇聚，或者需要通过图结构帮助调试和团队协作时，更适合使用 Graph API。官方文档也明确建议，在需要复杂流程可视化、显式状态管理、多条件分支、并行路径以及团队协作时，优先选择 Graph API。
 
-总之：
 
-> Graph API 更适合构建结构清晰、节点关系复杂、需要长期维护的工作流。
 
-典型场景包括：
+**总之：**
+
+> ⭐`Graph API 更适合构建结构清晰、节点关系复杂、需要长期维护的工作流。`
+
+**典型场景包括：**
 
 | 场景        | 说明                        |
 | --------- | ------------------------- |
@@ -100,13 +108,15 @@ Graph API 采用声明式方式构建工作流。开发者需要显式定义 Sta
 
 ### 1.3.2. Functional API
 
-Functional API 采用命令式方式构建工作流，更接近普通 Python 函数调用。开发者可以使用 `@entrypoint` 定义工作流入口，使用 `@task` 定义可被检查点记录的任务，然后在函数内部使用普通的 `if/else`、循环和函数调用来组织流程。官方文档指出，当已有过程式代码需要最小改造、流程主要是线性的、分支逻辑较简单、希望快速原型验证时，更适合使用 Functional API。
+`Functional API` 采用命令式方式构建工作流，更接近普通 Python 函数调用。开发者可以使用 `@entrypoint` 定义工作流入口，使用 `@task` 定义可被检查点记录的任务，然后在函数内部使用普通的 `if/else`、循环和函数调用来组织流程。官方文档指出，当已有过程式代码需要最小改造、流程主要是线性的、分支逻辑较简单、希望快速原型验证时，更适合使用 Functional API。
 
-可以这样理解：
 
-> Functional API 更适合在普通 Python 函数流程中，以较低成本接入 LangGraph 的持久化、中断恢复和任务记录能力。
 
-典型场景包括：
+**可以这样理解：**
+
+> ⭐`Functional API 更适合在普通 Python 函数流程中，以较低成本接入 LangGraph 的持久化、中断恢复和任务记录能力。`
+
+**典型场景包括：**
 
 | 场景      | 说明                        |
 | ------- | ------------------------- |
@@ -120,15 +130,15 @@ Functional API 采用命令式方式构建工作流，更接近普通 Python 函
 
 ### 1.3.3. 二者的核心区别
 
-| 对比项   | Graph API       | Functional API    |
-| ----- | --------------- | ----------------- |
-| 编程风格  | 声明式图结构          | 命令式函数流程           |
-| 核心抽象  | State、Node、Edge | entrypoint、task   |
-| 状态管理  | 显式定义全局 State    | 更多依赖函数参数和返回值      |
-| 流程表达  | 通过节点和边表达        | 通过普通 Python 控制流表达 |
-| 可视化能力 | 强，天然适合画图和调试     | 弱，更像普通代码流程        |
-| 适合场景  | 复杂工作流、多分支、多节点协作 | 简单流程、快速原型、已有代码改造  |
-| 学习成本  | 相对更高            | 相对更低              |
+| 对比项     | `Graph API`                    | `Functional API`                 |
+| ---------- | ------------------------------ | -------------------------------- |
+| 编程风格   | 声明式图结构                   | 命令式函数流程                   |
+| 核心抽象   | State、Node、Edge              | entrypoint、task                 |
+| 状态管理   | 显式定义全局 State             | 更多依赖函数参数和返回值         |
+| 流程表达   | 通过节点和边表达               | 通过普通 Python 控制流表达       |
+| 可视化能力 | 强，天然适合画图和调试         | 弱，更像普通代码流程             |
+| 适合场景   | 复杂工作流、多分支、多节点协作 | 简单流程、快速原型、已有代码改造 |
+| 学习成本   | 相对更高                       | 相对更低                         |
 
 ------
 
@@ -136,7 +146,7 @@ Functional API 采用命令式方式构建工作流，更接近普通 Python 函
 
 从零构建或流程结构复杂，用 `Graph API`；现有代码改造、快速原型验证或流程逻辑简单，用 `Functional API`。
 
-学习 `LangGraph` 建议优先掌握 `Graph API`。因为后者更能体现 `LangGraph` 的核心思想：通过 `State、Node、Edge` 显式描述一个可执行的计算图。
+学习 `LangGraph` ⭐⭐建议优先掌握 `Graph API`。因为后者更能体现 `LangGraph` 的核心思想：通过 `State、Node、Edge` 显式描述一个可执行的计算图。
 
 本文介绍 `Graph API`，对 `Functional API` 感兴趣的同学自行查阅
 
@@ -150,13 +160,15 @@ Functional API 采用命令式方式构建工作流，更接近普通 Python 函
 
 ## 2.1. 定义状态图
 
-状态图的定义可以分为以下几个步骤：
+**状态图的定义可以分为以下几个步骤：**
 
-**1. 定义全局状态**  定义整个运行图共享的全局状态（实际上，除了全局状态，LangGraph还支持其它类型的状态，下文详述）
+1. **定义全局状态**  定义整个运行图共享的全局状态（实际上，除了全局状态，LangGraph还支持其它类型的状态，下文详述）
 
-**2. 创建状态图**     创建 StateGraph实例，将状态和状态图绑定
+2. **创建状态图**     创建 StateGraph实例，将状态和状态图绑定
 
-**3. 定义图结构**     定义节点和边并添加到状态图中
+3. **定义图结构**     定义节点和边并添加到状态图中
+
+
 
 ### 2.1.1. 定义全局状态
 
@@ -167,6 +179,82 @@ class OverAllState(TypedDict):
     logs: Annotated[list[str], add]
     cur_id: str
 ```
+
+> ⭐**Annotated[list[str],add] 是什么意思？**
+>
+> `Annotated[list[str], add]` 的意思是：
+>
+> ```
+> 这是一个“字符串列表”，并且更新它时使用 add 规则合并。
+> ```
+>
+> 拆开看：
+>
+> ```
+> list[str]
+> ```
+>
+> 表示字段类型是“字符串列表”，例如：
+>
+> ```
+> ["开始执行", "node_1 完成"]
+> Annotated[类型, 额外规则]
+> ```
+>
+> `Annotated` 用于在类型后附加元数据。LangGraph 会读取这里的 `add`，把它当作该字段的合并规则（reducer）。
+>
+> ```
+> Annotated[list[str], add]
+> ```
+>
+> 因此，当原状态和节点返回的更新同时有 `logs` 时，LangGraph 会做：
+>
+> ```
+> 原来的 logs + 新返回的 logs
+> ```
+>
+> 例如：
+>
+> ```
+> 旧状态 = {"logs": ["node_1 运行完毕"]}
+> 
+> 节点返回 = {"logs": ["node_2 运行完毕"]}
+> ```
+>
+> 合并结果：
+>
+> ```
+> {
+>     "logs": ["node_1 运行完毕", "node_2 运行完毕"]
+> }
+> ```
+>
+> 其中 `add` 来自：
+>
+> ```
+> from operator import add
+> ```
+>
+> 它本质上就是 Python 的加法运算：
+>
+> ```
+> add(["A"], ["B"])
+> # ["A", "B"]
+> ```
+>
+> 如果不写 `Annotated[..., add]`：
+>
+> ```
+> logs: list[str]
+> ```
+>
+> 新值通常会覆盖旧值：
+>
+> ```
+> ["node_2 运行完毕"]
+> ```
+>
+> 而不是保留两条日志。
 
 ### 2.1.2. 创建状态图
 
@@ -225,6 +313,24 @@ graph = builder.compile()
 print(graph.invoke({"cur_id": "start"}))
 ```
 
+> **OverAllState([], "start") 是什么意思？**
+>
+> 
+>
+> 创建初始状态，等价于：
+>
+> ~~~python
+> OverAllState(
+>     logs=[],
+>     cur_id="start"
+> )
+> ~~~
+>
+> 即流程开始前：
+>
+> - `logs`：空日志列表
+> - `cur_id`：`"start"`
+
 ## 2.4. 完整代码
 
 ```python
@@ -267,6 +373,8 @@ print(graph.invoke({"cur_id": "start"}))
 ```
 {'logs': ['node_1 运行完毕', 'node_2 运行完毕'], 'cur_id': 'start, node_1, node_2'}
 ```
+
+
 
 ## 2.5. 图结构可视化
 
@@ -344,7 +452,7 @@ png = Image(png_bytes)
 display(png)
 ```
 
-运行结果如下所示
+**运行结果如下所示**
 
 ![image-20260522103648868](images/image-20260522103648868.png)
 
@@ -391,7 +499,9 @@ display(graph)
 
 状态的定义实际上是在声明状态的Schema，后者是状态字段的完整描述。
 
-官方推荐了三种定义Schema的方式：TypedDict、dataclass、Pydantic
+官方推荐了**三种定义Schema的方式**：
+
+* `TypedDict`、`dataclass`、`Pydantic`
 
 ### 3.1.1. TypedDict
 
@@ -483,9 +593,31 @@ print(graph.invoke({"cur_id": "start"}))
 {'logs': ['node_1 运行完毕', 'node_2 运行完毕'], 'cur_id': 'start, node_1, node_2'}
 ```
 
+> **注意：**
+>
+> * ⭐⭐⭐⭐返回的时候，`dataclass是支持字典与dataclass之间的转换的`。
+>
+>   ~~~python
+>   def node_1(state: OverAllState) -> OverAllState:
+>       pre_id = state.cur_id
+>       return {
+>           "logs": ["node_1 运行完毕"],
+>           "cur_id": pre_id + ", node_1"
+>       }
+>   
+>   ================互相转换===========================
+>   
+>   def node_1(state: OverAllState) -> OverAllState:
+>       pre_id = state.cur_id
+>      	return OverAllState(
+>           logs=state.logs + ["node_1 运行完毕"],
+>           cur_id=pre_id + ", node_1"
+>       )
+>   ~~~
+
 ### 3.1.3. Pydantic
 
-Pydantic模型的字段访问方式和dataclass相同。
+`Pydantic模型的字段访问方式和dataclass相同`。
 
 ```python
 from langgraph.graph import StateGraph, START, END
@@ -531,9 +663,13 @@ print(graph.invoke({"cur_id": "start"}))
 
 ### 3.1.4. 校验行为
 
-学习LangChain的结构化输出时我们提到：Pydantic对格式要求最严格，如果模型返回的内容不符合结构化Schema的要求，则抛出`ValidationError`。而其余方式都不会对模型的返回结果进行校验，即便模型返回的内容不符合结构化要求，也会原样返回给用户。
+学习`LangChain`的结构化输出时我们提到：
 
-而作为LangGraph计算图的状态时，这三种方式都要求字段名称完全一致。只是处理方式不同。具体规则如下
+* `Pydantic`对格式要求最严格，如果模型返回的内容不符合结构化Schema的要求，则抛出`ValidationError`。而其余方式都不会对模型的返回结果进行校验，即便模型返回的内容不符合结构化要求，也会原样返回给用户。
+
+
+
+而作为`LangGraph`计算图的状态时，这三种方式都要求字段名称完全一致。只是处理方式不同。具体规则如下
 
 #### 3.1.4.1. 输入字段不匹配
 
@@ -555,9 +691,13 @@ Pydantic对输入字段进行校验，不匹配时抛出`ValidationError`异常�
 
 ### 3.1.5. 推荐用法
 
-在实际使用中，推荐优先使用 `TypedDict` 定义 LangGraph 状态图的 State Schema。
+⭐在实际使用中，推荐优先使用 `TypedDict` 定义 LangGraph 状态图的 State Schema。
+
+
 
 大多数官方案例也采用 `TypedDict` 方式定义状态 `Schema`。这种方式写法简洁、结构清晰，能够直接描述状态中包含哪些字段，以及每个字段对应的数据类型，非常适合用于定义图运行过程中的共享状态。
+
+
 
 相比普通 `dict`，`TypedDict` 可以提供更明确的字段约束和类型提示；相比 `dataclass`，`TypedDict` 更贴近 LangGraph 中状态的更新方式，因为节点通常返回的是表示“部分状态更新”的字典，而不是完整对象；相比 `Pydantic BaseModel`，它又更加轻量，不会引入额外的数据校验开销。因此，在没有复杂校验需求的情况下，`TypedDict` 是定义 LangGraph State Schema 的首选方式。
 
@@ -567,11 +707,13 @@ Pydantic对输入字段进行校验，不匹配时抛出`ValidationError`异常�
 
 State Reducer 是 LangGraph 中用于合并状态更新的核心机制。在 LangGraph 的 `StateGraph` 中，每个节点可以读取和写入共享状态，而 Reducer 定义了如何将多个节点对同一状态键的更新合并 
 
-Reducer 的核心特征：
+**Reducer 的核心特征：**
 
-- 函数签名：`(Value, Value) -> Value`，接收当前值和更新值，返回合并后的新值
-- 注解定义：通过 `Annotated[Type, reducer_function]` 为状态键指定 Reducer
-- 默认行为：未指定 Reducer 的状态键使用覆盖策略（Last-Write-Wins）
+- `函数签名`：`(Value, Value) -> Value`，接收当前值和更新值，返回合并后的新值
+- `注解定义`：通过 `Annotated[Type, reducer_function]` 为状态键指定 Reducer
+- `默认行为`：未指定 Reducer 的状态键使用覆盖策略（Last-Write-Wins）
+
+
 
 #### 3.2.2. 如何定义Reducer
 
@@ -579,9 +721,11 @@ Reducer 的核心特征：
 
 Reducer 本质上是一个二元合并函数，用于定义当同一个字段产生多个更新值时，LangGraph 应该如何将这些值合并为一个最终结果。
 
-函数签名：`(Value, Value) -> Value`
+**函数签名：**`(Value, Value) -> Value`
 
-示例代码如下：
+
+
+**示例代码如下：**
 
 ```python
 def my_reducer(left: list[str], right: list[str]) -> list[str]:
@@ -592,20 +736,24 @@ right = ['c']
 print(my_reducer(left, right))
 ```
 
-其中，`my_reducer` 用于处理 `list[str]` 类型的数据。它接收两个列表参数：
+其中，`my_reducer` 用于处理 `list[str]` 类型的数据。它**接收两个列表参数：**
 
 - `left`：当前已累计的状态值；
 - `right`：本次待合并的新值。
 
 函数内部通过 `left + right` 将两个列表合并，并返回合并后的结果。
 
-因此，该 Reducer 的作用是：当某个状态字段存在多次列表更新时，将这些列表内容追加合并，而不是直接覆盖原值。
+因此，该 `Reducer 的作用`是：当某个状态字段存在多次列表更新时，将这些列表内容`追加合并`，而不是直接覆盖原值。
 
-运行结果如下
+
+
+**运行结果如下**
 
 ```
 ['a', 'b', 'c']
 ```
+
+
 
 ##### 3.2.2.2. 将Reducer和状态字段关联
 
@@ -615,20 +763,24 @@ print(my_reducer(left, right))
 
 严格来说，`Annotated` 的第一个参数是被注解的原始类型，后续参数是附加的元数据。至于这些元数据表示什么、如何解析，则由使用它的框架或工具自行决定。
 
-在 LangGraph 中，框架利用这一机制，将状态字段的类型和 Reducer 规则同时声明在字段定义中。其基本形式如下：
+
+
+在 LangGraph 中，框架利用这一机制，将状态字段的类型和 Reducer 规则同时声明在字段定义中。**其基本形式如下：**
 
 ```python
 Annotated[Type, reducer_function]
 ```
 
-其中：
+**其中：**
 
 - `Type`：表示状态字段的数据类型；
 - `reducer_function`：表示该字段对应的 Reducer 函数。
 
-示例代码如下：
 
-```
+
+**示例代码如下：**
+
+```python
 from typing import TypedDict, Annotated
 
 class OverAllState(TypedDict):
@@ -636,12 +788,14 @@ class OverAllState(TypedDict):
     cur_id: str
 ```
 
-在上述代码中：
+**在上述代码中：**
 
 - `logs` 字段的类型是 `list[str]`；
 - `my_reducer` 是与 `logs` 字段关联的 Reducer 函数；
 - 当多个节点同时更新 `logs` 字段时，LangGraph 会使用 `my_reducer` 将多个列表合并；
 - `cur_id` 字段没有指定 Reducer，因此采用默认更新规则。
+
+
 
 ##### 3.2.2.3. 常用内置Reducer函数
 
@@ -651,7 +805,7 @@ class OverAllState(TypedDict):
 
 它接收两个参数，等价于 `a（第一个参数）+b（第二个参数）`
 
-代码如下
+**代码如下**
 
 ```python
 from operator import add
@@ -661,13 +815,15 @@ print(f"{add([1,2], [3,4]) = }")
 print(f"{add(['a','b'], ['c']) = }")
 ```
 
-输出如下
+**输出如下**
 
 ```
 add(1,2) = 3
 add([1,2], [3,4]) = [1, 2, 3, 4]
 add(['a','b'], ['c']) = ['a', 'b', 'c']
 ```
+
+
 
 ###### 2. langgraph.graph.message.add_messages
 
@@ -684,27 +840,37 @@ def add_messages(
     return merged
 ```
 
-参数说明：
+**参数说明：**
 
 - `left`：状态中已有的消息列表；
 - `right`：当前节点返回的消息更新值；
 - `format`：可选参数，用于指定返回消息的格式，通常无需手动设置。
+
+
 
 `left` 与 `right` 的类型均为 `Messages`。`Messages` 可以理解为 LangChain 消息对象的列表，其中每个元素都是 `BaseMessage` 或其子类的实例，常见子类包括：
 
 - `HumanMessage`：用户的输入消息；
 - `AIMessage`：AI 的回复消息；
 - `SystemMessage`：系统提示消息；
-- `ToolMessage`：工具调用的结果消息。
+- `ToolMessage`：工具调用的结果消息
+
+
 
 `add_messages` 处理的是对话消息序列，而非普通的字符串列表。
+
+
 
 `BaseMessage` 包含一个可选的 `id` 属性，用于唯一标识一条消息。`add_messages` 在合并 `left` 与 `right` 时，不是简单地执行列表拼接，而是依据消息的 `id` 进行合并：
 
 - 若 `right` 中的某条消息的 `id` 在 `left` 中不存在，则将该消息追加到结果列表末尾；
 - 若 `right` 中的某条消息的 `id` 与 `left` 中已有消息的 `id` 相同，则使用 `right` 中的新消息替换 `left` 中的旧消息。
 
+
+
 因此，`add_messages` 的作用可以概括为：在保留历史消息的基础上追加新消息，并允许通过相同的消息 `id` 覆盖已有消息。
+
+
 
 需要特别说明，`add_messages` 并非简单地对 `left` 与 `right` 求“并集”。更准确地说，它是一个基于消息 `id` 的消息列表合并函数：既支持追加新消息，也支持更新已有消息。
 
