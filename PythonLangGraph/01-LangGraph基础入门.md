@@ -604,9 +604,9 @@ print(graph.invoke({"cur_id": "start"}))
 >           "logs": ["node_1 运行完毕"],
 >           "cur_id": pre_id + ", node_1"
 >       }
->   
+>       
 >   ================互相转换===========================
->   
+>       
 >   def node_1(state: OverAllState) -> OverAllState:
 >       pre_id = state.cur_id
 >      	return OverAllState(
@@ -801,7 +801,7 @@ class OverAllState(TypedDict):
 
 ###### 1. operator.add
 
-`operator.add` 是 Python 内置的加法操作函数，底层由 C 实现
+`operator.add` 是 Python `内置的加法操作函数`，底层由 C 实现
 
 它接收两个参数，等价于 `a（第一个参数）+b（第二个参数）`
 
@@ -861,10 +861,10 @@ def add_messages(
 
 
 
-`BaseMessage` 包含一个可选的 `id` 属性，用于唯一标识一条消息。`add_messages` 在合并 `left` 与 `right` 时，不是简单地执行列表拼接，而是依据消息的 `id` 进行合并：
+⭐️`BaseMessage` 包含一个可选的 `id` 属性，用于唯一标识一条消息。`add_messages` 在合并 `left` 与 `right` 时，不是简单地执行列表拼接，而是依据消息的 `id` 进行合并：
 
-- 若 `right` 中的某条消息的 `id` 在 `left` 中不存在，则将该消息追加到结果列表末尾；
-- 若 `right` 中的某条消息的 `id` 与 `left` 中已有消息的 `id` 相同，则使用 `right` 中的新消息替换 `left` 中的旧消息。
+- 若 `right` 中的某条消息的 `id` 在 `left` 中不存在，则将该消息`追加`到结果列表末尾；
+- 若 `right` 中的某条消息的 `id` 与 `left` 中已有消息的 `id` 相同，则使用 `right` 中的新消息`替换` `left` 中的旧消息。
 
 
 
@@ -874,7 +874,7 @@ def add_messages(
 
 需要特别说明，`add_messages` 并非简单地对 `left` 与 `right` 求“并集”。更准确地说，它是一个基于消息 `id` 的消息列表合并函数：既支持追加新消息，也支持更新已有消息。
 
-可以理解为：
+**可以理解为：**
 
 ```python
 merged = left + right
@@ -882,7 +882,13 @@ merged = left + right
 
 但若 `right` 中存在与 `left` 相同 `id` 的消息，则最终结果中不会出现重复消息，而是用 `right` 中的消息覆盖 `left` 中对应的旧消息。
 
-示例代码如下
+
+
+> 注意：
+>
+> * ⭐️⭐️**只会根据id来判断是新增还是替换**
+
+**示例代码如下**
 
 ```python
 from langgraph.graph.message import add_messages
@@ -907,7 +913,7 @@ for msg in merged:
     print(msg)
 ```
 
-输出如下
+**输出如下**
 
 ```
 content='你是个善解人意的助手' additional_kwargs={} response_metadata={} id='1'
@@ -917,13 +923,17 @@ content='你是谁？' additional_kwargs={} response_metadata={} id='4'
 content='我是小王' additional_kwargs={} response_metadata={} id='5' tool_calls=[] invalid_tool_calls=[]
 ```
 
+
+
 ### 3.2.3. 默认行为
 
-如果某个 State 字段没有显式定义 `Reducer`，LangGraph 会使用默认的状态更新行为：后一次更新值会覆盖该字段原有的状态值。
+如果某个 State 字段没有显式定义 `Reducer`，LangGraph 会使用`默认`的状态更新行为：`后一次更新值会覆盖该字段原有的状态值`。
 
-换句话说，当节点返回的更新结果中包含某个字段时，如果该字段没有配置 Reducer，LangGraph 不会对新旧值进行追加、合并或累加，而是直接使用本次返回的新值替换原来的旧值。
+**换句话说**，当节点返回的更新结果中包含某个字段时，如果该字段没有配置 Reducer，LangGraph `不会对新旧值进行追加、合并或累加`，而是`直接使用本次返回的新值替换原来的旧值`。
 
-示例代码如下：
+
+
+**示例代码如下：**
 
 ```python
 from langgraph.graph import StateGraph, START, END
@@ -958,7 +968,7 @@ print('=' * 30, '-> result <-', '=' * 30)
 print(result)
 ```
 
-输出如下
+**输出如下**
 
 ```
 ============================== -> result <- ==============================
@@ -980,9 +990,9 @@ def node(state: StateSchema):
     ...
 ```
 
-其中，`state` 表示当前节点执行时可以访问到的全局状态快照。节点可以通过读取 `state` 中的字段获取上游节点写入的数据，并基于这些数据完成当前节点的业务逻辑。
+其中，`state` 表示当前节点执行时可以访问到的全局状态快照。节点可以通过读取 `state` 中的字段`获取上游节点写入的数据`，并基于这些数据完成当前节点的业务逻辑。
 
-示例代码如下：
+**示例代码如下：**
 
 ```python
 from langgraph.graph import StateGraph, START, END
@@ -1006,29 +1016,66 @@ graph = builder.compile()
 result = graph.invoke({"logs": ["START"], "id": "start"})
 ```
 
-输出如下
+**输出如下**
 
 ```
 k: logs, v: ['START']
 k: id, v: start
 ```
 
+> ```python
+> print("state",state.items())
+> print("state",state)
+> 
+> ========打印结果=================
+> state dict_items([('logs', ['start']), ('cur_id', 'start')])
+> state {'logs': ['start'], 'cur_id': 'start'}
+> ```
+
+> **和state.items()有什么区别？**
+>
+> 
+>
+> | 表达式           | 返回/展示的内容       | 常见用途       |
+> | ---------------- | --------------------- | -------------- |
+> | `state`          | 完整字典              | 查看、按键取值 |
+> | `state.items()`  | `(键, 值)` 组成的视图 | 同时遍历键和值 |
+> | `state.keys()`   | 所有键                | 遍历键         |
+> | `state.values()` | 所有值                | 遍历值         |
+>
+> 因此，查看状态时通常直接写：
+>
+> ```
+> print("state:", state)
+> ```
+>
+> 需要遍历状态中的每个字段时使用：
+>
+> ```
+> for k, v in state.items():
+>     print(f"k:{k} v:{v}")
+> ```
+
+
+
 ### 3.3.2. 图节点更新State
 
 在 LangGraph 中，节点函数通常不需要返回更新后的完整状态，只需要返回本节点对状态的局部更新。
 
-也就是说，节点的返回值可以只包含需要修改的状态字段。
+也就是说，**节点的返回值可以只包含需要修改的状态字段**。
 
 - 对于节点没有返回的字段，LangGraph 会保留其原有状态值；
 
 - 对于节点返回的字段，LangGraph 会根据该字段是否配置了 `Reducer` 来决定如何合并更新值。
   
-  - 如果字段配置了 `Reducer`，则使用对应的 `Reducer` 函数将旧值和新值合并；
-  - 如果字段没有配置 `Reducer`，则按照默认规则使用节点返回的新值覆盖原值。
+  - 如果字段`配置了 Reducer`，则使用对应的 `Reducer` 函数将旧值和新值`合并`；
+  - 如果字段`没有配置Reducer`，则按照默认规则使用节点返回的新值`覆盖`原值。
 
 LangGraph运行时会按照状态字段的`Reducer`函数将其与当前的最新状态合并。
 
-示例代码如下：
+
+
+**示例代码如下：**
 
 ```python
 from langgraph.graph import StateGraph, START, END
@@ -1057,7 +1104,7 @@ print('=' * 30, '-> result <-', '=' * 30)
 print(result)
 ```
 
-输出如下
+**输出如下**
 
 ```
 k: logs, v: ['START']
@@ -1066,7 +1113,7 @@ k: id, v: start
 {'logs': ['START', 'node_a 更新状态'], 'id': 'start'}
 ```
 
-在上述示例中：
+**在上述示例中：**
 
 - `logs` 字段通过 `Annotated[list[str], add]` 绑定了 Reducer 函数 `operator.add`，因此 LangGraph 会将原有的 `logs` 值和 `node_a` 返回的新 `logs` 值进行列表拼接：
 
@@ -1074,7 +1121,7 @@ k: id, v: start
 ["START"] + ["node_a 更新状态"]
 ```
 
-最终得到：
+**最终得到：**
 
 ```
 ["START", "node_a 更新状态"]
@@ -1086,9 +1133,11 @@ k: id, v: start
 "id": "start"
 ```
 
-因此，LangGraph 节点更新 State 的核心规则可以概括为：
+因此，`LangGraph 节点更新 State 的核心规则可以概括为`：
 
-> 节点只返回需要更新的字段；未返回的字段保持不变；返回的字段根据是否配置 Reducer 决定是合并还是覆盖。
+> **节点只返回需要更新的字段；未返回的字段保持不变；返回的字段根据是否配置 Reducer 决定是合并还是覆盖。**
+
+
 
 ### 3.3.3. Overwrite绕过Reducer
 
@@ -1109,6 +1158,7 @@ from typing import TypedDict, Annotated
 from operator import add
 
 class OverAllState(TypedDict):
+  # 归约的方式是add追加合并
     logs: Annotated[list[str], add]
     id: str
 
@@ -1152,7 +1202,7 @@ print(result)
 {'logs': ['node_b', 'node_c'], 'id': 'node_c'}
 ```
 
-上述代码中：
+⭐️**上述代码中：**
 
 - `logs` 字段绑定了 `operator.add()` 函数
   - 如果没有 `Overwrite`，则最终输出的 `logs` 的值应为 `['START', 'node_a', 'node_b', 'node_c']`
@@ -1165,14 +1215,14 @@ print(result)
 
 `LangGraph` 支持在一个图中使用多个状态 Schema，用于区分图的外部输入、外部输出、内部共享状态以及节点间的临时状态。
 
-常见状态类型可以分为以下几类：
+**常见状态类型可以分为以下几类：**
 
-- 全局状态 / 内部状态：图内部主要使用的状态，创建 `StateGraph` 时传递给 `state_schema` 参数。它通常包含图运行过程中需要读写的大部分字段。
-- 输入状态：图对外接收输入时使用的状态，创建 `StateGraph` 时传递给 `input_schema` 参数。它用于约束调用图时允许传入哪些字段。
-- 输出状态：图最终对外返回结果时使用的状态，创建 `StateGraph` 时传递给 `output_schema` 参数。它用于约束图运行结束后只返回哪些字段。
-- 私有状态：图内部节点之间传递的临时状态，通常不作为图的输入，也不作为图的最终输出。它可以通过节点函数的入参类型注解声明，并在节点返回值中写入。
+- `全局状态 / 内部状态`：图内部主要使用的状态，创建 `StateGraph` 时传递给 `state_schema` 参数。它通常包含图运行过程中需要读写的大部分字段。
+- `输入状态`：图对外接收输入时使用的状态，创建 `StateGraph` 时传递给 `input_schema` 参数。它用于约束调用图时允许传入哪些字段。
+- `输出状态`：图最终对外返回结果时使用的 状态，创建 `StateGraph` 时传递给 `output_schema` 参数。它用于约束图运行结束后只返回哪些字段。
+- `私有状态`：图内部节点之间传递的临时状态，通常不作为图的输入，也不作为图的最终输出。它可以通过节点函数的入参类型注解声明，并在节点返回值中写入。
 
-需要注意，输入状态和输出状态主要面向图的边界，即“图如何接收外部输入”和“图如何返回外部结果”；而全局状态和私有状态主要面向图内部节点之间的数据传递。
+**需要注意**，输入状态和输出状态主要面向图的边界，即“图如何接收外部输入”和“图如何返回外部结果”；而全局状态和私有状态主要面向图内部节点之间的数据传递。
 
 ### 3.4.2. 状态之间的关系
 
@@ -1180,10 +1230,10 @@ print(result)
 
 本节主要说明 `LangGraph` 状态设计中的规范。以下规则属于工程上的最佳实践，违反这些规范未必一定导致程序报错，但容易降低代码的可读性和可维护性。
 
-1. 输入状态和输出状态通常应是全局状态的子集
+1. `输入状态和输出状态通常应是全局状态的子集`
    输入状态描述图对外需要接收的数据，输出状态描述图最终需要返回的数据。通常情况下，它们都应该是全局状态的一部分。
-   如：
-   
+   **如：**
+
    ```python
    class InputState(TypedDict):
        username: str
@@ -1196,18 +1246,18 @@ print(result)
        nickname: str
        graph_output: str
    ```
-   
+
    其中，`InputState` 和 `OutputState` 的所有字段均存在于 `OverAllState` 中。
 
-2. 私有状态和全局状态应尽量避免字段重名
+2. `私有状态和全局状态应尽量避免字段重名`
    私有状态的定位是图内部某些节点之间传递的临时字段。如果私有状态字段和全局状态字段重名，虽然某些情况下程序仍然可以运行，但容易让人误以为该字段是全局共享字段，从而造成理解混乱。
    因此，推荐让私有状态字段和全局状态字段保持清晰边界。
 
-3. 节点函数应明确声明入参状态类型和返回状态类型
+3. `节点函数应明确声明入参状态类型和返回状态类型`
    节点函数的第一个参数通常是当前节点可读取的状态。通过类型注解声明该参数，可以明确表达该节点需要读取哪些字段。
    同时，给节点函数声明返回状态类型，也可以帮助阅读者理解该节点会更新哪些字段。
    例如：
-   
+
    ```python
    def node_1(state: InputState) -> OverAllState:
        return {
@@ -1215,29 +1265,31 @@ print(result)
        }
    ```
 
-4. 节点函数中不应该访问入参状态类型中不存在的字段
+4. `节点函数中不应该访问入参状态类型中不存在的字段`
    节点实际接收到的状态会按照其入参类型进行裁剪。因此，如果节点入参声明为 `InputState`，就不应该在节点内部访问 `InputState` 中不存在的字段。
    例如：
-   
+
    ```python
    def node_1(state: InputState) -> OverAllState:
        return {
            "nickname": state["username"]
        }
    ```
-   
+
    如果在该函数中访问：
-   
+
    ```
    state["nickname"]
    ```
-   
+
    而 `nickname` 不属于 `InputState`，运行时就可能抛出 `KeyError`。
 
-5. 节点函数返回的字典应尽量和返回类型注解保持一致
-   从 Python 类型注解的角度看，函数返回类型只是静态提示，运行时不会自动强制校验。
+5. `节点函数返回的字典应尽量和返回类型注解保持一致`
+   `从 Python 类型注解的角度看，函数返回类型只是静态提示，运行时不会自动强制校验`。
    从 LangGraph 的运行机制看，节点返回的是对状态的部分更新，不是完整状态。只要返回字段已经被图记录为可用状态字段，LangGraph 就可以将其作为状态更新处理。
    不过，从工程规范上讲，节点返回字典中的字段最好和函数返回类型注解保持一致，这样更利于阅读、调试和维护。
+
+
 
 #### 3.4.2.2. 源码层面的约束
 
@@ -1247,7 +1299,7 @@ print(result)
 
 `LangGraph` 的状态并不是简单保存在一个普通字典中，而是会被拆分成多个可读写的状态字段。每个状态字段在底层通常对应一个 `Channel`。
 
-这些状态字段会在不同阶段被记录到状态图中。
+**这些状态字段会在不同阶段被记录到状态图中**。
 
 1. `StateGraph` 记录状态字段的核心方法是 `_add_schema()`
    `_add_schema()` 会解析传入的状态 Schema，并将其中声明的字段记录到图中，使这些字段成为图运行时可以读写的状态字段。
@@ -1368,36 +1420,114 @@ print(result)
 
 下面通过一个简单案例说明四类状态的定义和使用。
 
+**案例一**
+
+~~~python
+from langgraph.graph import StateGraph, START, END
+from typing import TypedDict
+#1. 输入状态
+class InputState(TypedDict):
+    username: str
+#2. 输出状态
+class OutputState(TypedDict):
+    graph_output: str
+#3. 全局状态
+class OverAllState(TypedDict):
+    username: str
+    graph_output: str
+    nickname: str
+#4. 私有状态
+class PrivateState(TypedDict):
+    greeting: str
+
+#5. 第一个节点 对接start => InputState 修改的状态内容在全局状态中 -> OverAllState
+def node_1(state: InputState) -> OverAllState:
+    # 向全局状态添加username
+    return {
+        "nickname": "Dear " + state["username"]
+    }
+#6. 第二个节点  对接node1 => OverAllState 使用的参数在全局状态中  修改的参数在私有状态中-> PrivateState
+def node_2(state: OverAllState) -> PrivateState:
+    # 向私有状态添加greeting
+    return {
+        "greeting": "Hello, " + state["nickname"]
+    }
+#7. 第三个节点  对接node2 => PrivateState 使用的参数在私有状态中  修改的参数在输出状态中-> OutputState
+def node_3(state:PrivateState) -> OutputState:
+    # 向输出状态添加graph_output
+    return {
+        "graph_output": state["greeting"] + " 很高兴认识你! "
+    }
+
+#8. 构建状态图
+# 定义图的时候 加载全局状态 输入状态 输出状态
+builder = StateGraph(state_schema=OverAllState,input_schema=InputState,output_schema=OutputState)
+
+#9. 添加节点
+# 添加节点的时候 加载私有状态
+builder.add_node("node_1",node_1)
+builder.add_node("node_2",node_2)
+builder.add_node("node_3",node_3)
+
+#10. 添加边
+builder.add_edge(START, "node_1")
+builder.add_edge("node_1", "node_2")
+builder.add_edge("node_2", "node_3")
+builder.add_edge("node_3", END)
+
+graph = builder.compile()
+# 填写的输入状态
+result = graph.invoke({"username": "atguigu"})
+# 打印结果 => 输出状态
+print(result)
+~~~
+
+~~~
+{'graph_output': 'Hello, Dear atguigu 很高兴认识你! '}
+~~~
+
+
+
+**案例二**
+
 ```python
 from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 
+#1. 输入状态
 class InputState(TypedDict):
     username: str
 
+#2. 输出状态
 class OutputState(TypedDict):
     graph_output: str
 
+#3. 全局状态
 class OverAllState(TypedDict):
     nickname: str
     username: str
     graph_output: str
 
+#4. 私有状态
 class PrivateState(TypedDict):
     greeting: str
 
+#5. 第一个节点 对接start => InputState 修改的状态内容在全局状态中 -> OverAllState
 def node_1(state: InputState) -> OverAllState:
     # 向全局状态写入数据
     return {
         "nickname": "Dear " + state["username"]
     }
 
+#6. 第二个节点  对接node1 => OverAllState 使用的参数在全局状态中  修改的参数在私有状态中-> PrivateState
+def node_2(state: OverAllState) -> PrivateState:
 def node_2(state: OverAllState) -> PrivateState:
     # 从全局状态读取数据，写入私有状态
     return {
         "greeting": state["nickname"] + ", 早上好~"
     }
 
+#7. 第三个节点  对接node2 => PrivateState 使用的参数在私有状态中  修改的参数在输出状态中-> OutputState
 def node_3(state: PrivateState) -> OutputState:
     # 从私有状态读取数据，写入输出状态
     return {
@@ -1490,6 +1620,8 @@ def node_3(state: PrivateState) -> OutputState:
 
 `node_3` 通过 `PrivateState` 读取 `greeting` 字段，并生成最终输出。
 
+
+
 #### 4. 输出状态
 
 ```python
@@ -1497,7 +1629,7 @@ class OutputState(TypedDict):
     graph_output: str
 ```
 
-`OutputState` 用于约束图最终返回给外部调用方的数据。
+`OutputState` 用于`约束图最终返回给外部调用方的数据`。
 
 虽然图内部运行过程中还存在 `username`、`nickname`、`greeting` 等字段，但最终结果只返回：
 
@@ -1521,7 +1653,7 @@ output_schema=OutputState
 
 开发者可以直接继承该状态类型，并在其基础上扩展自定义状态字段。
 
-源码如下：
+**源码如下：**
 
 ```python
 class MessagesState(TypedDict):
@@ -1529,6 +1661,8 @@ class MessagesState(TypedDict):
 ```
 
 由此可知，`MessagesState` 只有一个字段：`messages`。
+
+
 
 该字段的类型是列表，元素类型为 `AnyMessage`；同时，它通过 `Annotated` 绑定了内置 `Reducer` 函数 `add_messages`。
 
@@ -1563,7 +1697,7 @@ class OverAllState(MessagesState):
 def node_a(state: OverAllState) -> OverAllState:
     return {
         "messages": [HumanMessage("你好，我是 " + state["username"])]
-    }
+    } 
 
 def llm_node(state: OverAllState) -> OverAllState:
     res = model.invoke(state["messages"])
@@ -1648,7 +1782,7 @@ username
 output
 ```
 
-只关注 `messages` 状态，执行流程如下：
+只关注 `messages` 状态，**执行流程如下：**
 
 1. `node_a` 返回一条 `HumanMessage`；
 2. `LangGraph` 使用 `add_messages` 将该消息合并到 `messages` 状态字段中；
@@ -1657,15 +1791,17 @@ output
 5. `LangGraph` 再次通过 `add_messages` 将 `AIMessage` 合并到 `messages` 中；
 6. 最终状态中包含完整消息列表。
 
-`MessagesState` 帮开发者预先定义好了 `messages` 字段及其合并规则。在构建聊天机器人、Agent、工具调用流程、多轮对话流程时，它可以提升开发效率。
 
-### 3.5.2. AgentState
+
+⭐️`MessagesState` 帮开发者预先定义好了 `messages` 字段及其合并规则。在构建聊天机器人、Agent、工具调用流程、多轮对话流程时，它可以提升开发效率。
+
+### 3.5.2. AgentState（不推荐）
 
 `AgentState` 是 `LangChain Agent` 内部使用的状态类型。由于 `LangChain Agent` 底层也是基于 `LangGraph` 运行图构建的，所以从技术上讲，开发者也可以将 `AgentState` 或其子类作为自定义 `LangGraph` 的状态类型。
 
 `AgentState` 的全类名，也可以称为类的完全限定名（英文全称： `fully qualified class name`）是：`langchain.agents.middleware.types.AgentState`
 
-源码如下
+**源码如下**
 
 ```python
 class AgentState(TypedDict, Generic[ResponseT]):
@@ -1676,9 +1812,11 @@ class AgentState(TypedDict, Generic[ResponseT]):
     structured_response: NotRequired[Annotated[ResponseT, OmitFromInput]]
 ```
 
-该状态中主要包含三个字段。
 
-1. messages
+
+**该状态中主要包含三个字段：**
+
+1. **messages**
 
 ```
 messages: Required[Annotated[list[AnyMessage], add_messages]]
@@ -1688,7 +1826,7 @@ messages: Required[Annotated[list[AnyMessage], add_messages]]
 
 该字段和 `MessagesState` 中的 `messages` 字段类似，也使用 `add_messages` 作为 `Reducer`。
 
-2. jump_to
+2. **jump_to**
 
 ```
 jump_to: NotRequired[Annotated[JumpTo | None, EphemeralValue, PrivateStateAttr]]
@@ -1708,7 +1846,7 @@ Command(goto="node_name")
 
 见下文。
 
-3. structured_response
+3. **structured_response**
 
 ```python
 structured_response: NotRequired[Annotated[ResponseT, OmitFromInput]]
@@ -1722,4 +1860,4 @@ structured_response: NotRequired[Annotated[ResponseT, OmitFromInput]]
 
 总体来看，`AgentState` 是专门为 LangChain Agent 运行时设计的状态类型。
 
-因此，在普通自定义 `LangGraph` 项目中，一般不建议直接基于 `AgentState` 扩展图状态。
+因此，在普通自定义 `LangGraph` 项目中，一般**不建议**直接基于 `AgentState` 扩展图状态。
