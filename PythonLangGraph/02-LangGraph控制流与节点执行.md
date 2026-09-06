@@ -8,6 +8,8 @@
 
 因此，在 LangGraph 中，基础的控制流结构都可以通过 **`add_edge`** 进行构建。
 
+
+
 **示例如下：**
 
 ```python
@@ -63,17 +65,21 @@ display(graph)
 START -> node_a -> node_b -> END
 ```
 
-其中：
+**其中：**
 
 - **`START -> node_a`** 表示图从 `node_a` 开始执行；
 - **`node_a -> node_b`** 表示 `node_a` 执行完成后，继续执行 `node_b`；
 - **`node_b -> END`** 表示 `node_b` 执行完成后，图进入结束状态。
 
+
+
 ### 4.1.2. add_sequence
 
 如果需要构建一组按顺序执行的节点，也可以使用 **`add_sequence`**。
 
-**`add_sequence`** 支持传入一个可执行对象列表。LangGraph 会按照列表顺序依次添加节点，并在相邻节点之间自动添加边。默认情况下，函数名会被用作节点名称。
+**`add_sequence`** 支持传入一个可执行对象列表。LangGraph 会按照列表顺序依次添加节点，并在`相邻节点之间自动添加边`。**默认情况下，函数名会被用作节点名称**。
+
+
 
 **示例如下：**
 
@@ -124,13 +130,13 @@ display(graph)
 
 上述代码中：
 
-```
+```python
 builder.add_sequence([node_a, node_b])
 ```
 
-大致等价于：
+⭐️**大致等价于：**
 
-```
+```**
 builder.add_node("node_a", node_a)
 builder.add_node("node_b", node_b)
 builder.add_edge("node_a", "node_b")
@@ -144,6 +150,8 @@ START -> node_a -> node_b -> END
 
 相比手动调用多次 **`add_node`** 和 **`add_edge`**，**`add_sequence`** 更适合用于构建简单的线性执行流程。
 
+
+
 ### 4.1.3. 省略指向 **`END`** 的边
 
 在 LangGraph 中，图的终止并不完全依赖某个真实执行的特殊节点。
@@ -154,7 +162,9 @@ START -> node_a -> node_b -> END
 
 因此，在一些简单的线性流程中，即使省略指向 **`END`** 的边，最后一个节点执行完成后，如果没有后续节点被触发，图也可以正常结束。
 
-示例如下：
+
+
+**示例如下：**
 
 ```python
 from langgraph.graph import StateGraph, START
@@ -202,7 +212,7 @@ display(graph)
 
 ![image-20260527182015373](images/image-20260527182015373.png)
 
-在这个例子中，虽然没有显式添加：
+⭐️**在这个例子中，虽然没有显式添加：**
 
 ```python
 builder.add_edge("node_b", END)
@@ -229,12 +239,12 @@ builder.add_edge(START, "node_a")
 ### 4.2.1. 静态分支（Static Branch）
 
 - **定义**：节点的下游候选节点 **在图编译阶段就完全确定**，只是运行时根据条件选择哪条边执行。
-- 特点：
+- **特点：**
   - 下游节点集合固定，数量、目标在编译时确定
   - 运行时可选择**一个或多个**下游目标
   - 可以用来做条件分支，但不生成新的节点
 
-⚡ 核心判断：
+⚡ **核心判断**：
 
 > **编译期知道下游集合 → 静态分支**
 
@@ -242,7 +252,7 @@ builder.add_edge(START, "node_a")
 
 #### 4.2.1.1. 并行节点
 
-并行节点是最简单的静态分支形式。
+`并行节点`是**最简单的静态分支形式**。
 
 当多个节点都从同一个上游节点触发时，它们会在同一个**超步**被激活。典型写法如下：
 
@@ -316,7 +326,117 @@ display(graph)
 
 上述案例中，**`node_a`** 和 **`node_b`** 都由 **`START`** 触发。图运行时，二者会在**同一个超步中**被调度，它们各自读取当前状态并独立执行。
 
-需要注意的是：
+> ⭐️**什么叫“超步"？**
+>
+> “超步（superstep）”可以理解为 LangGraph 执行图时的一个**批次/轮次**。
+>
+> 普通的“步骤”容易让人想到一次只执行一个节点；而一个“超步”中，可以同时调度多个相互独立的节点。
+>
+> 你的图是：
+>
+> ```
+>              ┌── node_a ──┐
+> START ───────┤            ├── END
+>              └── node_b ──┘
+> ```
+>
+> 运行过程可以分成下面几轮。
+>
+>  
+>
+> 💙第 1 个超步：执行 `node_a` 和 `node_b`
+>
+> 两个节点都被 `START` 激活，因此进入同一个超步：
+>
+> ```
+> 状态快照：{"topic": "猫咪"}
+> 
+> node_a 读取该状态 → 生成 poem
+> node_b 读取该状态 → 生成 joke
+> ```
+>
+> 它们分别返回局部更新：
+>
+> ```
+> # node_a
+> {"poem": "关于猫咪的诗……"}
+> 
+> # node_b
+> {"joke": "关于猫咪的笑话……"}
+> ```
+>
+> 这两个返回值会先被暂存。在这个超步结束前：
+>
+> - `node_a` 看不到 `node_b` 刚生成的 `joke`
+> - `node_b` 也看不到 `node_a` 刚生成的 `poem`
+>
+> 💙超步结束：统一合并状态
+>
+> 当这一轮的所有节点都执行完成后，LangGraph 会来到一个同步点，将结果合并：
+>
+> ```
+> {
+>     "topic": "猫咪",
+>     "poem": "关于猫咪的诗……",
+>     "joke": "关于猫咪的笑话……"
+> }
+> ```
+>
+> 然后才会进入下一个超步。
+>
+> 可以把超步概括成：
+>
+> ```
+> 读取状态快照
+>     ↓
+> 执行本轮所有活跃节点
+>     ↓
+> 收集节点返回值
+>     ↓
+> 通过 reducer 合并状态
+>     ↓
+> 进入下一轮
+> ```
+>
+> 例如再增加一个节点：
+>
+> ```
+> builder.add_edge("node_a", "node_c")
+> builder.add_edge("node_b", "node_c")
+> ```
+>
+> 图变成：
+>
+> ```
+>              ┌── node_a ──┐
+> START ───────┤            ├── node_c ── END
+>              └── node_b ──┘
+> ```
+>
+> 执行轮次就是：
+>
+> ```
+> 超步 1：node_a、node_b
+> 超步结束：合并 poem 和 joke
+> 
+> 超步 2：node_c
+> ```
+>
+> 所以 `node_c` 可以读取合并后的完整状态：
+>
+> ```
+> def node_c(state: OverAllState):
+>     print(state["poem"])
+>     print(state["joke"])
+> ```
+>
+> 一句话总结：
+>
+> > 超步是图执行中的一轮；同一轮可以执行多个节点，这些节点读取同一份轮初状态，等全部完成后再统一合并结果。
+>
+> 这里的“同时执行”主要是一种**逻辑上的并发调度**，不代表它们一定在完全相同的物理时刻运行，也不应依赖谁先完成。
+
+**需要注意的是：**
 
 - 这里的“并行”主要指**调度语义上的并行**；两个节点之间没有先后依赖；
 - 它们的输出会在当前**超步**执行完成后统一合并到状态中；
@@ -338,7 +458,9 @@ display(graph)
 
 **`StateGraph`** 提供了 **`add_conditional_edges`** 方法，用于从某个上游节点出发，根据运行时状态选择下游节点。
 
-方法签名如下
+
+
+**方法签名如下**
 
 ```python
 def add_conditional_edges(
@@ -351,7 +473,7 @@ def add_conditional_edges(
 ) -> Self:
 ```
 
-不考虑 **`self`**，核心参数有三个：
+不考虑 **`self`**，**核心参数有三个：**
 
 - **`source`**：条件分支的起始节点；
 - **`path`**：路由规则，是一个可执行对象，通常是函数
@@ -397,9 +519,13 @@ def router(state: OverAllState) -> Literal["node_a", "node_b"]:
     return "node_b"
 ```
 
-此时，**`router`** 返回的 **`"node_a"`** 和 **`"node_b"`** 必须能够直接对应图中已经注册的节点名。
+此时，**`router`** 返回的 **`"node_a"`** 和 **`"node_b"`** 必须能够直**接对应图中已经`注册的节点名`**。
 
 **完整案例如下**
+
+> ⭐️**builder.add_conditional_edges(START, my_route)是什么意思？**
+>
+> * 图从 `START` 开始时，先调用 `my_route` 函数，根据它的返回值决定接下来执行哪个节点。
 
 ```python
 from typing import TypedDict, Literal
@@ -492,7 +618,7 @@ display(graph)
 
 ##### 4.2.1.2.2. 使用 `path_map`
 
-如果不希望路由函数直接返回节点名，而是返回业务语义更强的标识，可以使用 **`path_map`** 进行映射。如下：
+如果`不希望路由函数直接返回节点名`，而是返回业务语义更强的标识，可以使用 **`path_map`** 进行映射。如下：
 
 ```python
 def router(state: OverAllState) -> Literal["a", "b"]: 
@@ -512,7 +638,7 @@ builder.add_conditional_edges(
 
 此时返回的 **`"a"`** 和 **`"b"`** 可以不是图中已注册的节点名称，但要通过 **`path_map`** 映射到正确的节点
 
-这种写法的好处是：
+**这种写法的好处是：**
 
 - 路由函数可以返回业务含义更清晰的标签；
 - 图节点名称可以保持工程化命名；
@@ -617,6 +743,8 @@ display(graph)
 
 观察图结构可以发现，**`__start__`**指向**`node_a`**和**`node_b`**的虚线上出现了文本**`a`**和**`b`**，它们是路由函数返回的名称，通过**`path_map`**映射到具体的下游节点。
 
+
+
 ##### 4.2.1.2.3. 同时路由至多个节点
 
 **`add_conditional_edges`** 也支持一次路由到多个下游节点。
@@ -704,7 +832,7 @@ from IPython.display import display
 display(graph)
 ```
 
-在这个例子中：
+**在这个例子中：**
 
 - 当 **`content_type`** 包含 **`"诗"`** 时，同时触发 **`node_a`** 和 **`node_c`**；
 - 否则同时触发 **`node_b`** 和 **`node_c`**。
@@ -736,6 +864,8 @@ display(graph)
 观察图结构可以发现，**`node_a`**、**`node_b`**和**`node_c`**独立于图结构之外。
 
 和上一节案例相比，**`router`**函数返回的是序列而非单个节点，渲染器无法推断节点间的映射关系。
+
+
 
 ###### 2. 添加映射
 
@@ -872,7 +1002,7 @@ display(graph)
 
 #### 4.2.1.3. defer node execution
 
-某些情况下，我们希望在所有常规任务节点执行完毕后，再进行日志、审计等收尾工作
+某些情况下，我们希望在所有常规任务节点执行完毕后，`再进行日志、审计等收尾工`
 
 此时可以在添加节点时设置**`defer=True`**，如下：
 
@@ -882,9 +1012,9 @@ builder.add_node("audit_node", audit_node, defer=True)
 
 **`defer=True`** 的含义是：
 
-当前节点不会在其被触发后立即执行，而是被延迟到常规图运行流程结束后，再在**额外的超步中**触发执行。
+`当前节点不会在其被触发后立即执行，而是被延迟到常规图运行流程结束后，再在**额外的超步中**触发执行`。
 
-这类节点适合用于：
+**这类节点适合用于：**
 
 - 日志记录；
 - 审计检查；
@@ -934,7 +1064,7 @@ builder.add_node("audit_node", audit_node, defer=True)
 
 因此，**`defer=True`** 的运行机制可以概括为：
 
-> 触发边的 **`Channel`** 为特殊类型，首次写入不触发；常规流程结束后，特殊通道 **`finish()`**；通道变为可用；从而触发延迟节点，后者在额外超步中执行。
+> ⭐️触发边的 **`Channel`** 为特殊类型，首次写入不触发；常规流程结束后，特殊通道 **`finish()`**；通道变为可用；从而触发延迟节点，后者在额外超步中执行。
 
 ##### 4.2.1.3.2. 案例
 
@@ -1002,12 +1132,16 @@ from IPython.display import display
 display(graph)
 ```
 
-在这个图中：
+**在这个图中：**
 
 - **`node_a`** 和 **`node_b`** 是普通节点，在常规流程中被触发；
 - **`audit_node`** 虽然也由 **`START`** 触发，但由于设置了 **`defer=True`**，不会立即执行；
 - **`node_a`** 和 **`node_b`** 都执行完成后，常规运行流程结束，**`audit_node`** 才会在额外的超步中执行；
 - 因此，**`audit_node`** 中可以读取到 **`node_a`** 和 **`node_b`** 已经写入并提交后的状态。
+
+
+
+> ⭐️⭐️`defer=True` 表示：**把该节点推迟到本次图运行即将结束、其他待执行任务全部完成后再执行**。
 
 **输出如下**
 
@@ -1058,6 +1192,8 @@ display(graph)
 5. 延迟节点在额外超步中被触发执行。
 
 > 因此， **`defer=True`** 将节点的触发信号延迟释放，使该节点在常规流程结束后执行。
+
+> ⭐️⭐️`defer=True` 表示：**把该节点推迟到本次图运行即将结束、其他待执行任务全部完成后再执行**。
 
 ### 4.2.2. 动态分支（Dynamic Branch）
 
@@ -1232,7 +1368,121 @@ path_map=["worker_node"]
 
 因为 **`Send`** 的目标和数量可以运行时动态决定，图渲染器无法仅靠运行时返回值提前知道图结构。通过 **`path_map`** 声明候选下游节点后，渲染图才能正确展示 **`START`** 到 **`worker_node`** 的条件边关系。
 
-补充说明：如果多个并行任务写入同一个状态字段，通常需要为该字段定义 reducer，用于合并多个任务的输出。本例中三个任务分别写入 **`poem`**、**`ci_poem`**、**`joke`** 三个不同字段，因此不会发生同一字段的并发合并问题。
+补充说明：如果多个并行任务写入同一个状态字段，⭐️⭐️`通常需要为该字段定义 reducer，用于合并多个任务的输出`。本例中三个任务分别写入 **`poem`**、**`ci_poem`**、**`joke`** 三个不同字段，`因此不会发生同一字段的并发合并问题`。
+
+
+
+> **解释下上述代码**
+>
+> 之所以叫“并行节点”，不是因为定义了三个不同的节点，而是因为 `router()` 一次返回了三个 `Send`，于是 LangGraph 会在同一个执行阶段中，并行调用同一个 `worker_node` 三次。
+>
+> 你的列表推导式实际等价于：
+>
+> ```
+> return [
+>     Send(
+>         "worker_node",
+>         {
+>             "content_type": "poem",
+>             "prompt": "请生成关于莲花的七言绝句",
+>         },
+>     ),
+>     Send(
+>         "worker_node",
+>         {
+>             "content_type": "joke",
+>             "prompt": "请生成关于莲花的笑话",
+>         },
+>     ),
+>     Send(
+>         "worker_node",
+>         {
+>             "content_type": "ci_poem",
+>             "prompt": "请生成关于莲花的中文词",
+>         },
+>     ),
+> ]
+> ```
+>
+> 运行时结构可以理解成：
+>
+> ```
+>                      ┌─ worker_node(poem) ────┐
+> START → router ──────┼─ worker_node(joke) ────┼→ 合并状态 → END
+>                      └─ worker_node(ci_poem) ─┘
+> ```
+>
+> 虽然图中只注册了一个：
+>
+> ```
+> builder.add_node("worker_node", worker_node)
+> ```
+>
+> 但运行时产生了三个独立的节点任务：
+>
+> ```
+> worker_node 实例 1：生成 poem
+> worker_node 实例 2：生成 joke
+> worker_node 实例 3：生成 ci_poem
+> ```
+>
+> LangGraph 官方把这种模式称为动态并行或 Map-Reduce：`Send` 可以使用不同状态，多次并行调用同一个节点。[Send API](https://reference.langchain.com/python/langgraph/types/Send)
+>
+> 三个任务各自收到不同的私有状态：
+>
+> ```
+> {
+>     "content_type": ...,
+>     "prompt": ...
+> }
+> ```
+>
+> 然后分别返回：
+>
+> ```
+> {"poem": "..."}
+> {"joke": "..."}
+> {"ci_poem": "..."}
+> ```
+>
+> 因为它们写入的是不同字段，所以 LangGraph 可以直接把结果合并成：
+>
+> ```
+> {
+>     "poem": "...",
+>     "joke": "...",
+>     "ci_poem": "..."
+> }
+> ```
+>
+> 需要注意：“并行”表示它们被安排在同一个 superstep 中并发执行；实际并发度仍可能受到 `max_concurrency`、模型接口限流和运行环境的约束。[LangGraph Graph API](https://docs.langchain.com/oss/python/langgraph/graph-api)
+>
+> 更严谨地说，这里不是“三个并行节点”，而是：
+>
+> > 同一个节点的三个并行调用任务。
+>
+> 另外，假如三个任务都写入同一个状态字段，例如都返回：
+>
+> ```
+> {"contents": content}
+> ```
+>
+> 就需要给该字段配置 reducer，否则并行更新同一个字段可能冲突：
+>
+> ```
+> import operator
+> from typing import Annotated
+> 
+> class OverAllState(TypedDict):
+>     topic: str
+>     contents: Annotated[list[str], operator.add]
+> ```
+>
+> 每个任务则返回列表：
+>
+> ```
+> return {"contents": [content]}
+> ```
 
 ---
 
@@ -1247,13 +1497,17 @@ path_map=["worker_node"]
 - **`graph`**：存在子图时，用于指定跳转发生在哪一层图中，例如从子图跳转到父图；
 - **`resume`**：用于恢复被中断的图执行，常见于 **`human-in-the-loop`** 场景。
 
+
+
 ##### 4.2.2.2.2. 用`Command`实现条件分支
 
 可以通过 **`Command(goto=...)`** 在节点内部实现条件分支。
 
 与 **`add_conditional_edges()`** 相比，**`Command`** 更适合“状态更新”和“控制流跳转”需要放在同一个节点返回值中的场景。
 
-例如，一个节点既要更新状态，又要根据当前状态决定下一步跳转目标，就可以返回：
+
+
+**例如，一个节点既要更新状态，又要根据当前状态决定下一步跳转目标，就可以返回：**
 
 ```python
 return Command(
@@ -1386,7 +1640,7 @@ display(graph)
 
 ![image-20260529164837663](images/image-20260529164837663.png)
 
-这里使用：
+**这里使用：**
 
 ```python
 Command[Literal["poem_node", "joke_node", END]]
@@ -1396,15 +1650,15 @@ Command[Literal["poem_node", "joke_node", END]]
 
 注解不能限制 **`goto`** 在运行时只能写这些值，而是为了让 LangGraph 和类型检查工具知道：这个节点可能跳转到哪些目标。对于图结构渲染来说，这个注解非常重要。如果不声明，渲染出来的图可能无法正确表达 **`router`** 节点的潜在跳转关系。
 
-需要注意的是，如果某个节点使用 **`Command(goto=...)`** 控制后续跳转，一般不要再给这个节点额外添加普通下游边。否则，普通边和 **`Command`** 指定的跳转都可能生效，导致多个下游节点被同时触发。
+需要注意的是，如果某个节点使用 **`Command(goto=...)`** 控制后续跳转，⭐️`一般不要再给这个节点额外添加普通下游边`。否则，普通边和 **`Command`** 指定的跳转都可能生效，`导致多个下游节点被同时触发`。
 
-因此，本例中只添加：
+**因此，本例中只添加：**
 
 ```python
 builder.add_edge(START, "router")
 ```
 
-而不添加类似下面这样的边：
+`而不添加类似下面这样的边`：
 
 ```python
 builder.add_edge("router", "poem_node")
@@ -1424,7 +1678,7 @@ builder.add_edge("router", "joke_node")
 | 动态扇出 | **`Send`** + **`add_conditional_edges()`** | 运行时创建多个任务，常用于 **`Map-Reduce`** |
 | 动态跳转 | **`Command(goto=...)`**                    | 节点内部根据状态决定跳转目标                |
 
-二者的区别如下：
+**二者的区别如下：**
 
 * **`Send`** 更强调“一个节点动态分发多个任务实例”；
 * **`Command(goto=...)`** 更强调“当前节点执行完后动态跳转到哪个节点”。
@@ -1446,12 +1700,14 @@ builder.add_edge("router", "joke_node")
 
 在计算机中，**“与”**表示两个或多个条件同时满足，而**“或”**表示两个或多个条件任意一个满足。
 
-当多个上游分支同时汇入同一个下游节点时，根据触发条件的不同，可以分成两种情况：
+当多个上游分支同时汇入同一个下游节点时，根据触发条件的不同，**可以分成两种情况**：
 
 - **“与”**触发：上游所有分支全部到达才可触发下游节点
 - **“或”**触发：任意一个分支到达，都可以触发下游节点
 
 需要注意，这里的 **“与 / 或”** 只是帮助理解的类比，并不是 **`LangGraph`** 的官方术语。
+
+
 
 #### 4.3.1.1 **“与”**触发：等待所有上游分支到达
 
@@ -1538,7 +1794,7 @@ display(graph)
 
 ![image-20260605145540986](images/image-20260605145540986.png)
 
-由运行结果可知：
+**由运行结果可知：**
 
 * **`node_a`** 在第 1 个超步执行；
 * **`node_b`** 和 **`node_c`** 在第 2 个超步并行执行；
@@ -1552,13 +1808,17 @@ display(graph)
 builder.add_edge(["node_c", "node_d"], "node_e")
 ```
 
-这表示 **`node_e`** 需要等待 **`node_c`** 和 **`node_d`** 两个上游节点全部完成后，才会被触发一次。
+这表示 **`node_e`** 需要等待 **`node_c`** 和 **`node_d`** 两个上游节点全部完成后，`才会被触发一次`。
 
 因此，这种写法对应的是 **“与”触发**：等待所有上游分支到达方可触发。
 
+
+
 #### 4.3.1.2 **“或”**触发：任意上游分支到达即可触发
 
-另一种情况是：多个上游分支分别连接到同一个下游节点，但它们之间没有显式的同步等待关系。
+`另一种情况是：多个上游分支分别连接到同一个下游节点，但它们之间没有显式的同步等待关系`。
+
+
 
 **示例如下**
 
@@ -1634,7 +1894,7 @@ display(graph)
 
 ![image-20260605151209760](images/image-20260605151209760.png)
 
-从运行结果可以看出，**`node_e`** 被触发了两次：
+从运行结果可以看出，**`node_e`** 被触发了**两次**：
 
 1. **`node_c`** 在第 2 个超步执行完成后，触发 **`node_e`** 在第 3 个超步执行；
 2. **`node_d`** 在第 3 个超步执行完成后，再次触发 **`node_e`** 在第 4 个超步执行。
@@ -1663,10 +1923,10 @@ builder.add_edge("node_c", "node_e")
 builder.add_edge("node_d", "node_e")
 ```
 
-不是等价写法。
+⭐️`不是等价写法`。
 
-前者表示 **等待多个上游全部完成后才触发一次**；
-后者表示 **多个上游分支分别独立触发下游节点**。
+⭐️前者表示 **等待多个上游全部完成后才触发一次**；
+⭐️后者表示 **多个上游分支分别独立触发下游节点**。
 
 ### 4.3.2. 动态扇入-MapReduce结构
 
@@ -1676,7 +1936,7 @@ builder.add_edge("node_d", "node_e")
 
 如果这些子任务分别产生中间结果，并在后续通过 **`Reducer`** 进行合并，也就是重新 **扇入** 到一个下游节点中，最终得到统一的结果，那么就构成了典型的 **`MapReduce`** 结构。
 
-**`MapReduce`** 是大数据计算中的经典模型，通常包含两个核心阶段：
+**`MapReduce`** 是大数据计算中的经典模型，通常包含**两个核心阶段**：
 
 * **`Map`：映射阶段**
   将输入数据映射为中间结果。
@@ -1688,7 +1948,7 @@ builder.add_edge("node_d", "node_e")
   
   在 **`LangGraph`** 中，通常由一个特定的 **`reducer`** 节点完成归约：它接收上游 **`mapper`** 节点实例产生的中间结果，处理后得到计算图的最终输出。
 
-本节实现一个经典的词频统计任务
+**本节实现一个经典的词频统计任务**
 
 ```python
 输入数据
@@ -1734,92 +1994,89 @@ Reduce：归约 / 聚合
 
 **示例如下**
 
+> 这个Demo就是:**把多句话拆开并行统计单词，然后把各自的统计结果汇总，算出每个单词一共出现了多少次。**
+
 ```python
-from typing import TypedDict, Annotated
-from langgraph.graph import StateGraph, START, END
+from typing import TypedDict, Annotated, Sequence
+
+from langgraph.constants import START,END
+from langgraph.graph import StateGraph
 from langgraph.types import Send
-from _collections_abc import Sequence
 from operator import add
-
 from loguru import logger
-
+#1. 声明状态
+#1.1 声明全局状态
 class OverAllState(TypedDict):
     input_values: list[str]
-    entries: Annotated[list[tuple[str, int]], add]
-    word_counts: dict[str, int]
-
-def router_map(state: OverAllState) -> Sequence[Send]:
-    input_values = state["input_values"]
-
-    tasks = []
-    for input_value in input_values:
-        tasks.append(
-            Send(
-                "mapper_node",
-                {"input_value": input_value}
-            )
-        )
-
-    return tasks
+    entries:Annotated[list[tuple[str,int]],add]
+    word_counts:dict[str,int]
 
 class MaperInputState(TypedDict):
-    input_value: str
+    input_value:str
 
-def mapper_node(state: MaperInputState) -> OverAllState:
+#2. 声明节点
+#2.1 分发节点
+def router_node(state:OverAllState)-> Sequence[Send]:
+    input_values = state["input_values"]
+    task = []
+    for input_value in input_values:
+        task.append(
+            Send("mapper_node",{"input_value":input_value})
+        )
+    return task
+#2.2 接收单独的一句话, 切分为单词  组装为元组放到全局状态中
+def mapper_node(state:MaperInputState) -> OverAllState:
     input_value = state["input_value"]
     words = input_value.split(" ")
+    #  (hello, 1), (world, 1)
     entries = []
-
     for word in words:
-        entries.append((word, 1))
-
+        entries.append((word,1))
     return {
-        "entries": entries
+        "entries":entries
     }
 
-def reducer_node(state: OverAllState) -> OverAllState:
+#2.3 聚合所有的mapper_node拆分的元组进行合并
+def reducer_node(state:OverAllState) -> OverAllState:
     entries = state["entries"]
-    logger.info("reducer entries: {}", entries)
-
     shuffle_dict = {}
-
-    for k, v in entries:
+    # hello   -> [1, 1, 1]
+    for k,v in entries:
         if k not in shuffle_dict:
             shuffle_dict[k] = [v]
         else:
             shuffle_dict[k].append(v)
 
-    logger.info("reducer shuffle entries: {}", shuffle_dict)
-
+    logger.info("reducer shuffle entries:{}",shuffle_dict)
     reduce_dict = {}
 
-    for k, v in shuffle_dict.items():
+    for k,v in shuffle_dict.items():
         reduce_dict[k] = sum(v)
 
+    logger.info("reducer {}",reduce_dict)
+
     return {
-        "word_counts": reduce_dict
+        "word_counts":reduce_dict
     }
 
+#3. 构件图
 builder = StateGraph(state_schema=OverAllState)
-builder.add_node("mapper_node", mapper_node)
-builder.add_node("reducer_node", reducer_node)
-builder.add_conditional_edges(START, router_map, path_map=["mapper_node"])
-builder.add_edge("mapper_node", "reducer_node")
-builder.add_edge("reducer_node", END)
-
+builder.add_node("mapper_node",mapper_node)
+builder.add_node("reducer_node",reducer_node)
+builder.add_conditional_edges(START,router_node,path_map=["mapper_node"])
+builder.add_edge("mapper_node","reducer_node")
+builder.add_edge("reducer_node",END)
 graph = builder.compile()
-word_counts = graph.invoke(
-    {"input_values": [
-        "hello world",
-        "hello Atguigu",
-        "hello LLM"
-    ]}
-)
 
-print(word_counts)
+res = graph.invoke({
+    "input_values":["hello world","hello atguigu","hello llm"]
+})
+print(res)
 
 from IPython.display import display
 display(graph)
+
+
 ```
 
 运行结果如下
@@ -1916,7 +2173,7 @@ flowchart TD
 
 本节通过两种方式实现经典的 **`ReAct`** 循环结构。**`LangChain Agent`** 底层运行图架构正是 **`ReAct`** 。
 
-**`ReAct`** 是 **`Reason + Action`** 的缩写，即“推理 + 行动”架构。其核心思想是：
+**`ReAct`** 是 **`Reason + Action`** 的缩写，⭐️**即“推理 + 行动”架构**。其核心思想是：
 
 1. **Reason**：大模型根据当前消息状态进行推理，判断是否需要调用工具；
 2. **Action**：如果需要调用工具，则生成工具调用请求；
@@ -1926,7 +2183,7 @@ flowchart TD
 
 因此，**`ReAct`** 本质上是一个典型的 **“LLM → Tool → LLM → Tool → ... → LLM”** 循环结构。
 
-本节分别使用两种方式实现该循环：
+本节分别使用**两种方式实现该循环**：
 
 * **静态实现**：通过 **`add_conditional_edges()`** 在图结构中显式定义条件路由；
 * **动态实现**：通过 **`Command(goto=...)`** 在节点返回值中触发运行时跳转。
@@ -1947,6 +2204,22 @@ flowchart TD
 也就是说，图结构在编译阶段已经知道 **`llm_node`** 可能流向 **`tool_node`** 或 **`output_node`**，运行时只负责判断具体走哪一条路径。
 
 **示例如下**
+
+> ⭐️**parse\_docstring=True 是什么意思？**
+>
+> * 让 LangChain 自动解析函数的 docstring（文档注释），并把它转换成工具说明和参数说明，提供给大模型。
+>
+>
+> ⭐️**Literal["tool\_node","output\_node"] 是什么意思？**
+>
+> * 表示：**这个函数的返回值只能是 `"tool_node"` 或 `"output_node"` 这两个固定字符串之一。**
+>
+>
+> ⭐️**`graph.invoke(...)` 本身并不会直接调用 LLM，它只是启动并运行整张图。真正调用 LLM 的地方只有：**
+>
+> ~~~python
+> model_with_tool.invoke(state["messages"])
+> ~~~
 
 ```python
 from typing import Literal
@@ -2014,6 +2287,7 @@ def llm_node(state: OverAllState) -> OverAllState:
 
 def tool_node(state: OverAllState) -> OverAllState:
     messages = state["messages"]
+    # 查看最后一条消息的工具调用
     ai_msg = messages[-1]
     tool_calls = ai_msg.tool_calls
 
@@ -2306,7 +2580,7 @@ llm_node → tool_node → llm_node
 
 只要大模型持续返回工具调用，流程就会不断回到 **`llm_node`**，形成 **`ReAct`** 循环。
 
-需要注意的是，本例中“工具调用失败后继续重试”主要依赖这条系统提示词：
+需要注意的是，本例中**“工具调用失败后继续重试”**主要依赖`这条系统提示词`：
 
 ```python
 SystemMessage("如果工具调用失败，必须重新调用直至成功")
@@ -2314,7 +2588,237 @@ SystemMessage("如果工具调用失败，必须重新调用直至成功")
 
 也就是说，是否继续重试，在当前实现中主要由大模型决定，而不是由程序逻辑强制保证。
 
-因此，如果模型在多次工具调用失败后选择停止重试并生成最终回答，运行图不会阻止它。
+因此，**如果模型在多次工具调用失败后选择停止重试并生成最终回答，运行图不会阻止它**。
+
+
+
+> ⭐️**为什么第一次执行**
+>
+> ~~~python
+> def llm_node(state:OverAllState) -> OverAllState:
+>     ai_msg = model_with_tool.invoke(state["messages"])
+>     return {
+>         "messages":ai_msg
+>     }
+> ~~~
+>
+> **的时候为什么messages的长度就是2了**
+>
+> ~~~python
+> [
+>   SystemMessage(content='如果工具调用失败,必须重新调用直到成功为止', additional_kwargs={}, response_metadata={}, id='e98b5140-fb6a-485e-8aa6-85292dc1a37f'), 
+>   HumanMessage(content='查询今天的上海天气和AI新闻热点', additional_kwargs={}, response_metadata={}, id='dd665ed6-6c1e-42be-bebc-1e049f8b4655')
+> ]
+> ~~~
+>
+> **?**
+>
+> 因为你的状态继承了：
+>
+> ```
+> class OverAllState(MessagesState):
+> ```
+>
+> `MessagesState` 对 `messages` 字段预先配置了一个叫 `add_messages` 的 reducer。它的作用是：
+>
+> > 节点返回新的消息时，不覆盖原来的 `messages`，而是把新消息合并到消息列表末尾。
+>
+> 你第一次执行 `llm_node` 时，`messages` 长度已经是 2，具体过程如下。
+>
+> ```
+> graph.invoke 时传入 SystemMessage
+>                  ↓
+> messages 长度 = 1
+>                  ↓
+> input_node 返回 HumanMessage
+>                  ↓
+> add_messages 自动合并
+>                  ↓
+> messages 长度 = 2
+>                  ↓
+> 进入 llm_node
+> ```
+>
+> 初始调用传入了第一条消息：
+>
+> ```
+> graph.invoke({
+>     "user_input": "查询今天的上海天气和AI新闻热点",
+>     "messages": [
+>         SystemMessage("如果工具调用失败，必须重新调用直到成功为止")
+>     ]
+> })
+> ```
+>
+> 此时状态是：
+>
+> ```
+> messages = [
+>     SystemMessage(...)
+> ]
+> ```
+>
+> 所以长度为 1。
+>
+> 接着执行 `input_node`：
+>
+> ```
+> def input_node(state: OverAllState) -> OverAllState:
+>     return {
+>         "messages": [
+>             HumanMessage(state["user_input"])
+>         ]
+>     }
+> ```
+>
+> 如果是普通字典更新，可能会覆盖原来的 `SystemMessage`。但因为继承了 `MessagesState`，LangGraph 会使用 `add_messages` 合并：
+>
+> ```
+> 原消息 + 节点返回的新消息
+> ```
+>
+> 相当于：
+>
+> ```
+> messages = [
+>     SystemMessage(...),
+>     HumanMessage(...)
+> ]
+> ```
+>
+> 因此进入第一次 `llm_node` 时：
+>
+> ```
+> len(state["messages"]) == 2
+> ```
+>
+> 这正是截图里看到的状态。
+>
+> 
+>
+> 💙后续消息也是这样添加的
+>
+> 第一次执行 `llm_node`：
+>
+> ```
+> def llm_node(state: OverAllState) -> OverAllState:
+>     ai_msg = model_with_tool.invoke(state["messages"])
+>     return {
+>         "messages": [ai_msg]
+>     }
+> ```
+>
+> `AIMessage` 会被合并进去：
+>
+> ```
+> [
+>     SystemMessage(...),
+>     HumanMessage(...),
+>     AIMessage(tool_calls=[...])
+> ]
+> ```
+>
+> 长度变成 3。
+>
+> 工具节点再返回 `ToolMessage`：
+>
+> ```
+> return {
+>     "messages": tool_messages
+> }
+> ```
+>
+> 就会继续合并：
+>
+> ```
+> [
+>     SystemMessage(...),
+>     HumanMessage(...),
+>     AIMessage(...),
+>     ToolMessage(...),
+>     ToolMessage(...)
+> ]
+> ```
+>
+> 然后这些完整历史消息会再次传给 LLM，让它知道：
+>
+> - 用户问了什么
+> - 自己调用了什么工具
+> - 每个工具返回了什么结果
+>
+> 💙`MessagesState` 大致相当于什么？
+>
+> 它可以粗略理解为：
+>
+> ```
+> from typing import Annotated
+> from typing_extensions import TypedDict
+> from langgraph.graph.message import add_messages
+> 
+> 
+> class MessagesState(TypedDict):
+>     messages: Annotated[list, add_messages]
+> ```
+>
+> `Annotated[list, add_messages]` 告诉 LangGraph：
+>
+> ```
+> messages 字段更新时，使用 add_messages 合并，
+> 不要直接覆盖旧值。
+> ```
+>
+> 💙建议不要在 `tool_node` 中直接修改原列表
+>
+> 你原来的写法：
+>
+> ```
+> messages = state["messages"]
+> messages.append(...)
+> return {
+>     "messages": messages
+> }
+> ```
+>
+> 会直接修改状态中的原列表，然后又把完整列表返回给 reducer，逻辑容易变得混乱。
+>
+> 更推荐只返回新产生的工具消息：
+>
+> ```
+> def tool_node(state: OverAllState) -> OverAllState:
+>     ai_msg = state["messages"][-1]
+>     tool_messages = []
+> 
+>     for tool_call in ai_msg.tool_calls:
+>         if tool_call["name"] == "get_weather":
+>             tool_messages.append(get_weather.invoke(tool_call))
+> 
+>         elif tool_call["name"] == "get_news":
+>             tool_messages.append(get_news.invoke(tool_call))
+> 
+>         else:
+>             tool_messages.append(
+>                 ToolMessage(
+>                     content="工具名称错误，调用失败",
+>                     tool_call_id=tool_call["id"],
+>                 )
+>             )
+> 
+>     return {
+>         "messages": tool_messages
+>     }
+> ```
+>
+> 由 `MessagesState` 自动完成：
+>
+> ```
+> 旧 messages + tool_messages
+> ```
+>
+> 一句话总结：
+>
+> > `llm_node` 第一次执行时长度是 2，是因为调用图时传入了一个 `SystemMessage`，随后 `input_node` 又返回了一个 `HumanMessage`；`MessagesState` 使用 `add_messages` 将它们自动合并，而不是相互覆盖。
+>
+> 
 
 ---
 
@@ -2687,7 +3191,7 @@ def llm_node(state: OverAllState) -> Command[Literal["tool_node", "output_node"]
     )
 ```
 
-其返回值类型：
+**其返回值类型：**
 
 ```python
 Command[Literal["tool_node", "output_node"]]
@@ -2702,7 +3206,7 @@ Command[Literal["tool_node", "output_node"]]
 
 ---
 
-#### 4.4.1.3. 小结
+#### ⭐4.4.1.3. 小结
 
 |            | 静态实现                               | 动态实现                   |
 | ---------- | -------------------------------------- | -------------------------- |
@@ -2739,7 +3243,7 @@ Command[Literal["tool_node", "output_node"]]
 config["metadata"]["langgraph_step"]
 ```
 
-需要注意的是，这里的步骤编号对应图运行过程中的 **`SuperStep`**，从 `1` 开始计数。对于顺序执行的节点，不同节点通常位于不同的 **`SuperStep`**；对于并行执行的节点，多个节点可能处于同一个  **`SuperStep`**，因此它们读取到的 **`langgraph_step`** 可能相同。
+需要注意的是，这里的步骤编号对应图运行过程中的 **`SuperStep`**，从 `1` 开始计数。对于顺序执行的节点，不同节点通常位于不同的 **`SuperStep`**；对于⭐️**`并行执行的节点，多个节点可能处于同一个  SuperStep`**，因此它们读取到的 **`langgraph_step`** 可能相同。
 
 **示例如下**
 
@@ -2792,6 +3296,75 @@ display(graph)
 ![image-20260529195252649](images/image-20260529195252649.png)
 
 可以看到，**`node_a`**、**`node_b`**、**`node_c`** 是顺序执行的三个节点，因此分别处于第 **`1`**、**`2`**、**`3`** 个 **`SuperStep`**。
+
+> **一句大白话解释上述代码：**
+>
+> 一句大白话：
+>
+> > 这个 Demo 就是在观察 LangGraph 执行流程时，每一轮走到了第几步：`node_a` 是第 1 轮，`node_b` 是第 2 轮，`node_c` 是第 3 轮。
+>
+> 这里的 `SuperStep` 可以理解为 LangGraph 的“一轮批量执行”。
+>
+> ```
+> SuperStep 1：执行 node_a
+> SuperStep 2：执行 node_b
+> SuperStep 3：执行 node_c
+> ```
+>
+> 代码通过：
+>
+> ```
+> current_step = config["metadata"]["langgraph_step"]
+> ```
+>
+> 取得当前节点所在的 SuperStep 编号。
+>
+> 如果某一轮有多个可以同时执行的节点，它们会属于同一个 SuperStep：
+>
+> ```
+>                  ┌→ node_b ─┐
+> node_a 执行完毕 ─┤          ├→ node_d
+>                  └→ node_c ─┘
+> ```
+>
+> 对应：
+>
+> ```
+> SuperStep 1：node_a
+> SuperStep 2：node_b 和 node_c 并行执行
+> SuperStep 3：node_d
+> ```
+>
+> 同一个 SuperStep 中的节点读取的是这一轮开始时的状态；它们产生的状态更新经过合并后，通常在下一个 SuperStep 中生效。
+>
+> 所以，`SuperStep` 不是“执行了几个 Python 函数”，而是：
+>
+> > LangGraph 将当前所有可以执行的节点放在同一批次中运行，这一批就叫一个 SuperStep。
+>
+> 另外，`langgraph_step` 属于运行时元数据，适合调试和观察执行过程，不建议把核心业务逻辑强依赖在这个内部步数上。
+
+> ⭐️**node_a:12 - 1代表什么？**
+>
+> 这是 `loguru` 默认的日志格式，不是计算结果。
+> **分别表示**
+>
+> ~~~
+> __main__  ：当前 Python 文件/模块
+> node_a    ：打印日志的函数名
+> 12        ：logger.info 所在的代码行号
+> -         ：日志格式中的分隔符
+> 1         ：logger.info(current_step) 真正打印的内容
+> ~~~
+
+> ⭐️⭐️⭐️⭐️**什么是元数据**
+>
+> * 用来描述数据或运行过程的“附加信息”。
+>   * 它通常不是业务数据本身，而是帮助程序了解“数据从哪来、什么时候产生、当前执行到哪一步”等信息。
+>     * 例如一张照片：
+>       - 照片画面：实际数据
+>       - 拍摄时间、地点、相机型号、尺寸：`元数据`
+
+
 
 #### 4.4.2.2. 配置**递归限制**
 
