@@ -1009,7 +1009,7 @@ res: {} {'final_output': '关于 猫咪 的七言绝句：\n《戏猫》\n狸奴
         }
     }
     ```
-  
+
   **其中**
   
   - **`configurable`**：用于记录检查点的可配置信息，可能包含用户自定义字段，它一定包含以下三个字段：
@@ -1933,7 +1933,7 @@ with PostgresSaver.from_conn_string(DB_URL) as checkpointer:
 2026-06-10 16:17:43.545 | INFO     | __main__:node_joke:65 - node_joke 已执行
 2026-06-10 16:17:43.548 | INFO     | __main__:node_poem:54 - node_poem 已执行
 >Traceback...
-Exception: 人为中断
+Exception: 人为抛异常
 During task with name 'node_joke' and id 'edb59019-4808-ed51-68eb-d5fba8696b13'
 ```
 
@@ -1950,6 +1950,151 @@ During task with name 'node_joke' and id 'edb59019-4808-ed51-68eb-d5fba8696b13'
 ```python
 list(graph.get_state_history(config=config))
 ```
+
+**完整代码**
+
+~~~python
+from typing import TypedDict
+
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage
+from langchain_deepseek import ChatDeepSeek
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import StateGraph, START, END
+from loguru import logger
+
+load_dotenv(override=True)
+
+model = ChatDeepSeek(
+    model="deepseek-v4-flash",
+    extra_body={
+        "thinking": {
+            "type": "disabled"
+        }
+    }
+)
+
+
+#1. 声明状态
+class OverAllState(TypedDict):
+    topic: str
+    poem: str
+    joke: str
+    final_output: str
+
+
+#1.1 输入状态
+class InputState(TypedDict):
+    topic: str
+
+
+#1.2 输出状态
+class OutputState(TypedDict):
+    final_output: str
+
+
+topics = ["布偶猫", "狸花猫", "金渐层"]
+topic_index = 0
+
+
+#2. 定义节点
+def node_change_topic(state: InputState) -> OverAllState:
+    global topic_index
+    logger.info("topic_index:{}", topic_index)
+    sub_topic = topics[topic_index]
+    topic_index += 1
+    topic_index %= len(topics)
+
+    return {
+        "topic": f"{state["topic"]}:{sub_topic}"
+    }
+
+
+#2.1 同一个超步的位置 成功运行的节点
+def node_poem(state: OverAllState) -> OverAllState:
+    logger.info("node_poem正在执行")
+    topic = state["topic"]
+    poem = model.invoke([HumanMessage(f"写一首关于{topic}主题的七言绝句")]).content
+    return {
+        "poem": poem
+    }
+
+
+import time
+
+
+#2.2 同一个超步的位置 运行失败的节点
+def node_joke(state: OverAllState) -> OverAllState:
+    logger.info("node_joke正在执行")
+    topic = state["topic"]
+    time.sleep(5)
+    raise Exception("人为抛异常")
+    joke = model.invoke([HumanMessage(f"写一首关于{topic}主题的笑话")]).content
+    return {
+        "joke": joke
+    }
+
+
+def node_output(state: OverAllState) -> OutputState:
+    logger.info("node_output正在执行")
+    topic = state["topic"]
+    poem = state["poem"]
+    joke = state["joke"]
+    final_output = f"关于{topic}的七言绝句:{poem}\n 笑话:{joke}\n"
+    return {
+        "final_output": final_output
+    }
+
+
+#3. 构建图
+builder = StateGraph(state_schema=OverAllState, input_schema=InputState, output_schema=OutputState)
+
+#3.1 添加节点
+builder.add_node("node_change_topic", node_change_topic)
+builder.add_node("node_poem", node_poem)
+builder.add_node("node_joke", node_joke)
+builder.add_node("node_output", node_output)
+
+#3.2 添加边
+builder.add_edge(START, "node_change_topic")
+builder.add_edge("node_change_topic", "node_poem")
+builder.add_edge("node_change_topic", "node_joke")
+builder.add_edge("node_poem", "node_output")
+builder.add_edge("node_joke", "node_output")
+builder.add_edge("node_output", END)
+
+#4. 添加检查点后端
+DB_URL = "postgresql://langgraph_user:123456@localhost:5432/langgraph_db?sslmode=disable"
+from langgraph.checkpoint.postgres import PostgresSaver
+
+with PostgresSaver.from_conn_string(DB_URL) as checkpointer:
+    #5. 第一次使用PostgresSaver作为检查点 需要调用方法 setup()
+    # checkpointer.setup()
+    graph = builder.compile(checkpointer=checkpointer)
+
+    from IPython.display import display
+
+    display(graph)
+
+    config = {
+        "configurable": {
+            "thread_id": "chapter03-05"
+        }
+    }
+
+    try:
+        res = graph.invoke({"topic": "猫"}, config=config)
+        print(res)
+    finally:
+        # 无论运行成功还是抛异常，都会执行
+        history = list(graph.get_state_history(config=config))
+        display(history)
+
+
+
+~~~
+
+
 
 **运行结果如下**
 
@@ -2107,6 +2252,124 @@ list(graph.get_state_history(config=config))
 
 本例中，**`node_poem`** 和 **`node_joke`** 属于同一个超步。虽然 **`node_joke`** 失败了，但 **`node_poem`** 已成功，其计算结果会被持久化机制保存下来。因此，后续恢复运行时，**`node_poem`** 不会重复执行。
 
+> ⭐️**tasks字段是什么意思？**
+> 
+>
+> `tasks` 表示：**从这个检查点出发，被安排执行的节点任务，以及这些任务已记录的执行情况。** 每个 `PregelTask` 对应一次节点执行。
+>
+> 所以它不仅能告诉你“要执行谁”，还能告诉你“谁成功了、谁报错了、返回了什么”。
+>
+> 拿你最上面的快照来说：
+>
+> ```
+> values={"topic": "猫咪: 布偶猫"}
+> next=("node_poem", "node_joke")
+> ```
+>
+> 表示主题已经修改完毕，接下来安排两个并行任务。对应的 `tasks` 记录了：
+>
+> | 字段     | `node_poem`                     | `node_joke`             |
+> | -------- | ------------------------------- | ----------------------- |
+> | `name`   | 节点名 `node_poem`              | 节点名 `node_joke`      |
+> | `error`  | `None`，没有记录异常            | `Exception('人为中断')` |
+> | `result` | `{"poem": "《戏题布偶猫》..."}` | `None`，没有返回结果    |
+>
+> 也就是说，**诗写成功了，笑话节点执行失败了。**
+>
+> 这里最容易困惑的是：为什么 `tasks.result` 已经有诗，`values` 里面却没有？
+>
+> 因为这两个字段记录的层次不同：
+>
+> - `values`：这个检查点保存的图状态，此时只有主题。
+> - `tasks.result`：从这个检查点出发，单个节点已经完成的输出。
+>
+> 两个并行节点处于同一个超步。由于笑话节点失败，这一超步没有完整结束，因此没有生成合并诗和笑话后的下一个完整检查点。但诗的输出已经单独保存，称为 *pending writes*。修复错误并从失败处恢复时，可以复用诗的结果，不必重新执行成功的诗节点。[官方说明](https://docs.langchain.com/oss/python/langgraph/checkpointers#super-steps)
+>
+> 其他字段可以这样理解：
+>
+> | 字段         | 含义                              |
+> | ------------ | --------------------------------- |
+> | `id`         | 这一次任务的唯一标识              |
+> | `path`       | 内部调度路径，一般不用手动处理    |
+> | `interrupts` | LangGraph 中断信息；`()` 表示没有 |
+> | `state`      | 子图相关的状态信息；这里是 `None` |
+>
+> 另外，`error="Exception('人为中断')"` 属于普通异常，虽然文字叫“人为中断”，但不等于 LangGraph 的 `interrupt()`，所以 `interrupts` 仍为空。
+>
+> 你这三条历史记录按**最新到最旧**排列，倒着看就是：
+>
+> ```
+> step -1：安排 __start__，任务结果是输入 {"topic": "猫咪"}
+> step  0：安排 node_change_topic，任务结果是修改后的主题
+> step  1：安排 node_poem 和 node_joke，一个成功，一个失败
+> ```
+
+
+
+> ⭐️**StateSnapshot里的其他字段是什么意思？**
+>
+> 
+>
+> `StateSnapshot` 是**图在某个检查点的状态快照**。结合你这份结果，除 `tasks` 外，其余字段可以这样理解：
+>
+> | 字段            | 含义                               | 你的例子                       |
+> | --------------- | ---------------------------------- | ------------------------------ |
+> | `values`        | 这个检查点保存的状态数据           | `{"topic": "猫咪: 布偶猫"}`    |
+> | `next`          | 从这个检查点出发安排执行的节点名称 | `("node_poem", "node_joke")`   |
+> | `config`        | 精确定位当前检查点的配置           | 包含线程、命名空间、检查点 ID  |
+> | `metadata`      | 检查点如何产生、处在哪一步等信息   | `source="loop"`、`step=1`      |
+> | `created_at`    | 检查点创建时间                     | `2026-06-10T08:43:19...+00:00` |
+> | `parent_config` | 上一个检查点的定位配置             | 指向 `step=0` 的检查点         |
+> | `interrupts`    | 当前快照关联的 LangGraph 中断信息  | `()` 表示没有                  |
+>
+> `config` 中的三个字段：
+>
+> ```
+> config={
+>     "configurable": {
+>         "thread_id": "123",
+>         "checkpoint_ns": "",
+>         "checkpoint_id": "1f164a86-e60d-6881-8001-c717582e8893"
+>     }
+> }
+> ```
+>
+> - `thread_id`：这条执行历史所属的线程。同一线程可以积累多次调用产生的检查点。
+> - `checkpoint_ns`：检查点所属的命名空间。空字符串 `""` 表示主图；子图会使用自己的命名空间。
+> - `checkpoint_id`：某一个具体检查点的唯一标识。同一个线程下，不同检查点具有不同 ID。
+>
+> 所以，`thread_id` 帮你找到“一整条历史”，`checkpoint_id` 帮你找到“历史中的某一刻”。
+>
+> `metadata` 描述检查点的来源：
+>
+> ```
+> metadata={
+>     "source": "loop",
+>     "step": 1,
+>     "parents": {}
+> }
+> ```
+>
+> | 子字段    | 含义                                                         |
+> | --------- | ------------------------------------------------------------ |
+> | `source`  | `"input"` 表示由输入产生；`"loop"` 表示图正常执行过程中产生；`"update"` 表示通过状态更新操作产生 |
+> | `step`    | 超步编号，不是节点数量；并行执行的多个节点可以属于同一超步   |
+> | `parents` | 用于关联父级检查点的映射，主要涉及子图等场景；你的例子为空   |
+>
+> 注意，`metadata.parents` 和 `parent_config` 不同：**沿着同一条执行历史往前找上一个检查点，看的是 `parent_config`。**
+>
+> 你的三个快照对应关系是：
+>
+> | `step` | 此刻的 `values`                           | `next`                   |
+> | ------ | ----------------------------------------- | ------------------------ |
+> | `-1`   | `{}`，输入尚未进入图状态                  | `__start__`              |
+> | `0`    | `{"topic": "猫咪"}`，输入已经进入状态     | `node_change_topic`      |
+> | `1`    | `{"topic": "猫咪: 布偶猫"}`，主题已经修改 | `node_poem`、`node_joke` |
+>
+> 最后，`created_at` 中的 `+00:00` 表示 UTC 时间，你给出的 `08:43:19` 对应北京时间 `16:43:19`。它记录的是**检查点创建时间**，不一定是其中任务完成或报错的时间。
+
+
+
 ##### 6.5.3.2.3. 修复BUG之后恢复运行
 
 修复 **`node_joke`** 中的人为异常后，重新编译计算图，并基于最新检查点恢复运行。
@@ -2146,7 +2409,7 @@ res = new_graph.invoke(None, config=config)
 print(res)
 ```
 
-这里需要注意两点：
+**这里需要注意两点：**
 
 1. 重新编译计算图时，仍然使用原来的 **`checkpointer`** 对象。
 2. 恢复运行时，输入参数传入 **`None`**，并且配置中只传入 **`thread_id`**。
@@ -2163,7 +2426,7 @@ print(res)
 }
 ```
 
-运行结果中可以观察到：
+**运行结果中可以观察到：**
 
 * **`node_joke`** 被重新执行。
 * **`node_output`** 被执行。
@@ -2177,28 +2440,28 @@ print(res)
 
 所谓**检查点回溯**，是指基于某个历史检查点，重新执行后续流程，或者在该检查点基础上修改状态并创建新的执行分支。
 
-**检查点回溯**有两种形式，根据是否更改历史状态区分：
+**检查点回溯**有**两种形式，根据是否更改历史状态区分：**
 
 - **`Replay`**：检查点重放，回到某个历史检查点，沿着原先的执行路径重新执行后续节点。
 - **`Fork`**：检查点分叉，回到某个历史检查点，修改状态，从该位置创建一条新的执行分支。
 
-二者的共同点是：
+**二者的共同点是：**
 
-> 检查点之前的节点不会重新执行，检查点之后的节点会重新执行。
+> `检查点之前的节点不会重新执行，检查点之后的节点会重新执行。`
 
-二者的区别是：
+**二者的区别是：**
 
 > **`Replay`** 不修改历史状态；**`Fork`** 会基于历史检查点应用新的状态更新，并创建新的检查点分支。
 
 #### 6.5.4.1. Replay
 
-**`Replay`** 模式和失败恢复很接近，但二者的触发方式和语义不同。
+**`Replay`** 模式和`失败恢复很接近`，但**二者的触发方式和语义不同**:
 
 - 失败恢复通常基于最新检查点继续运行，配置中只包含 **`thread_id`**，不包含 **`checkpoint_id`**。
 
 - **`Replay`** 则是显式传入某个历史检查点的配置，配置中包含 **`checkpoint_id`**。**`LangGraph`** 会据此从该历史检查点开始重放后续步骤。
 
-需要注意：
+**需要注意：**
 
 > **`Replay`** 不是简单读取历史缓存，而是重新执行该检查点之后的节点。
 
@@ -2612,6 +2875,157 @@ with PostgresSaver.from_conn_string(DB_URL) as checkpointer:
     print(res)
 ```
 
+~~~python
+from typing import TypedDict
+
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage
+from langchain_deepseek import ChatDeepSeek
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import StateGraph, START, END
+from loguru import logger
+
+load_dotenv(override=True)
+
+model = ChatDeepSeek(
+    model="deepseek-v4-flash",
+    extra_body={
+        "thinking": {
+            "type": "disabled"
+        }
+    }
+)
+
+
+#1. 声明状态
+class OverAllState(TypedDict):
+    topic: str
+    poem: str
+    joke: str
+    final_output: str
+
+
+#1.1 输入状态
+class InputState(TypedDict):
+    topic: str
+
+
+#1.2 输出状态
+class OutputState(TypedDict):
+    final_output: str
+
+
+topics = ["布偶猫", "狸花猫", "金渐层"]
+topic_index = 0
+
+
+#2. 定义节点
+def node_change_topic(state: InputState) -> OverAllState:
+    global topic_index
+    logger.info("topic_index:{}", topic_index)
+    sub_topic = topics[topic_index]
+    topic_index += 1
+    topic_index %= len(topics)
+
+    return {
+        "topic": f"{state["topic"]}:{sub_topic}"
+    }
+
+
+#2.1 同一个超步的位置 成功运行的节点
+def node_poem(state: OverAllState) -> OverAllState:
+    logger.info("node_poem正在执行")
+    topic = state["topic"]
+    poem = model.invoke([HumanMessage(f"写一首关于{topic}主题的七言绝句")]).content
+    return {
+        "poem": poem
+    }
+
+
+import time
+
+
+#2.2 同一个超步的位置 运行失败的节点
+def node_joke(state: OverAllState) -> OverAllState:
+    logger.info("node_joke正在执行")
+    topic = state["topic"]
+    # time.sleep(5)
+    # raise Exception("人为抛异常")
+    joke = model.invoke([HumanMessage(f"写一首关于{topic}主题的笑话")]).content
+    return {
+        "joke": joke
+    }
+
+
+def node_output(state: OverAllState) -> OutputState:
+    logger.info("node_output正在执行")
+    topic = state["topic"]
+    poem = state["poem"]
+    joke = state["joke"]
+    final_output = f"关于{topic}的七言绝句:{poem}\n 笑话:{joke}\n"
+    return {
+        "final_output": final_output
+    }
+
+
+#3. 构建图
+builder = StateGraph(state_schema=OverAllState, input_schema=InputState, output_schema=OutputState)
+
+#3.1 添加节点
+builder.add_node("node_change_topic", node_change_topic)
+builder.add_node("node_poem", node_poem)
+builder.add_node("node_joke", node_joke)
+builder.add_node("node_output", node_output)
+
+#3.2 添加边
+builder.add_edge(START, "node_change_topic")
+builder.add_edge("node_change_topic", "node_poem")
+builder.add_edge("node_change_topic", "node_joke")
+builder.add_edge("node_poem", "node_output")
+builder.add_edge("node_joke", "node_output")
+builder.add_edge("node_output", END)
+
+#4. 添加检查点后端
+DB_URL = "postgresql://langgraph_user:123456@localhost:5432/langgraph_db?sslmode=disable"
+from langgraph.checkpoint.postgres import PostgresSaver
+with PostgresSaver.from_conn_string(DB_URL) as checkpointer:
+    #5. 第一次使用PostgresSaver作为检查点 需要调用方法 setup()
+    #checkpointer.setup()
+    graph = builder.compile(checkpointer=checkpointer)
+
+    config = {
+        "configurable":{
+            "thread_id":"chapter03-05"
+        }
+    }
+    # 获取到检查点历史
+    history_checkpoints = list(graph.get_state_history(config=config))
+    print(history_checkpoints)
+    print("====================================")
+    new_checkpoint = None
+    #next = ('node_poem', 'node_joke')
+    for checkpoint in history_checkpoints:
+        if checkpoint.next == ('node_poem', 'node_joke'):
+            new_checkpoint = checkpoint
+            break
+
+    # 如果想要实现replay的效果 状态填写None  config填写为之前某一个检查点的config
+    res = graph.invoke(None,config=new_checkpoint.config)
+    print(res)
+~~~
+
+
+
+> **`history_checkpoints` 按时间倒序排列：最新的在前，最早的在后**，所以列表顺序和执行顺序相反。
+>
+> ~~~
+> next=()                            # 最晚：全部执行完
+> next=('node_output',)              # 诗和笑话已完成，等待汇总
+> next=('node_poem', 'node_joke')     # 主题已修改，等待写诗和笑话
+> next=('node_change_topic',)        # 已接收输入，等待修改主题
+> next=('__start__',)                # 最早
+> ~~~
+
 **运行结果如下**
 
 ```json
@@ -2622,12 +3036,12 @@ with PostgresSaver.from_conn_string(DB_URL) as checkpointer:
 
 ```
 
-本例中：
+**本例中：**
 
 1. **`node_poem`** 和 **`node_joke`** 被重新执行。
 2. **`node_output`** 被重新执行。
 
-由于没有执行change_topic,所以可以一直写同一只猫的内容
+`由于没有执行change_topic,所以可以一直写同一只猫的内容`
 
 #### 6.5.4.2. Fork
 
@@ -2774,7 +3188,7 @@ res = graph.invoke({
 print(res)
 ```
 
-执行逻辑如下：
+**执行逻辑如下：**
 
 1. **`router_node`** 根据用户输入提取结构化结果，例如 **`{"topic": "布偶猫", "mode": "poem"}`**。
 2. **`router`** 根据 **`mode`** 决定后续分支。
@@ -2782,7 +3196,7 @@ print(res)
 4. 如果 **`mode == "joke"`**，进入 **`node_joke`**。
 5. 如果无法识别，则进入 **`node_default`**。
 
-运行结果如下
+**运行结果如下**
 
 ![image-20260611142714758](images/image-20260611142714758.png)
 
