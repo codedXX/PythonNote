@@ -3448,11 +3448,11 @@ StateSnapshot(
 )
 ```
 
-该检查点表示：
+**该检查点表示：**
 
 > 用户输入已经写入状态，下一步将要执行 **`router_node`**。
 
-从这个检查点分叉，本文采用两种方案（还可以有别的方案）：
+**从这个检查点分叉，本文采用两种方案（还可以有别的方案）：**
 
 1. 修改输入，让 **`router_node`** 重新执行。见 **`6.5.4.2.3.`** 节
 2. 直接伪造 **`router_node`** 的输出，从而跳过 **`router_node`**。见 **`6.5.4.2.4.`** 节
@@ -3492,7 +3492,7 @@ change_input_config
 
 执行 **`update_state()`** 后会返回一个新的配置，其中包含新的 **`checkpoint_id`**。这个新的 **`checkpoint_id`** 不同于原有历史检查点，说明 **`update_state()`** 创建了一个新的检查点分支。
 
-需要注意：
+**需要注意：**
 
 > **`update_state()`** 返回的是新检查点的配置，不是新状态本身。
 
@@ -3532,7 +3532,7 @@ graph.invoke(None, change_input_config)
 }
 ```
 
-由运行结果可知：
+**由运行结果可知：**
 
 1. **`user_input`** 已经从“帮我写一首关于布偶猫的七言绝句”变成“帮我写一个关于布偶猫的笑话”。而 **`username`** 没有被更新，仍然保持原值 **`"小黄"`**。说明 **`values`** 是 **状态更新** 而非完整的 **状态替换**。
 2. **`router_node`** 开始的节点全部重新运行。由于新的输入被识别为笑话任务，因此后续进入 **`node_joke`**。
@@ -3655,7 +3655,7 @@ graph.invoke(None, skip_router_config)
 
 # 7. 图记忆管理
 
- **`Agent`** 的三种记忆：
+ **`Agent`** 的**三种记忆：**
 
 - **短期记忆**：通过运行时状态 **`State`** 访问，并由检查点存储器 **`Checkpointer`** 保存，它按照 **`thread_id`** 组织，可以实现线程内的记忆共享。
 
@@ -3671,7 +3671,7 @@ graph.invoke(None, skip_router_config)
 
 我们不止一次提到，**`Agent`** 底层就是一个简易的 **`ReAct`** 架构的 **`LangGraph`** 状态图，所以 **`Agent`** 的记忆机制本质上就是 **`LangGraph`** 状态图的记忆机制。
 
-生产环境建议用基于持久化数据库的记忆存储器，如 **`PostgresSaver`** 和 **`PostgresStore`**。
+`生产环境建议用基于持久化数据库的记忆存储器`，如 **`PostgresSaver`** 和 **`PostgresStore`**。
 
 ## 7.1. 短期记忆
 
@@ -3745,7 +3745,7 @@ Item(namespace=['users', 'Black'], key='preferences', value={'course': '数字�
 
 这里使用 **`USERS_NS`** 作为顶层命名空间，`store.search(USERS_NS)` 会查询所有以 **`("users",)`** 开头的记忆数据。返回的每条数据都是一个 **`Item`** 实例。
 
-需要注意：
+**需要注意：**
 
 1. **`namespace`** 使用元组是硬性约束，天然表达层级结构。本例使用两层命名空间 **`("users", "Alice")`**，清晰区分了**领域（`users`）**和**实体（用户名）**，而具体存储什么类型的数据则由 **`key`** 参数表达（如 **`"preferences"`**）。
 
