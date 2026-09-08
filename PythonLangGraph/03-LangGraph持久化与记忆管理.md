@@ -3735,6 +3735,18 @@ with PostgresStore.from_conn_string(DB_URL) as store:
         print(item)
 ```
 
+> ```
+> store.put(命名空间, 键, 数据)
+> ```
+>
+> 三个参数的存储对应关系是：
+>
+> | 位置   | 含义     | 数据库列 |
+> | ------ | -------- | -------- |
+> | 第一个 | 命名空间 | `prefix` |
+> | 第二个 | 键       | `key`    |
+> | 第三个 | 数据     | `value`  |
+
 **运行结果如下**
 
 ```json
