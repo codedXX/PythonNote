@@ -899,7 +899,7 @@ print(resumed_res)
 {'username': '小黄', 'age': 15, 'gender': 'male'}
 ```
 
-中断恢复时，整个被中断的节点函数都会重新运行。
+`中断恢复时，整个被中断的节点函数都会重新运行`。
 
 单个节点中串行地多次调用 **`interrupt()`** 函数时，检查点存储器会记录历史的 **`resume`** 信息，**`LangGraph`** 运行时会读取这些信息，并在 **`interrupt()`** 函数中维护索引，按照节点内调用 **`interrupt()`** 函数的顺序，逐个取出历史 **`resume`** 的值，并将它们作为 **`interrupt()`** 函数的返回值。
 
@@ -908,6 +908,84 @@ print(resumed_res)
 当历史 **`resume`** 耗尽后，本次恢复运行时传入的 **`resume`** 会作为本次中断的返回值，然后节点函数继续运行。
 
 所有中断都触发并恢复后，计算图正常结束。
+
+
+
+> ⭐️**为什么系统知道age_interrupted_res = graph.invoke(Command(resume=user_name), config=config)对应username = interrupt("请输入您的用户名：")？**
+>
+> 
+>
+> 系统通过 **相同的 `thread_id` 找到暂停的任务，再按 `interrupt()` 的调用顺序匹配恢复值**。它不依赖 `user_name`、`username` 或 `age_interrupted_res` 这些变量名。[官方说明](https://docs.langchain.com/oss/python/langgraph/interrupts)
+>
+> 你的节点中，三个中断的顺序固定：
+>
+> ```
+> def get_info_node(state: OverAllState) -> OverAllState:
+>     username = interrupt("请输入您的用户名：")       # 第 0 个
+>     age = interrupt("请输入您的年龄：")              # 第 1 个
+>     gender = interrupt("请输入您的性别：(male/female)") # 第 2 个
+> 
+>     return {"username": username, "age": age, "gender": gender}
+> ```
+>
+> 具体执行过程如下。
+>
+> 1. 第一次调用：
+>
+>    ```
+>    graph.invoke({}, config=config)
+>    ```
+>
+>    执行到第 0 个 `interrupt()`，尚无恢复值，于是暂停。这时 `interrupt()` 还没有正常返回，`username` 的赋值也没有完成。
+>
+> 2. 提交用户名，例如 `"张三"`：
+>
+>    ```
+>    age_interrupted_res = graph.invoke(
+>        Command(resume="张三"),
+>        config=config,
+>    )
+>    ```
+>
+>    相同的 `thread_id` 让 LangGraph 找回刚才暂停的任务。
+>
+>    ⭐️**恢复时，节点函数会从头重新执行。** 再次遇到第 0 个 `interrupt()`，它返回已提交的 `"张三"`，因此完成：
+>
+>    ```
+>    username = "张三"
+>    ```
+>
+>    随后执行到第 1 个 `interrupt()`，因为还没有年龄的恢复值，再次暂停。所以你把本次结果命名为 `age_interrupted_res`：它表示“现在暂停在询问年龄的位置”，而本次传入的值仍然是用户名。
+>
+> 3. 提交年龄：
+>
+>    ```
+>    graph.invoke(Command(resume=18), config=config)
+>    ```
+>
+>    节点又从头执行：第 0 个 `interrupt()` 返回之前保存的 `"张三"`；第 1 个返回新提交的 `18`；第 2 个暂停，等待性别。
+>
+> 4. 提交性别：
+>
+>    ```
+>    graph.invoke(Command(resume="male"), config=config)
+>    ```
+>
+>    节点再次从头执行，三个 `interrupt()` 分别返回 `"张三"`、`18`、`"male"`，最后执行 `return`。
+>
+> 可以把这段代码中的恢复值理解为逐步积累的列表：
+>
+> ```
+> # 示意：当前节点任务的恢复值
+> []
+> ["张三"]
+> ["张三", 18]
+> ["张三", 18, "male"]
+> ```
+>
+> 每次重跑节点，第几个 `interrupt()` 就取第几个已保存的恢复值；遇到尚无对应值的位置，就暂停等待。因此，多次恢复之间需要保持 `interrupt()` 的调用顺序稳定，而且写在中断前的代码也会重新执行。[恢复顺序与节点重执行规则](https://reference.langchain.com/python/langgraph/types/interrupt)
+
+
 
 ### 8.1.5. 使用规范
 
@@ -943,7 +1021,7 @@ def node_a(state: State):
 
 #### 8.1.5.2. 不要更改单个节点内`interrupt`的调用顺序
 
-上文提到：
+**上文提到：**
 
 1. 恢复运行时整个节点函数都会重新运行，而非精确地从断点继续
 2. 同一节点中存在多个断点时：历史恢复记录被记录在检查点中，并在恢复运行时按顺序加载
@@ -1009,7 +1087,7 @@ def node_a(state: State):
 
 **`LangGraph`** 运行时会将 **`interrupt()`** 函数接收到的参数经过 **`JSON` 序列化** 之后传递给调用者。
 
-如果传递不支持 **`JSON` 序列化** 的复杂类型，如函数，将会抛出异常，如下所示
+如果传递不支持 **`JSON` 序列化** 的复杂类型，`如函数`，将会抛出异常，如下所示
 
 ```json
 TypeError: Type is not msgpack serializable: Interrupt
@@ -1086,11 +1164,13 @@ def node_a(state: State):
   - 写数据库
   - 写文件
   - 发送邮件或消息
-- **幂等性**：多次执行的结果等价于一次执行。
+- ⭐️**幂等性**：`多次执行的结果等价于一次执行`。
 
 我们知道，中断恢复时，断点所在的函数会被重复执行，所以，如果断点之前存在不满足幂等性的副作用操作，将会导致多次调用结果不一致。
 
 如：写数据操作不满足幂等性，可能导致写入多条重复记录。
+
+
 
 **正确用法**
 
@@ -1110,7 +1190,7 @@ def node_a(state: State):
     return {"approved": approved}
 ```
 
-**`upsert`** 的语义是：**写入或更新**，如果有相同记录则覆盖更新，否则新增。满足幂等性。
+**`upsert`** 的语义是：**写入或更新**，`如果有相同记录则覆盖更新，否则新增。满足幂等性`。
 
 **2. 将副作用操作放在断点之后**
 
@@ -1342,13 +1422,13 @@ print(resumed_his)
 
 中断触发时，检查点存储器中记录的最新检查点超步为 **`0`**，中断信息只能和这个超步绑定
 
-中断信息存了两份：
+**中断信息存了两份：**
 
 - **`StateSnapshot`** 的 **`tasks`** 属性下记录的 **`PregelTask`** 实例的 **`interrupts`** 字段记录了当前任务触发的中断信息。
 
 - **`StateSnapshot`** 的 **`interrupts`** 属性记录了当前超步发生的所有中断
 
-当存在多个并行中断时
+**当存在多个并行中断时**
 
 - 中断信息被记录在各自所属任务的 **`PregelTask`** 实例中
 - 同时也会被汇总在 **`StateSnapshot`** 的 **`tasks`** 属性中
@@ -1450,7 +1530,7 @@ print(resumed_his)
 
 **`checkpoint_id`、任务`id`、中断`id`** 和历史检查点完全一致，只是 **`Interrupt`** 实例的 **`value`** 属性变成了第二次中断的值。
 
-由此可见，恢复运行时检查点的更新确实是覆盖写入，历史中断信息不会被保留。
+由此可见，恢复运行时检查点的更新确实是`覆盖写入`，`历史中断信息不会被保留`。
 
 并且，中断恢复时传递的 **`resume`** 在 **`graph.get_state_history()`** 时也不可见。
 
@@ -1990,7 +2070,7 @@ list(graph.get_state_history(config=config))
 ]
 ```
 
-由上可知，同一个超步中：
+**由上可知，同一个超步中：**
 
 - 发生中断的任务，其中断信息被记录在任务实例和快照的 **`interrupts`** 字段中
 
@@ -2032,7 +2112,7 @@ list(graph.get_state_history(config=config))
 
 7. 支持在两个阶段设置静态断点
 
-   - 状态图编译时
+   - `状态图编译时（推荐）`
 
      ```python
      graph = builder.compile(
@@ -2042,7 +2122,7 @@ list(graph.get_state_history(config=config))
      )
      ```
 
-   - 计算图调用时
+   - `计算图调用时`
 
      ```python
      first_res = graph.invoke(
@@ -2053,7 +2133,7 @@ list(graph.get_state_history(config=config))
      )
      ```
 
-   断点都是在运行时生效，计算图调用时设置的断点优先级更高。
+   断点都是在运行时生效，**计算图调用时**设置的断点优先级更高。
 
    如果调用时传入的断点列表不为空，则会覆盖编译时配置。
 
@@ -2095,7 +2175,7 @@ list(graph.get_state_history(config=config))
 
    - 而产生中断之前已经保存了检查点，恢复运行时会从 **`node_b`** 的超步开始
    - **`node_b`** 的超步第一阶段，检查点和上次静态断点相比，没有变化，所以不会中断
-   - 因此，**`node_a` 之后** 和 **`node_b` 之前** 设置断点只会中断一次
+   - 因此，**`node_a` 之后** 和 **`node_b` 之前** 设置断点⭐️**只会中断一次**
 
 ### 8.2.3. 示例
 
@@ -2179,7 +2259,7 @@ logger.info("{}-> 完毕 <-{}", "=" * 10, "=" * 10)
 
 ![image-20260618112251743](images/image-20260618112251743.png)
 
-编译时设置的断点在渲染拓扑结构时被感知，图中对应结点新增了断点标记：
+**编译时设置的断点在渲染拓扑结构时被感知，图中对应结点新增了断点标记：**
 
 ```python
 __interrupt = before,after
@@ -2205,6 +2285,85 @@ __interrupt = before,after
 ```
 
 由日志可知，**`node_a`** 和 **`node_b`** 之间只产生了一次中断，和分析相符。
+
+
+
+> ⭐️在全新运行、`没有复用旧状态的情况下`，四次调用的过程是：
+>
+> | 调用                  | 本次执行的节点 | 停在哪里        | 当前 `final_res`          |
+> | --------------------- | -------------- | --------------- | ------------------------- |
+> | 第一次 `invoke({})`   | 无             | `node_a` 执行前 | 尚未设置                  |
+> | 第二次 `invoke(None)` | `node_a`       | `node_a` 执行后 | `"node_a 运行的中间结果"` |
+> | 第三次 `invoke(None)` | `node_b`       | `node_b` 执行后 | `"node_b 运行的中间结果"` |
+> | 第四次 `invoke(None)` | `node_c`       | 到达 `END`      | `"node_c 运行的中间结果"` |
+
+> ⭐️**second\_res = graph.invoke(None, config=config)第一个参数一定要为none吗？**
+>
+> 
+>
+> **如果你想从静态中断的位置继续执行，第一个参数应当传 `None`。**
+>
+> ```
+> second_res = graph.invoke(None, config=config)
+> ```
+>
+> 这里 `None` 的意思是：**不提交新的输入，使用保存的状态继续执行。**
+>
+> 如果传入字典：
+>
+> ```
+> graph.invoke({"final_res": "新的输入"}, config=config)
+> ```
+>
+> 它会被当作一次新的输入处理，更新状态，并从图的入口开始新一轮执行，而不是单纯从断点继续。即使传 `{}`，也不等同于 `None`。
+>
+> 如果你想**先修改状态，再从断点继续**，可以分两步：
+>
+> ```
+> # 修改该线程保存的状态
+> graph.update_state(
+>     config,
+>     {"final_res": "人工修改后的结果"}
+> )
+> 
+> # 从暂停位置继续
+> second_res = graph.invoke(None, config=config)
+> ```
+>
+> 注意，这里说的是你使用的**静态中断**。如果是在节点内部调用 `interrupt()` 产生的动态中断，通常用 `Command(resume=...)` 恢复。
+
+> ⭐️**第三次执行 不是应该在node\_b执行前吗？**
+>
+> 
+>
+> **第三次调用开始时，确实位于 `node_b` 执行前；但它不会在那里再次暂停，而是执行 `node_b`，然后在 `node_b` 后暂停。**
+>
+> 关键在于：第二次调用已经停在这个位置了：
+>
+> ```
+> node_a 执行完 → 【当前暂停位置】 → node_b 尚未执行
+> ```
+>
+> 这个位置既是 **`node_a` 后**，也是 **`node_b` 前**。
+>
+> 第三次调用：
+>
+> ```
+> third_res = graph.invoke(None, config=config)
+> ```
+>
+> 表示从这里继续。LangGraph 恢复时会记录当前状态版本；只有之后有新的状态版本更新，才会再次触发静态中断。因此，在执行 `node_b` 前没有新进展，不会再暂停一次；执行完 `node_b` 后有了更新，便触发它的后置中断。[恢复逻辑源码](https://github.com/langchain-ai/langgraph/blob/main/libs/langgraph/langgraph/pregel/_loop.py)、[中断判断源码](https://github.com/langchain-ai/langgraph/blob/main/libs/langgraph/langgraph/pregel/_algo.py)
+>
+> 所以实际过程是：
+>
+> ```
+> 第一次：暂停在 a 前
+> 第二次：执行 a → 暂停在 a 后（此时也在 b 前）
+> 第三次：执行 b → 暂停在 b 后
+> 第四次：执行 c → 结束
+> ```
+>
+> 我前面说“节点前后设置断点”，容易让人理解成每个配置都必定单独停一次；**这里相邻节点之间的前后断点，不会导致连续两次原地暂停。**
 
 ##### 8.2.3.1.2. 存在并行节点时设置断点
 
