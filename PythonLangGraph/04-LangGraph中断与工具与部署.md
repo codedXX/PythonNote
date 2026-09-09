@@ -1,6 +1,6 @@
 # 8. 中断
 
-**`LangGraph`** 提供了两种中断机制：
+**`LangGraph`** 提供了**两种中断机制：**
 
 - **动态中断**：在图的任意节点中调用 **`interrupt()`** 函数实现
 
@@ -40,7 +40,7 @@
 
 ### 8.1.3. 恢复中断
 
-满足以下要求：
+**满足以下要求：**
 
 - 基于相同的配置再次调用计算图
 
@@ -52,7 +52,7 @@
 
 ### 8.1.4. 常见使用模式
 
-根据中断发生的位置、业务场景以及执行结构，动态中断可以衍生出多种常见的使用模式。本节将介绍以下模式：
+**根据中断发生的位置、业务场景以及执行结构，动态中断可以衍生出多种常见的使用模式。本节将介绍以下模式：**
 
 1. **基础 HITL 模式**：状态图触发一次中断，获取人类输入后继续执行。
 2. **多个并行中断**：多个并行任务分别产生中断，并根据 **中断 `ID`** 接收各自的恢复数据。
@@ -136,6 +136,50 @@ print(resume_res)
 {'username': '小黄'}
 ```
 
+> ⭐⭐**Command(resume=username)是什么意思？**
+>
+> 
+>
+> `Command(resume=username)` 的意思是：**恢复暂停的图，并把 `username` 的值作为这次中断的返回值传进去。**
+>
+> 例如你输入“张三”：
+>
+> ```python
+> username = input(prompt)  # "张三"
+> 
+> resume_res = graph.invoke(
+>     Command(resume=username),  # 恢复图，并传入 "张三"
+>     config=config
+> )
+> ```
+>
+> 节点里的这句：
+>
+> ```python
+> username = interrupt("请输入您的姓名")
+> ```
+>
+> 在恢复执行时，`interrupt(...)` 就会返回 `"张三"`，所以节点接着返回：
+>
+> ```python
+> {"username": "张三"}
+> ```
+>
+> ⭐这里有两个细节：
+>
+> - **恢复时节点会从头重新执行**，执行到对应的 `interrupt()` 时，取出你传入的恢复值并继续。因此，中断之前的代码也会再次运行。
+> - 必须使用相同的 `thread_id`，才能恢复之前暂停的图。
+>
+> 另外，你获取提示语的键名应当是 **`"__interrupt__"`（两侧各两个下划线）**：
+>
+> ```python
+> prompt = interrupt_res["__interrupt__"][0].value
+> ```
+>
+> 不能写成 `"**interrupt**"`。
+
+
+
 #### 8.1.4.2. 多个并行中断
 
 **示例如下**
@@ -209,6 +253,71 @@ print(resumed_res)
 
 {'username': '小黄', 'age': 19}
 ```
+
+> ⭐**`Command(resume=resume_map)` 如何根据中断 ID，将恢复值传递给对应的 `interrupt()` 调用，并作为其返回值赋给 `age` 等变量？**
+>
+> 
+>
+> **靠的是中断的 `id`，不是靠“年龄”这段提示文字。**
+>
+> 第一次执行到：
+>
+> ```
+> age = interrupt("请输入您的年龄")
+> ```
+>
+> 节点会暂停，返回的中断信息类似：
+>
+> ```
+> Interrupt(value="请输入您的年龄", id="age_interrupt_id")
+> ```
+>
+> 此时 `interrupt()` 还没有正常返回，**`age` 也还没有完成赋值**。
+>
+> 你的循环把这个中断 ID 和用户输入绑定起来：
+>
+> ```
+> resume_map[i.id] = int(user_input)
+> ```
+>
+> 最终得到类似这样的映射：
+>
+> ```
+> resume_map = {
+>     "name_interrupt_id": "小王",
+>     "age_interrupt_id": 18,
+> }
+> ```
+>
+> 当你执行：
+>
+> ```
+> graph.invoke(Command(resume=resume_map), config=config)
+> ```
+>
+> LangGraph 通过同一个 `thread_id` 找到保存的执行状态，再根据中断 ID，将恢复值交给对应的暂停任务。这也是恢复时需要使用同一个 `config` 的原因。
+>
+> ⭐**恢复节点时，节点函数会从头重新执行。** 再次到达对应的 `interrupt()` 时，它会返回你提供的恢复值：
+>
+> ```
+> def node_b(state):
+>     age = interrupt("请输入您的年龄")  # 这次返回 18
+>     return {"age": age}
+> ```
+>
+> 整个对应关系就是：
+>
+> ```
+> 年龄中断的 ID → resume_map[该 ID] = 18
+>                          ↓
+>            对应的 interrupt() 返回 18
+>                          ↓
+>                       age = 18
+> ```
+>
+> 你写的 `if "年龄" in i.value` **只是用来决定是否把输入转成整数**，不负责匹配恢复位置。
+
+
 
 #### 8.1.4.3. 审批模式
 
@@ -315,6 +424,89 @@ print(approved_res)
 {'topic': '牡丹花', 'poem': '请求被拒绝', 'is_approved': False}
 ```
 
+> ⭐**下面代码是什么意思？**
+>
+> ~~~python
+> return Command(
+>         goto=goto,
+>         update={"is_approved":is_approved}
+>     )
+> ~~~
+>
+> * `goto=goto:`
+>
+>   *  根据审核结果选择下一节点
+>
+> *  `update={"is_approved": is_approved}:`
+>
+>   * 这行代码的作用是：**把用户的审核结果，保存到图的状态 `state` 中。**
+>
+>     ```
+>     update={"is_approved": is_approved}
+>     #        ↑               ↑
+>     #   状态中的字段名     函数里的变量值
+>     ```
+>
+>     这两个 `is_approved` 虽然名字一样，但含义不同：
+>
+>     - 左边 `"is_approved"` 带引号，是要更新的**状态字段名**。
+>     - 右边 `is_approved` 不带引号，是刚从 `interrupt()` 得到的**审核结果**，也就是 `True` 或 `False`。
+>
+>     例如，用户同意调用模型，右边的变量就是 `True`，这行便相当于：
+>
+>     ```
+>     update={"is_approved": True}
+>     ```
+>
+>     LangGraph 会将状态从：
+>
+>     ```
+>     {"topic": "菊花"}
+>     ```
+>
+>     更新为：
+>
+>     ```
+>     {"topic": "菊花", "is_approved": True}
+>     ```
+>
+>     其他节点之后就可以通过：
+>
+>     ```
+>     state["is_approved"]
+>     ```
+>
+>     读取这个结果。
+
+> ⭐**Python 的条件表达式**
+>
+> 
+>
+> 这是 Python 的**条件表达式**，把 `if...else` 写在一行：
+>
+> ```
+> goto = "llm_node" if is_approved else "default_node"
+> ```
+>
+> 读作：**如果审批通过，`goto` 就是 `"llm_node"`；否则就是 `"default_node"`。**
+>
+> 等价于：
+>
+> ```
+> if is_approved:
+>     goto = "llm_node"
+> else:
+>     goto = "default_node"
+> ```
+>
+> 觉得别扭是因为它把“条件成立时的结果”放在了条件前面。记住这个结构就行：
+>
+> ```
+> 变量 = 成立时的值 if 条件 else 不成立时的值
+> ```
+>
+> 不习惯就用展开的 `if...else`，效果完全一样。
+
 #### 8.1.4.4. 审核与编辑模式
 
 **示例如下**
@@ -401,6 +593,91 @@ print(reviewed_res)
 
 {'topic': '布偶猫', 'poem': '《布偶猫》\n冰眸玉骨雪团身，蓝影衔春卧月轮。\n偶启朱唇呼入梦，云鬟一枕醉红尘。', 'reviewed_poem': '已审核：《布偶猫》\n冰眸玉骨雪团身，蓝影衔春卧月轮。\n偶启朱唇呼入梦，云鬟一枕醉红尘。'}
 ```
+
+
+
+> ⭐**下面代码是什么意思？**
+>
+> ~~~python
+> reviewed_poem = interrupt({
+>         "instruction": "请审核并修改大模型生成的七言绝句",
+>         "poem": state['poem']
+> })
+> ~~~
+>
+> 
+>
+> 这行代码的意思是：**暂停图的执行，把待审核的诗句交给外部；等外部提交审核结果后，再把结果赋给 `reviewed_poem`。**
+>
+> ```
+> reviewed_poem = interrupt({
+>     "instruction": "请审核并修改大模型生成的七言绝句",
+>     "poem": state["poem"]
+> })
+> ```
+>
+> 可以分成两个阶段理解。
+>
+> **1. 第一次执行：暂停并传出数据**
+>
+> 当你调用：
+>
+> ```
+> interrupted_res = graph.invoke({"topic": "布偶猫"}, config=config)
+> ```
+>
+> 图先生成诗句，然后进入 `review_node`。执行到 `interrupt(...)` 时：
+>
+> - 图暂停，当前进度由 checkpointer 保存。
+> - 传入的字典成为中断信息，交给调用方。
+> - **此时赋值还没有完成**，后面的 `return` 也没有执行。
+>
+> 所以你可以在外部拿到这个字典：
+>
+> ```
+> payload = interrupted_res["__interrupt__"][0].value
+> 
+> print(payload["instruction"])  # 请审核并修改大模型生成的七言绝句
+> print(payload["poem"])         # 模型生成的诗句
+> ```
+>
+> 这里的 `"instruction"` 和 `"poem"` 都是你自定义的数据字段。`interrupt()` 不会自动显示审核界面，也不会自动调用 `input()`；收集用户输入的是你后面写的代码。
+>
+> **2. 恢复执行：接收数据并完成赋值**
+>
+> 用户输入后，你调用：
+>
+> ```
+> reviewed_res = graph.invoke(
+>     Command(resume=user_review),
+>     config=config
+> )
+> ```
+>
+> **`resume` 传入的 `user_review`，会成为 `interrupt(...)` 的返回值。** 因此，从结果上理解，此时相当于：
+>
+> ```
+> reviewed_poem = user_review
+> ```
+>
+> 随后执行：
+>
+> ```
+> return {"reviewed_poem": reviewed_poem}
+> ```
+>
+> 将审核后的诗句写入图的状态。
+>
+> 两边的数据方向可以这样记：
+>
+> ```
+> interrupt(待审核信息)       → 把信息交给外部
+> Command(resume=审核结果)    → 把结果交回节点
+> ```
+>
+> 还有一个细节：**恢复时，`review_node` 会从函数开头重新执行**，运行到对应的 `interrupt()` 时，它返回已提交的恢复值，然后继续向下执行。因此，放在 `interrupt()` 前面的代码会再次运行。本例已经完成的 `llm_node` 不会因此重新生成诗句。恢复时要使用相同的 `thread_id`，才能找到对应的中断进度。
+
+
 
 #### 8.1.4.5. 工具执行审批模式
 
