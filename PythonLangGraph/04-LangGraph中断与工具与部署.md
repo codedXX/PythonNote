@@ -2768,7 +2768,7 @@ hitl_demo/
 └── langgraph.json
 ```
 
-其中：
+**其中：**
 
 - **`src`**：源码包，存放业务代码
   - **`__init__.py`**：**`Python`** 包的初始化文件
@@ -3155,7 +3155,7 @@ builder.add_edge("tool_node", "llm_node")
 chat_graph = builder.compile()
 ```
 
-此处返回的中断信息，遵循 **`AgentChatUI`** 定义的 **`HITL`** 协议，遵循此协议，则前端可以正确渲染中断信息，前端期望的中断信息格式如下：
+此处返回的中断信息，遵循 **`AgentChatUI`** 定义的 **`HITL`** 协议，遵循此协议，则前端可以正确渲染中断信息，**前端期望的中断信息格式如下：
 
 ```json
 {
@@ -3181,7 +3181,7 @@ chat_graph = builder.compile()
 }
 ```
 
-当中断发生时，前端会将中断信息渲染在对话框中，根据用户操作的不同，后端拿到的反馈数据样式如下
+**当中断发生时，前端会将中断信息渲染在对话框中，根据用户操作的不同，后端拿到的反馈数据样式如下**
 
 - **`approve`**：
 
@@ -3597,6 +3597,128 @@ Kimi 新模型发布
 
 如果您想了解更多详细内容，随时可以继续问我！
 ```
+
+>  ⭐**这里是如何实现工具调用的?**
+>
+> 
+>
+> 这段代码通过 LangGraph 实现了一个典型的“LLM 判断 → 调用工具 → LLM 汇总答案”循环。
+>
+> 执行流程如下：
+>
+> ```
+> START
+>   ↓
+> llm_node
+>   ↓
+> 模型是否生成 tool_calls？
+>   ├─ 否 → END
+>   └─ 是 → tool_node
+>               ↓
+>           执行对应工具
+>               ↓
+>           返回 llm_node
+> ```
+>
+> 核心机制：
+>
+> 1. `@tool` 把 Python 函数转换为 LangChain 工具，并根据类型注解和 docstring 生成参数 Schema。
+>
+> 2. `model.bind_tools(tools)` 把工具描述提供给模型，但此时并不会执行工具。
+>
+> 3. 模型返回 `AIMessage`；如果它认为需要查询天气或新闻，就会在 `tool_calls` 中给出工具名和参数。
+>
+> 4. ```
+>    router
+>    ```
+>
+>     检查最后一条消息：
+>
+>    - 有 `tool_calls`：进入 `ToolNode`
+>    - 没有：结束图执行
+>
+> 5. `ToolNode` 根据工具名实际调用 Python 函数，并生成 `ToolMessage`。
+>
+> 6. 工具结果重新传给模型，由模型生成最终自然语言回答。
+>
+> 例如用户输入：
+>
+> ```
+> 今天北京天气如何？国内有哪些新闻？
+> ```
+>
+> 模型可能生成：
+>
+> ```
+> [
+>     {
+>         "name": "get_weather",
+>         "args": {"city": "北京"}
+>     },
+>     {
+>         "name": "get_news",
+>         "args": {"home_or_abroad": True}
+>     }
+> ]
+> ```
+>
+> `ToolNode` 执行后，模型会同时看到：
+>
+> ```
+> 北京 今天天气不错
+> Kimi 新模型发布
+> ```
+>
+> 然后组织成最终回答。
+
+> ⭐**return "tool\_node"这里的tool\_node是什么？**
+>
+> 
+>
+> `"tool_node"` 是 LangGraph 中一个节点的名称，不是 Python 函数，也不是特殊关键字。
+>
+> 它在这里被注册：
+>
+> ```
+> builder.add_node(
+>     "tool_node",          # 节点名称
+>     ToolNode(tools=tools) # 节点实际执行的逻辑
+> )
+> ```
+>
+> 因此路由函数返回：
+>
+> ```
+> return "tool_node"
+> ```
+>
+> 意思是：下一步跳转到名称为 `"tool_node"` 的节点，由 `ToolNode` 执行模型请求调用的工具。
+>
+> 完整对应关系是：
+>
+> ```
+> def router(state):
+>     if state["messages"][-1].tool_calls:
+>         return "tool_node"  # 跳转到工具执行节点
+>     return END              # 没有工具调用，结束
+> ```
+>
+> 节点名称可以换成其他字符串，但注册和返回必须一致：
+>
+> ```
+> builder.add_node("tools", ToolNode(tools=tools))
+> 
+> def router(state):
+>     if state["messages"][-1].tool_calls:
+>         return "tools"
+>     return END
+> ```
+>
+> 另外，`tool\_node` 中的反斜杠只是 Markdown 转义；实际 Python 代码应写成：
+>
+> ```
+> return "tool_node"
+> ```
 
 ## 10.2. 进阶用法
 
