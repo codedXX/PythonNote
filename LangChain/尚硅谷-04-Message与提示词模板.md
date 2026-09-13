@@ -578,6 +578,33 @@ tool_call_id="call_00_nUD2NC9QRN5Cg1GaoIkBJQ4s" # 一定要和AI消息中的调�
 
 
 
+> ⭐️⭐️**调用工具的完整流程**
+>
+> 完整流程是：
+>
+> 1. **第一次调用 LLM**：模型决定调用工具，返回 `AIMessage`，其中 `tool_calls` 包含工具名称、参数和调用 ID。
+> 2. **程序执行工具**：根据 `tool_calls` 调用对应函数，把结果包装成 `ToolMessage`。
+> 3. **再次调用 LLM**：把之前的对话、请求工具的 `AIMessage`、工具结果 `ToolMessage` 一起传给模型，让它根据结果回答。
+>
+> 例如，用户问“北京天气怎么样”：
+>
+> ```
+> 用户 → LLM
+>        ↓
+> AIMessage(
+>     content="",  # 常见情况，但不是必然
+>     tool_calls=[查询北京天气的请求]
+> )
+>        ↓ 程序执行工具
+> ToolMessage(content="北京晴，25℃", tool_call_id="对应的调用 ID")
+>        ↓ 将上述消息加入对话，再调用 LLM
+> AIMessage(content="北京今天晴，气温 25℃。")
+> ```
+>
+> **第二次调用也可能继续请求其他工具**，因此实际通常是循环，直到模型不再返回 `tool_calls`。
+>
+> 如果你用的是 `llm.bind_tools(...).invoke(...)`，需要自己处理执行工具和再次调用的逻辑；如果用的是 `create_agent(...)`，Agent 通常会自动完成这个循环。
+
 **举例1：工具调用（json格式）**
 
 > `不必深究，学过 tools 章节，再来看这个示例就会很简单。`
@@ -1380,6 +1407,65 @@ print(prompt)
 
 
 
+> ⭐️⭐️**PromptTemplate和ChatPromptTemplate的区别：**
+>
+> * `PromptTemplate`：生成一段文本
+>
+>   * 你的第一段：
+>
+>     ```python
+>     template = PromptTemplate.from_template(
+>         "你是一个{difficulty}级别的编程导师。请用简单易懂的语言解释{topic}。"
+>     )
+>     
+>     prompt = template.format(difficulty="初级", topic="装饰器")
+>     ```
+>
+>     `prompt` 是字符串：
+>
+>     ```python
+>     "你是一个初级级别的编程导师。请用简单易懂的语言解释装饰器。"
+>     ```
+>
+>     它没有区分 `system`、`human` 等消息角色。传给聊天模型 `model.invoke(prompt)` 时，这段字符串通常会作为一条 `HumanMessage` 输入。**文字里写了“你是……”，并不意味着它就是系统消息。**
+>
+> * `ChatPromptTemplate`：生成带角色的消息
+>
+>   * 你的第二段：
+>
+>     ```python
+>     prompt_template = ChatPromptTemplate([
+>         ("system", "你是一个AI开发工程师。你的名字是 {name}。"),
+>         ("human", "{user_input}"),
+>     ])
+>     
+>     prompt = prompt_template.invoke({
+>         "name": "小谷AI",
+>         "user_input": "你能帮我做什么?"
+>     })
+>     ```
+>
+>     `prompt` 是 `ChatPromptValue`，里面保留了消息角色。调用：
+>
+>     ```python
+>     prompt.to_messages()
+>     ```
+>
+>     得到的结构相当于：
+>
+>     ```python
+>     [
+>         SystemMessage(content="你是一个AI开发工程师。你的名字是 小谷AI。"),
+>         HumanMessage(content="你能帮我做什么?")
+>     ]
+>     ```
+>
+>     它也可以直接传给模型：
+>
+>     ```python
+>     response = model.invoke(prompt)
+>     ```
+
 ### 2.2 提示词机制演进
 LangChain 1.0的架构变革中，核心的演进之一体现在 Prompt 机制上：**一个结构化的、富含元数据的消**
 **息列表已经取代单一字符串，成为与模型交互的标准数据格式。**
@@ -1431,7 +1517,7 @@ print(prompt)
   | 对话历史 | ❌ 不支持           | ✅ 支持                  |
   | 适用场景 | 简单提示           | 聊天、对话、多轮交互    |
 
-​	因此，用于生成消息列表的 ChatPromptTemplate，也自然取代了生成字符串的 PromptTemplate，成为构建	现代LangChain 应用的首选工具。
+​	因此，用于生成消息列表的 ChatPromptTemplate，也自然取代了生成字符串的 PromptTemplate，成为构建现代LangChain 应用的首选工具。
 
 
 
@@ -1441,7 +1527,7 @@ print(prompt)
 >
 > `PromptTemplate` 输出的是一段普通字符串：
 >
-> ```
+> ```python
 > from langchain_core.prompts import PromptTemplate
 > 
 > template = PromptTemplate.from_template("请解释：{topic}")
@@ -1453,13 +1539,13 @@ print(prompt)
 >
 > 输出：
 >
-> ```
+> ```python
 > 请解释：量子力学
 > ```
 >
 > 而 `ChatPromptTemplate` 输出的是“消息列表”，每条消息都有角色，例如 `system`、`human`（用户）、`ai`（助手）。
 >
-> ```
+> ```python
 > from langchain_core.prompts import ChatPromptTemplate
 > 
 > template = ChatPromptTemplate.from_messages([
@@ -1474,7 +1560,7 @@ print(prompt)
 >
 > 输出大致是：
 >
-> ```
+> ```python
 > [
 >     SystemMessage(content='你是一位耐心的老师。'),
 >     HumanMessage(content='请解释：量子力学。')
@@ -1573,6 +1659,24 @@ print(prompt)
 > ~~~
 
 > `说明：`from_messages()的底层，也是调用的类的 __init()__方法
+
+
+
+> ⭐️⭐️**ChatPromptTemplate和ChatPromptTemplate.from_messages的区别**
+>
+> ```python
+> # 写法一：直接调用构造函数
+> template = ChatPromptTemplate([
+>     ("system", "你是一位耐心的老师。"),
+>     ("human", "请解释：{topic}"),
+> ])
+> 
+> # 写法二：通过类方法创建
+> template = ChatPromptTemplate.from_messages([
+>     ("system", "你是一位耐心的老师。"),
+>     ("human", "请解释：{topic}"),
+> ])
+> ```
 
 
 

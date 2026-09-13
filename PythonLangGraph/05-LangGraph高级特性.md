@@ -217,38 +217,936 @@ for chunk in graph.stream(
 **运行结果如下**
 
 ```json
-('values', {'messages': [HumanMessage(content='你好!', additional_kwargs={}, response_metadata={}, id='0f0ff522-bc84-4ead-8228-66221903e9b4')]})
-('messages', (AIMessageChunk(content='', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='你好', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='！', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='很高兴', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='见到', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='你', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='，', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='有什么', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='可以', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='帮', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='你的', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='吗', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='？', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='无论是', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='聊天', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='、', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='解答', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='问题', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='，', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='还是', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='需要', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='帮助', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='，', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='都可以', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='告诉我', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='哦', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='！', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='😊', additional_kwargs={}, response_metadata={'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='', additional_kwargs={}, response_metadata={'finish_reason': 'stop', 'model_name': 'deepseek-v4-flash', 'system_fingerprint': 'fp_8b330d02d0_prod0820_fp8_kvcache_20260402', 'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], usage_metadata={'input_tokens': 6, 'output_tokens': 28, 'total_tokens': 34, 'input_token_details': {'cache_read': 0}, 'output_token_details': {}}, tool_call_chunks=[]), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('messages', (AIMessageChunk(content='', additional_kwargs={}, response_metadata={}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], tool_call_chunks=[], chunk_position='last'), {'langgraph_step': 1, 'langgraph_node': 'llm_node', 'langgraph_triggers': ('branch:to:llm_node',), 'langgraph_path': ('__pregel_pull', 'llm_node'), 'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6', 'ls_provider': 'deepseek', 'ls_model_name': 'deepseek-v4-flash', 'ls_model_type': 'chat', 'ls_temperature': None}))
-('values', {'messages': [HumanMessage(content='你好!', additional_kwargs={}, response_metadata={}, id='0f0ff522-bc84-4ead-8228-66221903e9b4'), AIMessage(content='你好！很高兴见到你，有什么可以帮你的吗？无论是聊天、解答问题，还是需要帮助，都可以告诉我哦！😊', additional_kwargs={}, response_metadata={'finish_reason': 'stop', 'model_name': 'deepseek-v4-flash', 'system_fingerprint': 'fp_8b330d02d0_prod0820_fp8_kvcache_20260402', 'model_provider': 'deepseek'}, id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba', tool_calls=[], invalid_tool_calls=[], usage_metadata={'input_tokens': 6, 'output_tokens': 28, 'total_tokens': 34, 'input_token_details': {'cache_read': 0}, 'output_token_details': {}})]})
+(
+    'values',
+    {
+        'messages': [
+            HumanMessage(
+                content='你好!',
+                additional_kwargs={},
+                response_metadata={},
+                id='0f0ff522-bc84-4ead-8228-66221903e9b4'
+            )
+        ]
+    }
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='你好',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='！',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='很高兴',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='见到',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='你',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='，',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='有什么',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='可以',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='帮',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='你的',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='吗',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='？',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='无论是',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='聊天',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='、',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='解答',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='问题',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='，',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='还是',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='需要',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='帮助',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='，',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='都可以',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='告诉我',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='哦',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='！',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='😊',
+            additional_kwargs={},
+            response_metadata={
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='',
+            additional_kwargs={},
+            response_metadata={
+                'finish_reason': 'stop',
+                'model_name': 'deepseek-v4-flash',
+                'system_fingerprint': 'fp_8b330d02d0_prod0820_fp8_kvcache_20260402',
+                'model_provider': 'deepseek'
+            },
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            usage_metadata={
+                'input_tokens': 6,
+                'output_tokens': 28,
+                'total_tokens': 34,
+                'input_token_details': {
+                    'cache_read': 0
+                },
+                'output_token_details': {}
+            },
+            tool_call_chunks=[]
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'messages',
+    (
+        AIMessageChunk(
+            content='',
+            additional_kwargs={},
+            response_metadata={},
+            id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+            tool_calls=[],
+            invalid_tool_calls=[],
+            tool_call_chunks=[],
+            chunk_position='last'
+        ),
+        {
+            'langgraph_step': 1,
+            'langgraph_node': 'llm_node',
+            'langgraph_triggers': ('branch:to:llm_node',),
+            'langgraph_path': ('__pregel_pull', 'llm_node'),
+            'langgraph_checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'checkpoint_ns': 'llm_node:e0f03332-6641-0bb0-cf08-e99ffeb6c7a6',
+            'ls_provider': 'deepseek',
+            'ls_model_name': 'deepseek-v4-flash',
+            'ls_model_type': 'chat',
+            'ls_temperature': None
+        }
+    )
+)
+
+(
+    'values',
+    {
+        'messages': [
+            HumanMessage(
+                content='你好!',
+                additional_kwargs={},
+                response_metadata={},
+                id='0f0ff522-bc84-4ead-8228-66221903e9b4'
+            ),
+            AIMessage(
+                content='你好！很高兴见到你，有什么可以帮你的吗？无论是聊天、解答问题，还是需要帮助，都可以告诉我哦！😊',
+                additional_kwargs={},
+                response_metadata={
+                    'finish_reason': 'stop',
+                    'model_name': 'deepseek-v4-flash',
+                    'system_fingerprint': 'fp_8b330d02d0_prod0820_fp8_kvcache_20260402',
+                    'model_provider': 'deepseek'
+                },
+                id='lc_run--019f5a6a-64cf-7573-874a-e669e00000ba',
+                tool_calls=[],
+                invalid_tool_calls=[],
+                usage_metadata={
+                    'input_tokens': 6,
+                    'output_tokens': 28,
+                    'total_tokens': 34,
+                    'input_token_details': {
+                        'cache_read': 0
+                    },
+                    'output_token_details': {}
+                }
+            )
+        ]
+    }
+)
 ```
 
 #### 11.2.2.4. `checkpoints`
@@ -2108,6 +3006,31 @@ async for chunk in graph.astream_events(
 # 12. 子图
 
 状态图节点中调用另外的状态图或直接将另外的状态图作为其节点则后者为子图。
+
+
+
+> ⭐️⭐️**什么是子图？**
+>
+> LangGraph 里的**子图（Subgraph），就是把一个图作为另一个图中的节点使用**。外层的图叫“父图”，子图内部仍然可以有自己的节点、边和状态。
+>
+> 可以把它理解为：**将一组处理步骤封装成一个可复用的流程模块。**
+>
+> **例如，你正在做一个问答系统：**
+>
+> ```
+> 父图：
+> 开始 → 理解问题 → 检索子图 → 生成回答 → 结束
+>                     │
+>                     └─ 内部流程：
+>                        开始 → 改写查询 → 搜索文档 → 筛选结果 → 结束
+> ```
+>
+> 父图只需要把问题交给“检索子图”，再使用它返回的结果，不必把所有检索细节都展开在父图里。
+>
+> ⭐️**普通节点和子图有什么区别？**
+>
+> - `普通节点：`通常由一个函数实现，接收状态，返回状态更新。
+> - `子图节点：`内部是一套完整流程，可以包含多个节点、条件分支和循环。
 
 **注意：**
 
@@ -4544,14 +5467,14 @@ display(parent_graph)
 
 后一个节点依赖前一个节点的结果。
 
-适合：
+**适合：**
 
 * 翻译 → 校对 → 润色
 * 生成内容 → 检查一致性 → 修订
 * 提取信息 → 分类 → 格式化
 * 需求分析 → 生成代码 → 代码解释
 
-官方示例是：
+**官方示例是：**
 
 ```text
 生成笑话
